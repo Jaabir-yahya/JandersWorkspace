@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(uuid())
+  tenant_id      String
+  phone_number   String
+  email          String?
+  display_name   String?
+  role           String?
+  metadata       Json     @default("{}")
+  created_at     DateTime @default(now())
+  Transactions   Transaction[] @relation("created_by")
+  @@unique([tenant_id, phone_number])
+}
+
+model Entity {
+  id               String   @id @default(uuid())
+  tenant_id        String
+  type             String
+  display_name     String
+  phone_number     String?
+  metadata         Json     @default("{}")
+  created_by_user  User     @relation(fields: [created_by_user_id], references: [id])
+  created_by_user_id String
+  created_at       DateTime @default(now())
+  Transactions     Transaction[]
+  @@unique([tenant_id, phone_number])
+}
+
+model Transaction {
+  id                    String   @id @default(uuid())
+  tenant_id             String
+  entity                Entity?  @relation(fields: [entity_id], references: [id])
+  entity_id             String?
+  reference             String?
+  status                String   @default("DRAFT")
+  type                  String   @default("RETAIL")
+  payment_status        String   @default("PENDING")
+  total_amount          Decimal  @default("0")
+  currency_code         String   @default("USD")
+  metadata              Json     @default("{}")
+  created_by_user       User     @relation(fields: [created_by_user_id], references: [id])
+  created_by_user_id    String
+  created_at            DateTime @default(now())
+  reversed_transaction_id String?
+  lines                 TransactionLine[]
+}
+
+model TransactionLine {
+  id               String   @id @default(uuid())
+  transaction      Transaction @relation(fields: [transaction_id], references: [id])
+  transaction_id   String
+  description      String?
+  sku              String?
+  quantity         Decimal  @default("1")
+  unit_price       Decimal
+  total_line_amount Decimal
+  account_code     String
+  metadata         Json     @default("{}")
+  created_at       DateTime @default(now())
+}
+
+model Payment {
+  id               String   @id @default(uuid())
+  tenant_id        String
+  reference        String?
+  amount           Decimal
+  currency_code    String   @default("USD")
+  status           String   @default("PENDING")
+  metadata         Json     @default("{}")
+  created_by_user_id String
+  created_at       DateTime @default(now())
+  applications     PaymentApplication[]
+}
+
+model PaymentApplication {
+  id             String   @id @default(uuid())
+  payment        Payment  @relation(fields: [payment_id], references: [id])
+  payment_id     String
+  transaction    Transaction @relation(fields: [transaction_id], references: [id])
+  transaction_id String
+  applied_amount Decimal
+  created_at     DateTime @default(now())
+  @@unique([payment_id, transaction_id])
+}

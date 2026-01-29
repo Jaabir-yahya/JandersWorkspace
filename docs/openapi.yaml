@@ -1,0 +1,173 @@
+openapi: 3.0.3
+info:
+  title: Project Bridge - Truth Ledger (Phase 1)
+  version: 1.0.0
+servers:
+  - url: /api
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    TransactionLine:
+      type: object
+      required: [description, quantity, unit_price, account_code]
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        sku:
+          type: string
+        quantity:
+          type: number
+        unit_price:
+          type: number
+        total_line_amount:
+          type: number
+        account_code:
+          type: string
+        metadata:
+          type: object
+    Transaction:
+      type: object
+      required: [type, currency_code, lines]
+      properties:
+        id:
+          type: string
+          format: uuid
+        reference:
+          type: string
+        entity_id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [RETAIL, SERVICE, RENTAL, EXPENSE]
+        status:
+          type: string
+          enum: [DRAFT, POSTED, REVERSED, RECONCILED, VOIDED, ARCHIVED]
+        payment_status:
+          type: string
+          enum: [PENDING, PARTIAL, PAID, OVERDUE]
+        total_amount:
+          type: number
+        currency_code:
+          type: string
+        metadata:
+          type: object
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionLine'
+paths:
+  /transactions:
+    post:
+      summary: Create a transaction (DRAFT)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transaction'
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Validation error
+    get:
+      summary: List transactions
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+        - in: query
+          name: type
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /transactions/{id}:
+    get:
+      summary: Get transaction detail
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not found
+  /transactions/{id}/reverse:
+    post:
+      summary: Create a reversal transaction for a POSTED transaction
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason_code:
+                  type: string
+                reason_text:
+                  type: string
+      responses:
+        '201':
+          description: Reversal created
+        '400':
+          description: Invalid request
+  /payments:
+    post:
+      summary: Create a payment
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reference: { type: string }
+                amount: { type: number }
+                currency_code: { type: string }
+      responses:
+        '201':
+          description: Created
+  /payments/{id}/apply:
+    post:
+      summary: Apply a payment to a transaction
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transaction_id: { type: string }
+                amount: { type: number }
+      responses:
+        '200':
+          description: Applied
