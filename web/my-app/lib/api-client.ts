@@ -45,6 +45,9 @@ const fetcher = (url: string) => api.get(url).then((res) => res.data);
 
 export function useTransactions(filters?: TransactionFilters) {
   const params = new URLSearchParams();
+  // Always include tenant_id
+  params.append("tenant_id", DEFAULT_TENANT_ID);
+  
   if (filters) {
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "") {
