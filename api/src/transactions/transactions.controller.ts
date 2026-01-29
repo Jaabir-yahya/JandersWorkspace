@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Body,
   Param,
   Query,
@@ -127,6 +128,40 @@ export class EntitiesController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   /**
+   * List all entities for a tenant
+   */
+  @Get()
+  findAll(
+    @Query('tenant_id') tenantId: string,
+    @Query('type') type?: string,
+    @Query('search') search?: string,
+  ) {
+    if (!tenantId) {
+      throw new Error('tenant_id is required');
+    }
+    return this.transactionsService.findAllEntities(tenantId, { type, search });
+  }
+
+  /**
+   * Create a new entity
+   */
+  @Post()
+  create(
+    @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+    dto: any,
+  ) {
+    return this.transactionsService.createEntity(dto);
+  }
+
+  /**
+   * Get entity by ID
+   */
+  @Get(':id')
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.transactionsService.findEntityById(id);
+  }
+
+  /**
    * Get entity history with running balance
    * The "Copper" feature
    */
@@ -139,5 +174,75 @@ export class EntitiesController {
       throw new Error('tenant_id is required');
     }
     return this.transactionsService.getEntityHistory(id, tenantId);
+  }
+
+  /**
+   * Get entity with balance calculation
+   */
+  @Get(':id/balance')
+  getEntityBalance(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('tenant_id') tenantId: string,
+  ) {
+    if (!tenantId) {
+      throw new Error('tenant_id is required');
+    }
+    return this.transactionsService.getEntityBalance(id, tenantId);
+  }
+
+  /**
+   * Get entity 360 view (entity + balance + recent transactions + files)
+   */
+  @Get(':id/360-view')
+  getEntity360View(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('tenant_id') tenantId: string,
+  ) {
+    if (!tenantId) {
+      throw new Error('tenant_id is required');
+    }
+    return this.transactionsService.getEntity360View(id, tenantId);
+  }
+
+  /**
+   * Search entities by phone number
+   */
+  @Get('search')
+  searchByPhone(
+    @Query('phone') phone: string,
+    @Query('tenant_id') tenantId: string,
+  ) {
+    if (!tenantId) {
+      throw new Error('tenant_id is required');
+    }
+    if (!phone) {
+      throw new Error('phone query parameter is required');
+    }
+    return this.transactionsService.searchEntitiesByPhone(phone, tenantId);
+  }
+
+  /**
+   * Add linked phone to entity
+   */
+  @Post(':id/linked-phones')
+  addLinkedPhone(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body('phone') phone: string,
+  ) {
+    if (!phone) {
+      throw new Error('phone is required');
+    }
+    return this.transactionsService.addLinkedPhone(id, phone);
+  }
+
+  /**
+   * Remove linked phone from entity
+   */
+  @Delete(':id/linked-phones/:phone')
+  removeLinkedPhone(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('phone') phone: string,
+  ) {
+    return this.transactionsService.removeLinkedPhone(id, phone);
   }
 }

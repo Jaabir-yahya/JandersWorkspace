@@ -405,4 +405,239 @@ export class TransactionsService {
 
     return data;
   }
+
+  // ============================================
+  // ENTITY METHODS (Phase 3)
+  // ============================================
+
+  async findAllEntities(tenantId: string, filters?: { type?: string; search?: string }) {
+    let query = this.supabase
+      .from('entities')
+      .select('*')
+      .eq('tenant_id', tenantId);
+
+    if (filters?.type) {
+      query = query.eq('type', filters.type);
+    }
+
+    if (filters?.search) {
+      const searchPattern = `%${filters.search}%`;
+      query = query.or([
+        `display_name.ilike.${searchPattern}`,
+        `phone_number.ilike.${searchPattern}`,
+        `alternate_names.cs.{${filters.search}}`,
+      ].join(','));
+    }
+
+    const { data, error } = await query.order('display_name');
+
+    if (error) {
+      throw new BadRequestException(error.message);
+    }
+
+    return data || [];
+  }
+
+  async createEntity(dto: any) {
+    const { data, error } = await this.supabase
+      .from('entities')
+      .insert({
+        tenant_id: dto.tenant_id,
+        type: dto.type,
+        display_name: dto.display_name,
+        phone_number: dto.phone_number || null,
+        linked_phones: dto.linked_phones || [],
+        alternate_names: dto.alternate_names || [],
+        location: dto.location || null,
+        notes: dto.notes || null,
+        trust_score: dto.trust_score || 50,
+        metadata: dto.metadata || {},
+        created_by_user_id: dto.created_by_user_id,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new BadRequestException(error.message);
+    }
+
+    return data;
+  }
+
+  async findEntityById(id: string) {
+    const { data, error } = await this.supabase
+      .from('entities')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      throw new BadRequestException(error.message);
+    }
+
+    if (!data) {
+      throw new NotFoundException(`Entity with ID ${id} not found`);
+    }
+
+    return data;
+  }
+
+  async getEntityBalance(entityId: string, tenantId: string) {
+    // Get entity details
+    const entity = await this.findEntityById(entityId);
+
+    // Verify tenant access
+    if (entity.tenant_id !== tenantId) {
+      throw new NotFoundException(`Entity with ID ${entityId} not found`);
+    }
+
+    // Calculate balance using the database function
+    const { data: balanceData, error: balanceError } = await this.supabase.rpc(
+      'calculate_entity_balance',
+      { p_entity_id: entityId }
+    );
+
+    if (balanceError) {
+      throw new BadRequestException(balanceError.message);
+    }
+
+    const balance = balanceData?.[0] || { total_credit: 0, total_debit: 0, net_balance: 0 };
+
+    // Get transaction count
+    const { count, error: countError } = await this.supabase
+      .from('transactions')
+      .select('*', { count: 'exact', head: true })
+      .eq('entity_id', entityId)
+      .eq('status', 'POSTED');
+
+    if (countError) {
+      throw new BadRequestException(countError.message);
+    }
+
+    return {
+      entity,
+      balance: {
+        total_credit: Number(balance.total_credit),
+        total_debit: Number(balance.total_debit),
+        net_balance: Number(balance.net_balance),
+        transaction_count: count || 0,
+      },
+    };
+  }
+
+  async getEntity360View(entityId: string, tenantId: string) {
+    // Get entity with balance
+    const { entity, balance } = await this.getEntityBalance(entityId, tenantId);
+
+    // Get recent transactions (last 10)
+    const { data: recentTransactions, error: txnError } = await this.supabase
+      .from('transactions')
+      .select('*, lines:transaction_lines(*)')
+      .eq('entity_id', entityId)
+      .eq('status', 'POSTED')
+      .order('transaction_date', { ascending: false })
+      .limit(10);
+
+    if (txnError) {
+      throw new BadRequestException(txnError.message);
+    }
+
+    // Get attachments
+    const { data: attachments, error: attachError } = await this.supabase
+      .from('attachments')
+      .select('*')
+      .eq('entity_id', entityId)
+      .order('uploaded_at', { ascending: false });
+
+    if (attachError) {
+      throw new BadRequestException(attachError.message);
+    }
+
+    return {
+      entity,
+      balance,
+      recent_transactions: recentTransactions || [],
+      attachments: attachments || [],
+    };
+  }
+
+  async searchEntitiesByPhone(phone: string, tenantId: string) {
+    const { data, error } = await this.supabase.rpc('search_entities_by_phone', {
+      p_phone: phone,
+      p_tenant_id: tenantId,
+    });
+
+    if (error) {
+      throw new BadRequestException(error.message);
+    }
+
+    return data || [];
+  }
+
+  async addLinkedPhone(entityId: string, phone: string) {
+    // Get current linked phones
+    const { data: entity, error: fetchError } = await this.supabase
+      .from('entities')
+      .select('linked_phones')
+      .eq('id', entityId)
+      .single();
+
+    if (fetchError || !entity) {
+      throw new NotFoundException(`Entity with ID ${entityId} not found`);
+    }
+
+    // Check if phone already exists
+    const currentPhones = entity.linked_phones || [];
+    if (currentPhones.includes(phone)) {
+      throw new BadRequestException('Phone number already linked to this entity');
+    }
+
+    // Add new phone
+    const { data, error } = await this.supabase
+      .from('entities')
+      .update({
+        linked_phones: [...currentPhones, phone],
+      })
+      .eq('id', entityId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new BadRequestException(error.message);
+    }
+
+    return data;
+  }
+
+  async removeLinkedPhone(entityId: string, phone: string) {
+    // Get current linked phones
+    const { data: entity, error: fetchError } = await this.supabase
+      .from('entities')
+      .select('linked_phones')
+      .eq('id', entityId)
+      .single();
+
+    if (fetchError || !entity) {
+      throw new NotFoundException(`Entity with ID ${entityId} not found`);
+    }
+
+    // Remove phone
+    const currentPhones = entity.linked_phones || [];
+    const updatedPhones = currentPhones.filter((p: string) => p !== phone);
+
+    const { data, error } = await this.supabase
+      .from('entities')
+      .update({
+        linked_phones: updatedPhones,
+      })
+      .eq('id', entityId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new BadRequestException(error.message);
+    }
+
+    return data;
+  }
 }
