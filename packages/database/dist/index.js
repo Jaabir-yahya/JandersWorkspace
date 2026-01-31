@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.prisma = exports.PrismaClient = void 0;
+// Re-export Prisma client for shared usage across the monorepo
+var client_1 = require("@prisma/client");
+Object.defineProperty(exports, "PrismaClient", { enumerable: true, get: function () { return client_1.PrismaClient; } });
+// Export a singleton PrismaClient instance for use in applications
+const client_2 = require("@prisma/client");
+const globalForPrisma = globalThis;
+exports.prisma = globalForPrisma.prisma ?? new client_2.PrismaClient();
+if (process.env.NODE_ENV !== "production")
+    globalForPrisma.prisma = exports.prisma;
+exports.default = exports.prisma;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBQUEsK0RBQStEO0FBQy9ELHlDQUE4QztBQUFyQyxzR0FBQSxZQUFZLE9BQUE7QUFFckIsbUVBQW1FO0FBQ25FLDJDQUE4QztBQUU5QyxNQUFNLGVBQWUsR0FBRyxVQUV2QixDQUFDO0FBRVcsUUFBQSxNQUFNLEdBQUcsZUFBZSxDQUFDLE1BQU0sSUFBSSxJQUFJLHFCQUFZLEVBQUUsQ0FBQztBQUVuRSxJQUFJLE9BQU8sQ0FBQyxHQUFHLENBQUMsUUFBUSxLQUFLLFlBQVk7SUFBRSxlQUFlLENBQUMsTUFBTSxHQUFHLGNBQU0sQ0FBQztBQUUzRSxrQkFBZSxjQUFNLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvLyBSZS1leHBvcnQgUHJpc21hIGNsaWVudCBmb3Igc2hhcmVkIHVzYWdlIGFjcm9zcyB0aGUgbW9ub3JlcG9cbmV4cG9ydCB7IFByaXNtYUNsaWVudCB9IGZyb20gXCJAcHJpc21hL2NsaWVudFwiO1xuXG4vLyBFeHBvcnQgYSBzaW5nbGV0b24gUHJpc21hQ2xpZW50IGluc3RhbmNlIGZvciB1c2UgaW4gYXBwbGljYXRpb25zXG5pbXBvcnQgeyBQcmlzbWFDbGllbnQgfSBmcm9tIFwiQHByaXNtYS9jbGllbnRcIjtcblxuY29uc3QgZ2xvYmFsRm9yUHJpc21hID0gZ2xvYmFsVGhpcyBhcyB1bmtub3duIGFzIHtcbiAgcHJpc21hOiBQcmlzbWFDbGllbnQgfCB1bmRlZmluZWQ7XG59O1xuXG5leHBvcnQgY29uc3QgcHJpc21hID0gZ2xvYmFsRm9yUHJpc21hLnByaXNtYSA/PyBuZXcgUHJpc21hQ2xpZW50KCk7XG5cbmlmIChwcm9jZXNzLmVudi5OT0RFX0VOViAhPT0gXCJwcm9kdWN0aW9uXCIpIGdsb2JhbEZvclByaXNtYS5wcmlzbWEgPSBwcmlzbWE7XG5cbmV4cG9ydCBkZWZhdWx0IHByaXNtYTtcbiJdfQ==

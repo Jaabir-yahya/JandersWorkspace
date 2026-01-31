@@ -80,7 +80,7 @@ let DashboardService = class DashboardService {
             .eq('tenant_id', tenantId)
             .eq('status', 'POSTED')
             .in('type', ['RETAIL', 'SERVICE', 'RENTAL'])
-            .eq('payment_status', 'CREDIT');
+            .eq('is_credit', true);
         if (creditError) {
             throw new common_1.BadRequestException(creditError.message);
         }
@@ -89,8 +89,8 @@ let DashboardService = class DashboardService {
             .select('total_amount')
             .eq('tenant_id', tenantId)
             .eq('status', 'POSTED')
-            .eq('type', 'EXPENSE')
-            .eq('payment_status', 'CREDIT');
+            .eq('type', 'PROCUREMENT')
+            .eq('is_credit', true);
         if (debtError) {
             throw new common_1.BadRequestException(debtError.message);
         }

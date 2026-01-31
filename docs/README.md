@@ -1,92 +1,145 @@
 # Project Bridge Documentation
 
-Welcome to the African Informal Economy Ledger (Project Bridge) documentation.
+Welcome to the Project Bridge documentation. This is your central hub for all project documentation.
 
-## Quick Start
+---
 
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Deploy the application
-- **[API_CONTRACT.md](./API_CONTRACT.md)** - API reference
-- **[../CONTRIBUTING.md](../CONTRIBUTING.md)** - Development workflow
+## Quick Links
+
+| Document | Description |
+|----------|-------------|
+| [Quick Start](../README.md#quick-start) | Get up and running in 5 minutes |
+| [Architecture Overview](../README.md#architecture) | System architecture and design |
+| [API Documentation](API_CONTRACT.md) | API reference and examples |
+| [Frontend Architecture](FRONTEND_ARCHITECTURE.md) | Next.js frontend documentation |
+| [Deployment Guide](../DEPLOYMENT.md) | Deploy to production |
+| [Contributing Guide](../CONTRIBUTING.md) | Development guidelines |
+| [Changelog](../CHANGELOG.md) | Version history and changes |
+
+---
+
+## By Role
+
+### I'm a Developer
+
+1. [Quick Start](../README.md#quick-start) - Set up your development environment
+2. [Contributing Guide](../CONTRIBUTING.md) - Development workflow and standards
+3. [Frontend Architecture](FRONTEND_ARCHITECTURE.md) - Frontend development guide
+4. [API Contract](API_CONTRACT.md) - API reference
+
+### I'm DevOps
+
+1. [Deployment Guide](../DEPLOYMENT.md) - Complete deployment instructions
+2. [Environment Setup](../DEPLOYMENT.md#environment-setup) - Environment variables
+3. [Troubleshooting](../DEPLOYMENT.md#troubleshooting) - Common issues and solutions
+
+### I'm a Product Manager
+
+1. [Project Status](../README.md#project-status) - Current phase and features
+2. [Changelog](../CHANGELOG.md) - What's new and changed
+3. [Phase 3 Summary](PHASE_3_COMPLETE.md) - Current state details
+4. [Phase 4 Roadmap](../CHANGELOG.md#future-roadmap) - What's coming next
+
+---
+
+## Project Phases
+
+| Phase | Status | Description | Documentation |
+|-------|--------|-------------|---------------|
+| Phase 1 | ✅ Complete | Core data infrastructure (Truth Ledger) | [Archive](archive/PHASE_1_SPEC.md) |
+| Phase 2 | ✅ Complete | State machine, search, entity history | [Archive](archive/PHASE_2_SPEC.md) |
+| Phase 3 | ✅ Complete | Frontend, dashboard, webhook monitoring | [Summary](PHASE_3_COMPLETE.md) |
+| Phase 4 | 🚧 Planned | Auth, subscriptions, M-Pesa, WhatsApp, AI | [Roadmap](../CHANGELOG.md#future-roadmap) |
+
+---
 
 ## Documentation Structure
 
 ```
 docs/
-├── README.md              # This file
-├── PRD.md                 # Product Requirements Document
-├── API_CONTRACT.md        # API specification
-├── DEPLOYMENT.md          # Deployment guide
-├── DEPLOYMENT_CHECKLIST.md # Pre-deployment checklist
-├── GOAL_CHECKLIST.md      # Project goals tracking
-├── openapi.yaml           # OpenAPI specification
-├── PHASE_1_SPEC.md        # Phase 1 specification
-├── PHASE_2_SPEC.md        # Phase 2 specification
-├── PHASE_3_COMPLETE.md    # Phase 3 completion summary
-├── PHASE_3_COMPLETION_PLAN.md # Phase 3 completion plan
+├── README.md                    # This file - documentation index
+├── FRONTEND_ARCHITECTURE.md     # Next.js frontend documentation
+├── API_CONTRACT.md              # API documentation
+├── PHASE_3_COMPLETE.md          # Phase 3 completion summary
+├── PHASE_3_MASTER.md            # Phase 3 master document
 ├── PHASE_3_FRONTEND_STRATEGY.md # Frontend strategy
-├── PHASE_3_MASTER.md      # Phase 3 master document
-├── archive/               # Archived documentation
-│   └── frontend1/         # Old frontend implementation
-└── plans/                 # Planning documents
-    ├── finalization-cleanup-plan.md
+├── DEPLOYMENT_CHECKLIST.md      # Deployment checklist
+├── DATABASE_AUDIT_REPORT.md     # Database audit results
+├── openapi.yaml                 # OpenAPI/Swagger specification
+├── archive/                     # Archived documentation
+│   ├── PRD.md                   # Original PRD
+│   ├── PHASE_1_SPEC.md          # Phase 1 specification
+│   ├── PHASE_2_SPEC.md          # Phase 2 specification
+│   └── ...                      # Other archived docs
+└── plans/                       # Future plans
+    ├── phase-3-completion-plan.md
     ├── phase-3-lock-procedure.md
-    ├── phase3-build-infrastructure-plan.md
-    ├── prisma-supabase-analysis.md
-    └── turborepo-pattern-adoption.md
+    └── ...
 ```
 
-## Key Documents
+---
 
-### For Developers
-- **[API_CONTRACT.md](./API_CONTRACT.md)** - Complete API reference with examples
-- **[../CONTRIBUTING.md](../CONTRIBUTING.md)** - How to contribute and development workflow
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - How to deploy the application
+## Key Features
 
-### For Understanding the System
-- **[PRD.md](./PRD.md)** - Product requirements and vision
-- **[PHASE_3_COMPLETE.md](./PHASE_3_COMPLETE.md)** - What was built in Phase 3
-- **[PHASE_3_MASTER.md](./PHASE_3_MASTER.md)** - Phase 3 detailed specification
+### Core Ledger
+- Double-entry bookkeeping
+- Transaction state machine (DRAFT → POSTED → RECONCILED)
+- Multi-tenancy support
+- Six immutability locks
 
-### For Operations
-- **[DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)** - Pre-deployment verification
-- **[GOAL_CHECKLIST.md](./GOAL_CHECKLIST.md)** - Project goals status
+### Dashboard
+- Real-time statistics
+- Payment tracking
+- Entity management
+- Attachment support
 
-## API Quick Reference
+### Webhook Monitoring
+- Real-time event monitoring
+- Integration support (M-Pesa, WhatsApp, QuickBooks, Xero, Shopify)
+- Auto-refresh every 10 seconds
+- Retry functionality
+- 24-hour activity charts
 
-### Base URL
-```
-http://localhost:3000/api/v1
-```
+### Integrations
+- M-Pesa payment processing
+- WhatsApp messaging
+- QuickBooks sync
+- Xero sync
+- Shopify integration
 
-### Key Endpoints
+---
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/transactions` | POST | Create transaction |
-| `/transactions` | GET | List/search transactions |
-| `/transactions/:id` | GET | Get transaction details |
-| `/transactions/:id/reverse` | POST | Reverse transaction |
-| `/dashboard/metrics` | GET | Dashboard metrics |
-| `/dashboard/reconciliation` | GET | Reconciliation summary |
+## Technology Stack
 
-See [API_CONTRACT.md](./API_CONTRACT.md) for full details.
+| Layer | Technology |
+|-------|------------|
+| Frontend | Next.js 15, React 19, TypeScript 5 |
+| Styling | Tailwind CSS 4, shadcn/ui |
+| Backend | NestJS 11, Prisma 6 |
+| Database | PostgreSQL 15+, Supabase |
+| Monorepo | Turborepo |
 
-## Architecture
+---
 
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Next.js   │────▶│   NestJS    │────▶│  Supabase   │
-│   (Web)     │     │   (API)     │     │(PostgreSQL) │
-│   :3001     │◀────│   :3000     │◀────│             │
-└─────────────┘     └─────────────┘     └─────────────┘
-```
+## Getting Help
 
-## Version History
+- **General Questions**: Check this documentation index
+- **Development Issues**: See [Contributing Guide](../CONTRIBUTING.md)
+- **Deployment Issues**: See [Deployment Troubleshooting](../DEPLOYMENT.md#troubleshooting)
+- **API Questions**: See [API Contract](API_CONTRACT.md)
 
-See [../CHANGELOG.md](../CHANGELOG.md) for version history.
+---
 
-## Support
+## Contributing to Documentation
 
-- Run `npm run health-check` to verify system status
-- Run `npm run verify-phase3` to verify Phase 3 completion
-- Check [DEPLOYMENT.md](./DEPLOYMENT.md) for troubleshooting
+When adding or updating documentation:
+
+1. Follow the existing structure
+2. Update this index if adding new files
+3. Use clear, concise language
+4. Include code examples where helpful
+5. Keep links up to date
+
+---
+
+**Last Updated**: 2026-01-31

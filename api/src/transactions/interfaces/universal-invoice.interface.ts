@@ -38,7 +38,7 @@ export interface UniversalInvoice {
   customer_name: string;
   
   /** Entity ID (UUID) */
-  customer_id: string;
+  customer_id: string | null;
   
   /** Invoice date (economic event date) */
   invoice_date: string; // ISO 8601 format
@@ -56,7 +56,7 @@ export interface UniversalInvoice {
   tax_amount: number;
   
   /** Invoice status */
-  status: 'DRAFT' | 'POSTED' | 'REVERSED' | 'RECONCILED' | 'PAID' | 'PENDING';
+  status: 'DRAFT' | 'POSTED' | 'REVERSED' | 'RECONCILED' | 'VOIDED' | 'ARCHIVED';
   
   /** Payment status */
   payment_status: 'PENDING' | 'PARTIAL' | 'SETTLED' | 'FAILED' | 'CANCELLED';

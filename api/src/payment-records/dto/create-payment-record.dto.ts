@@ -21,4 +21,18 @@ export class CreatePaymentRecordDto {
   @IsOptional()
   @IsDateString()
   paid_at?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsUUID()
+  tenant_id?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsUUID()
+  created_by_user_id?: string;
+
+  @IsOptional()
+  @IsString()
+  currency_code?: string;
 }

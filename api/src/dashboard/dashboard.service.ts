@@ -1,6 +1,6 @@
-import { Inject, Injectable, BadRequestException } from '@nestjs/common';
-import { SupabaseClient } from '@supabase/supabase-js';
-import { SUPABASE_CLIENT } from '../supabase/supabase.module';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { TxnStatus, TxnType, PaymentStatus } from '@prisma/client';
 
 export interface DashboardStats {
   total_revenue_today: number;
@@ -33,9 +33,7 @@ export interface DashboardStats {
 
 @Injectable()
 export class DashboardService {
-  constructor(
-    @Inject(SUPABASE_CLIENT) private readonly supabase: SupabaseClient,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async getDashboardStats(tenantId: string): Promise<DashboardStats> {
     const today = new Date();
@@ -44,156 +42,181 @@ export class DashboardService {
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
     // Revenue today
-    const { data: todayRevenue, error: todayError } = await this.supabase
-      .from('transactions')
-      .select('total_amount')
-      .eq('tenant_id', tenantId)
-      .eq('status', 'POSTED')
-      .in('type', ['RETAIL', 'SERVICE', 'RENTAL'])
-      .gte('transaction_date', startOfToday.toISOString());
-
-    if (todayError) {
-      throw new BadRequestException(todayError.message);
-    }
+    const todayRevenue = await this.prisma.transaction.findMany({
+      where: {
+        tenantId,
+        status: TxnStatus.POSTED,
+        type: { in: [TxnType.RETAIL, TxnType.SERVICE, TxnType.RENTAL] },
+        createdAt: { gte: startOfToday },
+      },
+      select: { totalAmount: true },
+    });
 
     // Revenue this week
-    const { data: weekRevenue, error: weekError } = await this.supabase
-      .from('transactions')
-      .select('total_amount')
-      .eq('tenant_id', tenantId)
-      .eq('status', 'POSTED')
-      .in('type', ['RETAIL', 'SERVICE', 'RENTAL'])
-      .gte('transaction_date', startOfWeek.toISOString());
-
-    if (weekError) {
-      throw new BadRequestException(weekError.message);
-    }
+    const weekRevenue = await this.prisma.transaction.findMany({
+      where: {
+        tenantId,
+        status: TxnStatus.POSTED,
+        type: { in: [TxnType.RETAIL, TxnType.SERVICE, TxnType.RENTAL] },
+        createdAt: { gte: startOfWeek },
+      },
+      select: { totalAmount: true },
+    });
 
     // Revenue this month
-    const { data: monthRevenue, error: monthError } = await this.supabase
-      .from('transactions')
-      .select('total_amount')
-      .eq('tenant_id', tenantId)
-      .eq('status', 'POSTED')
-      .in('type', ['RETAIL', 'SERVICE', 'RENTAL'])
-      .gte('transaction_date', startOfMonth.toISOString());
-
-    if (monthError) {
-      throw new BadRequestException(monthError.message);
-    }
+    const monthRevenue = await this.prisma.transaction.findMany({
+      where: {
+        tenantId,
+        status: TxnStatus.POSTED,
+        type: { in: [TxnType.RETAIL, TxnType.SERVICE, TxnType.RENTAL] },
+        createdAt: { gte: startOfMonth },
+      },
+      select: { totalAmount: true },
+    });
 
     // Transaction counts
-    const { count: todayCount, error: todayCountError } = await this.supabase
-      .from('transactions')
-      .select('*', { count: 'exact', head: true })
-      .eq('tenant_id', tenantId)
-      .eq('status', 'POSTED')
-      .gte('transaction_date', startOfToday.toISOString());
+    const todayCount = await this.prisma.transaction.count({
+      where: {
+        tenantId,
+        status: TxnStatus.POSTED,
+        createdAt: { gte: startOfToday },
+      },
+    });
 
-    if (todayCountError) {
-      throw new BadRequestException(todayCountError.message);
-    }
+    const weekCount = await this.prisma.transaction.count({
+      where: {
+        tenantId,
+        status: TxnStatus.POSTED,
+        createdAt: { gte: startOfWeek },
+      },
+    });
 
-    const { count: weekCount, error: weekCountError } = await this.supabase
-      .from('transactions')
-      .select('*', { count: 'exact', head: true })
-      .eq('tenant_id', tenantId)
-      .eq('status', 'POSTED')
-      .gte('transaction_date', startOfWeek.toISOString());
+    // Outstanding credit (money owed to us) - pending payment status
+    const creditData = await this.prisma.transaction.findMany({
+      where: {
+        tenantId,
+        status: TxnStatus.POSTED,
+        type: { in: [TxnType.RETAIL, TxnType.SERVICE, TxnType.RENTAL] },
+        paymentStatus: { in: [PaymentStatus.PENDING, PaymentStatus.PARTIAL] },
+      },
+      select: { totalAmount: true },
+    });
 
-    if (weekCountError) {
-      throw new BadRequestException(weekCountError.message);
-    }
+    // Outstanding debt (money we owe suppliers) - expense type with pending payment
+    const debtData = await this.prisma.transaction.findMany({
+      where: {
+        tenantId,
+        status: TxnStatus.POSTED,
+        type: TxnType.EXPENSE,
+        paymentStatus: { in: [PaymentStatus.PENDING, PaymentStatus.PARTIAL] },
+      },
+      select: { totalAmount: true },
+    });
 
-    // Outstanding credit (money owed to us)
-    const { data: creditData, error: creditError } = await this.supabase
-      .from('transactions')
-      .select('total_amount')
-      .eq('tenant_id', tenantId)
-      .eq('status', 'POSTED')
-      .in('type', ['RETAIL', 'SERVICE', 'RENTAL'])
-      .eq('payment_status', 'CREDIT');
+    // Payment method breakdown (from payments)
+    const paymentData = await this.prisma.payment.findMany({
+      where: { tenantId },
+      select: {
+        amount: true,
+        metadata: true,
+      },
+    });
 
-    if (creditError) {
-      throw new BadRequestException(creditError.message);
-    }
+    // Top customers - aggregate using Prisma
+    const topCustomersRaw = await this.prisma.transaction.groupBy({
+      by: ['entityId'],
+      where: {
+        tenantId,
+        status: TxnStatus.POSTED,
+      },
+      _sum: {
+        totalAmount: true,
+      },
+      _count: {
+        id: true,
+      },
+      orderBy: {
+        _sum: {
+          totalAmount: 'desc',
+        },
+      },
+      take: 5,
+    });
 
-    // Outstanding debt (money we owe suppliers)
-    const { data: debtData, error: debtError } = await this.supabase
-      .from('transactions')
-      .select('total_amount')
-      .eq('tenant_id', tenantId)
-      .eq('status', 'POSTED')
-      .eq('type', 'EXPENSE')
-      .eq('payment_status', 'CREDIT');
+    // Get entity details for top customers
+    const entityIds = topCustomersRaw.map(c => c.entityId).filter(Boolean) as string[];
+    const entities = await this.prisma.entity.findMany({
+      where: {
+        id: { in: entityIds },
+      },
+      select: {
+        id: true,
+        displayName: true,
+      },
+    });
 
-    if (debtError) {
-      throw new BadRequestException(debtError.message);
-    }
-
-    // Payment method breakdown (from payment_records)
-    // Note: payment_records table doesn't have tenant_id column, so we join with transactions
-    const { data: paymentData, error: paymentError } = await this.supabase
-      .from('payment_records')
-      .select('method, amount, transactions!inner(tenant_id)')
-      .eq('transactions.tenant_id', tenantId);
-
-    if (paymentError) {
-      throw new BadRequestException(paymentError.message);
-    }
-
-    // Top customers
-    const { data: topCustomers, error: topCustomersError } = await this.supabase.rpc(
-      'get_top_customers',
-      { p_tenant_id: tenantId, p_limit: 5 }
-    );
-
-    if (topCustomersError) {
-      // If the function doesn't exist, return empty array
-      console.warn('get_top_customers function not found:', topCustomersError.message);
-    }
+    const topCustomers = topCustomersRaw.map(customer => {
+      const entity = entities.find(e => e.id === customer.entityId);
+      return {
+        entity_id: customer.entityId || '',
+        display_name: entity?.displayName || 'Unknown',
+        total_amount: Number(customer._sum.totalAmount) || 0,
+        transaction_count: customer._count.id,
+      };
+    });
 
     // Recent activity
-    const { data: recentActivity, error: activityError } = await this.supabase
-      .from('transactions')
-      .select('id, type, total_amount, transaction_date, reference, entities:entity_id(display_name)')
-      .eq('tenant_id', tenantId)
-      .order('transaction_date', { ascending: false })
-      .limit(10);
-
-    if (activityError) {
-      throw new BadRequestException(activityError.message);
-    }
+    const recentActivity = await this.prisma.transaction.findMany({
+      where: { tenantId },
+      select: {
+        id: true,
+        type: true,
+        totalAmount: true,
+        createdAt: true,
+        reference: true,
+        entity: {
+          select: {
+            displayName: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 10,
+    });
 
     // Calculate payment method breakdown
     const paymentBreakdown = { cash: 0, mpesa: 0, bank: 0, credit: 0 };
-    (paymentData || []).forEach((payment: any) => {
-      const method = payment.method?.toLowerCase();
-      if (method === 'cash') paymentBreakdown.cash += payment.amount;
-      else if (method === 'm-pesa' || method === 'mpesa') paymentBreakdown.mpesa += payment.amount;
-      else if (method === 'bank_transfer' || method === 'bank') paymentBreakdown.bank += payment.amount;
-      else if (method === 'credit') paymentBreakdown.credit += payment.amount;
+    paymentData.forEach((payment) => {
+      const metadata = payment.metadata as any;
+      const method = metadata?.method?.toLowerCase() || 'unknown';
+      const amount = Number(payment.amount);
+      if (method === 'cash') paymentBreakdown.cash += amount;
+      else if (method === 'm-pesa' || method === 'mpesa') paymentBreakdown.mpesa += amount;
+      else if (method === 'bank_transfer' || method === 'bank') paymentBreakdown.bank += amount;
+      else if (method === 'credit') paymentBreakdown.credit += amount;
     });
 
     // Format recent activity
-    const formattedActivity: DashboardStats['recent_activity'] = (recentActivity || []).map((txn: any) => ({
+    const formattedActivity: DashboardStats['recent_activity'] = recentActivity.map((txn) => ({
       id: txn.id,
-      type: (txn.type === 'EXPENSE_RETURN' ? 'reversal' : 'transaction') as 'transaction' | 'reversal',
-      description: `${txn.type} - ${txn.entities?.display_name || 'Unknown'}${txn.reference ? ` (${txn.reference})` : ''}`,
-      amount: txn.total_amount,
-      timestamp: txn.transaction_date,
+      type: (txn.type === 'EXPENSE' ? 'transaction' : 'transaction') as 'transaction' | 'reversal',
+      description: `${txn.type} - ${txn.entity?.displayName || 'Unknown'}${txn.reference ? ` (${txn.reference})` : ''}`,
+      amount: Number(txn.totalAmount),
+      timestamp: txn.createdAt.toISOString(),
     }));
 
     return {
-      total_revenue_today: (todayRevenue || []).reduce((sum: number, t: any) => sum + (t.total_amount || 0), 0),
-      total_revenue_week: (weekRevenue || []).reduce((sum: number, t: any) => sum + (t.total_amount || 0), 0),
-      total_revenue_month: (monthRevenue || []).reduce((sum: number, t: any) => sum + (t.total_amount || 0), 0),
-      transactions_today: todayCount || 0,
-      transactions_week: weekCount || 0,
-      outstanding_credit: (creditData || []).reduce((sum: number, t: any) => sum + (t.total_amount || 0), 0),
-      outstanding_debt: (debtData || []).reduce((sum: number, t: any) => sum + (t.total_amount || 0), 0),
+      total_revenue_today: todayRevenue.reduce((sum, t) => sum + Number(t.totalAmount), 0),
+      total_revenue_week: weekRevenue.reduce((sum, t) => sum + Number(t.totalAmount), 0),
+      total_revenue_month: monthRevenue.reduce((sum, t) => sum + Number(t.totalAmount), 0),
+      transactions_today: todayCount,
+      transactions_week: weekCount,
+      outstanding_credit: creditData.reduce((sum, t) => sum + Number(t.totalAmount), 0),
+      outstanding_debt: debtData.reduce((sum, t) => sum + Number(t.totalAmount), 0),
       payment_method_breakdown: paymentBreakdown,
-      top_customers: topCustomers || [],
+      top_customers: topCustomers,
       recent_activity: formattedActivity,
     };
   }

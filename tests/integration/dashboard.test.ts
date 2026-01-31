@@ -1,12 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { AppModule } from '../../api/src/app.module';
+import { Test, TestingModule } from "@nestjs/testing";
+import { INestApplication, ValidationPipe } from "@nestjs/common";
+import request from "supertest";
+import { AppModule } from "../../api/src/app.module";
 
-describe('Dashboard Integration Tests', () => {
+describe("Dashboard Integration Tests", () => {
   let app: INestApplication;
 
-  const testTenantId = '00000000-0000-0000-0000-000000000000';
+  const testTenantId = "00000000-0000-0000-0000-000000000000";
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -14,6 +14,8 @@ describe('Dashboard Integration Tests', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ transform: true }));
+    app.setGlobalPrefix("api/v1");
     await app.init();
   });
 
@@ -21,26 +23,26 @@ describe('Dashboard Integration Tests', () => {
     await app.close();
   });
 
-  describe('GET /api/v1/dashboard/metrics', () => {
-    it('should return dashboard metrics', async () => {
+  describe("GET /api/v1/dashboard/metrics", () => {
+    it("should return dashboard metrics", async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/v1/dashboard/metrics')
+        .get("/api/v1/dashboard/metrics")
         .query({ tenant_id: testTenantId })
         .expect(200);
 
-      expect(response.body).toHaveProperty('total_transactions');
-      expect(response.body).toHaveProperty('total_amount');
-      expect(response.body).toHaveProperty('by_payment_method');
-      expect(response.body).toHaveProperty('by_type');
-      expect(response.body).toHaveProperty('recent_transactions');
+      expect(response.body).toHaveProperty("total_transactions");
+      expect(response.body).toHaveProperty("total_amount");
+      expect(response.body).toHaveProperty("by_payment_method");
+      expect(response.body).toHaveProperty("by_type");
+      expect(response.body).toHaveProperty("recent_transactions");
     });
 
-    it('should filter metrics by date range', async () => {
+    it("should filter metrics by date range", async () => {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 30);
 
       const response = await request(app.getHttpServer())
-        .get('/api/v1/dashboard/metrics')
+        .get("/api/v1/dashboard/metrics")
         .query({
           tenant_id: testTenantId,
           start_date: startDate.toISOString(),
@@ -48,21 +50,21 @@ describe('Dashboard Integration Tests', () => {
         })
         .expect(200);
 
-      expect(response.body).toHaveProperty('total_transactions');
+      expect(response.body).toHaveProperty("total_transactions");
     });
   });
 
-  describe('GET /api/v1/dashboard/reconciliation', () => {
-    it('should return reconciliation summary', async () => {
+  describe("GET /api/v1/dashboard/reconciliation", () => {
+    it("should return reconciliation summary", async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/v1/dashboard/reconciliation')
+        .get("/api/v1/dashboard/reconciliation")
         .query({ tenant_id: testTenantId })
         .expect(200);
 
-      expect(response.body).toHaveProperty('total_expected');
-      expect(response.body).toHaveProperty('total_received');
-      expect(response.body).toHaveProperty('variance');
-      expect(response.body).toHaveProperty('by_method');
+      expect(response.body).toHaveProperty("total_expected");
+      expect(response.body).toHaveProperty("total_received");
+      expect(response.body).toHaveProperty("variance");
+      expect(response.body).toHaveProperty("by_method");
     });
   });
 });

@@ -1,0 +1,307 @@
+/* Nairobi-optimized mobile-first styles for African commerce */
+
+/* African market color palette */
+:root {
+  /* Primary colors - culturally relevant */
+  --primary-kenya: #14213d; /* Dark blue - trust, professionalism */
+  --primary-nigeria: #00875a; /* Green - growth, prosperity */
+  --primary-ghana: #d81b60; /* Red, gold tones - warmth */
+  --primary-uganda: #0a5e0c; /* Yellow, black - strength */
+  --primary-tanzania: #00a69c; /* Light blue - calm */
+
+  /* Success colors - payment focused */
+  --success-mpesa: #7cb342; /* M-Pesa green */
+  --success-paystack: #06d6a0; /* Paystack teal */
+  --success-general: #10b981; /* General success green */
+
+  /* Status colors - offline-first design */
+  --status-online: #10b981; /* Green for connectivity */
+  --status-offline: #f59e0b; /* Orange for warning */
+  --status-syncing: #3b82f6; /* Blue for activity */
+
+  /* Typography optimized for mobile */
+  --font-mobile:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Touch targets for one-handed operation */
+  --touch-min: 44px; /* Minimum for accessibility */
+  --touch-comfortable: 56px; /* Comfortable touch */
+  --thumb-zone-bottom: 20px; /* Natural thumb position */
+  --thumb-zone-right: 16px;
+
+  /* African market considerations */
+  --border-radius: 12px; /* Modern, rounded design */
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-strong: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark theme for high contrast African sun conditions */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --card: #1a1a1a;
+  --border: #333333;
+  --muted: #666666;
+}
+
+/* Light theme */
+.light {
+  --background: #ffffff;
+  --foreground: #000000;
+  --card: #f8f9fa;
+  --border: #e2e8f0;
+  --muted: #6b7280;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 640px) {
+  /* Small phone optimization */
+  .container {
+    padding: 1rem;
+  }
+
+  .text-responsive {
+    font-size: 16px; /* Minimum readable size */
+    line-height: 1.5;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Tablet and small desktop */
+  .container {
+    padding: 2rem;
+  }
+
+  .text-responsive {
+    font-size: 14px;
+  }
+}
+
+/* Touch-friendly component styles */
+.touch-target {
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  position: relative;
+}
+
+.thumb-zone {
+  position: absolute;
+  bottom: var(--thumb-zone-bottom);
+  right: var(--thumb-zone-right);
+  z-index: 10;
+}
+
+/* Payment method colors for African markets */
+.payment-mpesa {
+  background: var(--success-mpesa);
+  color: white;
+}
+
+.payment-paystack {
+  background: var(--success-paystack);
+  color: white;
+}
+
+.payment-cash {
+  background: var(--success-general);
+  color: white;
+}
+
+/* Status indicators for connectivity */
+.status-online {
+  background: var(--status-online);
+  color: white;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status-offline {
+  background: var(--status-offline);
+  color: white;
+}
+
+.status-syncing {
+  background: var(--status-syncing);
+  color: white;
+  animation: spin 1s linear infinite;
+}
+
+/* Animations for African UX feedback */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Offline indicator styles */
+.offline-indicator {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: var(--status-offline);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 50;
+}
+
+/* Quick action buttons for one-handed use */
+.quick-action {
+  min-height: var(--touch-comfortable);
+  width: 100%;
+  margin: 0.25rem 0;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.quick-action:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-strong);
+}
+
+.quick-action:active {
+  transform: scale(0.98);
+}
+
+/* Amount input optimized for mobile */
+.amount-input {
+  font-size: 1.5rem; /* Large for visibility */
+  font-weight: 700;
+  text-align: center;
+  padding: 1rem;
+  border: 3px solid var(--border);
+  border-radius: var(--border-radius);
+  background: var(--card);
+}
+
+/* Phone number input with country detection */
+.phone-input {
+  font-size: 1.125rem;
+  padding: 1rem 1rem 1rem 3rem; /* Space for country code */
+  border: 2px solid var(--border);
+  border-radius: var(--border-radius);
+}
+
+/* Cards optimized for mobile viewing */
+.mobile-card {
+  background: var(--card);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin: 1rem 0;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border);
+}
+
+/* Transaction list optimized for touch */
+.transaction-list {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.transaction-item {
+  min-height: var(--touch-comfortable);
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Voice input button */
+.voice-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  position: relative;
+}
+
+.voice-button.listening {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.voice-button::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid white;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: sound-wave 1.5s ease-in-out infinite;
+}
+
+@keyframes sound-wave {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.6;
+  }
+}
+
+/* Loading states optimized for African networks */
+.loading-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    var(--background) 50%,
+    var(--muted) 75%
+  );
+  background-size: 200% 200%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* High contrast for African sun conditions */
+.high-contrast {
+  --background: #000000;
+  --foreground: #ffffff;
+  --border: #ffffff;
+}
+
+/* Reduced motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

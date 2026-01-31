@@ -1,0 +1,36 @@
+{
+  "name": "@project-bridge/database",
+  "version": "1.0.0",
+  "description": "Shared Prisma database client for Project Bridge",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "deploy": "prisma migrate deploy",
+    "studio": "dotenv -e ../../.env prisma studio",
+    "clean": "rm -rf dist",
+    "lint": "eslint src/**/*.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.0.0"
+  },
+  "devDependencies": {
+    "prisma": "^6.0.0",
+    "typescript": "^5.3.0",
+    "@types/node": "^20.0.0",
+    "@eslint/js": "^9.18.0",
+    "dotenv-cli": "^7.4.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.2",
+    "globals": "^16.0.0",
+    "typescript-eslint": "^8.20.0"
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@project-bridge/config",
+  "version": "1.0.0",
+  "description": "Shared configuration files for Project Bridge",
+  "private": true,
+  "files": [
+    "eslint",
+    "typescript"
+  ],
+  "scripts": {
+    "clean": "echo 'Nothing to clean'"
+  }
+}

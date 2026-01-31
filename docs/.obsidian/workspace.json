@@ -1,0 +1,230 @@
+{
+  "main": {
+    "id": "ccd977d3e860068b",
+    "type": "split",
+    "children": [
+      {
+        "id": "c76925406b62d7fc",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f8c0a9ddcd55d4eb",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "PHASE_3_FRONTEND_STRATEGY.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "PHASE_3_FRONTEND_STRATEGY"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "680efe4534f3492d",
+    "type": "split",
+    "children": [
+      {
+        "id": "66da7997123934b7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d0d97d85a6940b59",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "05c6a39b97418343",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "ce0ee43d6d03614e",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "26978a309f1647f2",
+    "type": "split",
+    "children": [
+      {
+        "id": "6b196c8f38d97523",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "dead74dacb5d1f9e",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "PHASE_3_FRONTEND_STRATEGY.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for PHASE_3_FRONTEND_STRATEGY"
+            }
+          },
+          {
+            "id": "498ee9345be6e489",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "PHASE_3_FRONTEND_STRATEGY.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from PHASE_3_FRONTEND_STRATEGY"
+            }
+          },
+          {
+            "id": "0022929a1f25f75b",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "76af276d8f87b250",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "872919eb790dab7b",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "PHASE_3_FRONTEND_STRATEGY.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of PHASE_3_FRONTEND_STRATEGY"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "f8c0a9ddcd55d4eb",
+  "lastOpenFiles": [
+    "archive/TURBOREPO_MIGRATION_GUIDE.md",
+    "HUMAN_GUIDE.md",
+    "archive/DEPLOYMENT.md",
+    "archive/HUMAN_GUIDE.md",
+    "archive/DOCUMENTATION_CLEANUP_PLAN.md",
+    "archive/skills",
+    "archive/bridge-frontend/node_modules/next/dist/esm/build/webpack/loaders/css-loader/src/plugins/postcss-url-parser.js.map",
+    "archive/bridge-frontend/node_modules/next/dist/esm/build/webpack/loaders/css-loader/src/plugins/postcss-url-parser.js",
+    "archive/bridge-frontend/node_modules/next/dist/esm/build/webpack/loaders/css-loader/src/plugins/postcss-import-parser.js.map",
+    "archive/bridge-frontend/node_modules/next/dist/esm/build/webpack/loaders/css-loader/src/plugins/postcss-import-parser.js",
+    "archive/bridge-frontend/node_modules/next/dist/esm/build/webpack/loaders/css-loader/src/plugins/postcss-icss-parser.js.map",
+    "archive/bridge-frontend/node_modules/next/dist/esm/build/webpack/loaders/css-loader/src/plugins/postcss-icss-parser.js",
+    "archive/bridge-frontend/node_modules/next/dist/esm/build/webpack/loaders/css-loader/src/plugins/index.js.map",
+    "archive/bridge-frontend/node_modules/next/dist/esm/build/webpack/loaders/css-loader/src/plugins/index.js",
+    "archive/bridge-frontend/node_modules/next/dist/esm/build/webpack/loaders/css-loader/src/runtime/getUrl.js.map",
+    "archive/bridge-frontend/node_modules/@tanstack/react-query/build/codemods/src/v5/keep-previous-data/README.md",
+    "archive/bridge-frontend/node_modules/next/dist/compiled/@babel/runtime/README.md",
+    "archive/bridge-frontend/node_modules/next/dist/compiled/regenerator-runtime/README.md",
+    "archive/bridge-frontend/node_modules/next/dist/compiled/react-refresh/README.md",
+    "archive/bridge-frontend/node_modules/next/dist/compiled/react-is/README.md",
+    "archive/bridge-frontend/node_modules/@typescript-eslint/typescript-estree/node_modules/semver/README.md",
+    "archive/bridge-frontend/node_modules/@typescript-eslint/typescript-estree/node_modules/minimatch/README.md",
+    "archive/bridge-frontend/node_modules/@typescript-eslint/typescript-estree/node_modules/brace-expansion/README.md",
+    "archive/bridge-frontend/node_modules/@typescript-eslint/eslint-plugin/node_modules/ignore/README.md",
+    "archive/bridge-frontend/node_modules/@eslint-community/eslint-utils/node_modules/eslint-visitor-keys/README.md",
+    "archive/bridge-frontend/node_modules/tsconfig-paths/node_modules/json5/README.md",
+    "archive/bridge-frontend/node_modules/tsconfig-paths/node_modules/json5/LICENSE.md",
+    "archive/bridge-frontend/node_modules/tinyglobby/node_modules/picomatch/README.md",
+    "archive/bridge-frontend/node_modules/tinyglobby/node_modules/fdir/README.md",
+    "archive/bridge-frontend/node_modules/sharp/node_modules/semver/README.md",
+    "archive/bridge-frontend/node_modules/next/node_modules/postcss/README.md",
+    "archive/bridge-frontend/node_modules/is-bun-module/node_modules/semver/README.md",
+    "archive/bridge-frontend/node_modules/fast-glob/node_modules/glob-parent/README.md",
+    "archive/bridge-frontend/node_modules/fast-glob/node_modules/glob-parent/CHANGELOG.md",
+    "archive/bridge-frontend/node_modules/eslint-plugin-react/node_modules/resolve/SECURITY.md",
+    "archive/bridge-frontend/node_modules/eslint-module-utils/node_modules/debug/README.md",
+    "archive/bridge-frontend/public/window.svg",
+    "archive/bridge-frontend/public/vercel.svg",
+    "archive/bridge-frontend/public/next.svg",
+    "archive/bridge-frontend/public/globe.svg",
+    "archive/bridge-frontend/public/file.svg"
+  ]
+}

@@ -1,16 +1,72 @@
 version: 2
 # Get your authtoken from https://dashboard.ngrok.com/get-started/your-authtoken
 # Then run: ngrok config add-authtoken YOUR_TOKEN
+# Or set NGROK_AUTH_TOKEN environment variable
 
 # Optional: Custom domain (requires paid plan)
 # hostname: your-domain.ngrok.io
 
+# Global configuration
+region: us
+authtoken: ${NGROK_AUTH_TOKEN}
+
+# Web console settings
+web_addr: localhost:4040
+inspect_db_size: 50000000
+log_level: info
+log_format: json
+log: /var/log/ngrok.log
+
+# Tunnels configuration
 tunnels:
+  # Web frontend tunnel
   web:
     proto: http
     addr: 3001
     inspect: true
+    host_header: localhost:3001
+    bind_tls: true
+    # Optional: subdomain for paid plans
+    # subdomain: project-bridge-web
+
+  # API backend tunnel
   api:
     proto: http
     addr: 3000
     inspect: true
+    host_header: localhost:3000
+    bind_tls: true
+    # Optional: subdomain for paid plans
+    # subdomain: project-bridge-api
+
+  # Webhook tunnel for external integrations
+  webhooks:
+    proto: http
+    addr: 3000
+    inspect: true
+    host_header: localhost:3000
+    bind_tls: true
+    # Webhook-specific path routing
+    # This allows webhooks to be routed to specific endpoints
+    # Optional: subdomain for paid plans
+    # subdomain: project-bridge-webhooks
+
+  # M-Pesa callback tunnel
+  mpesa:
+    proto: http
+    addr: 3000
+    inspect: true
+    host_header: localhost:3000
+    bind_tls: true
+    # Optional: subdomain for paid plans
+    # subdomain: project-bridge-mpesa
+
+  # WhatsApp webhook tunnel
+  whatsapp:
+    proto: http
+    addr: 3000
+    inspect: true
+    host_header: localhost:3000
+    bind_tls: true
+    # Optional: subdomain for paid plans
+    # subdomain: project-bridge-whatsapp
