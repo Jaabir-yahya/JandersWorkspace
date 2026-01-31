@@ -132,10 +132,11 @@ export class DashboardService {
     }
 
     // Payment method breakdown (from payment_records)
+    // Note: payment_records table doesn't have tenant_id column, so we join with transactions
     const { data: paymentData, error: paymentError } = await this.supabase
       .from('payment_records')
-      .select('method, amount')
-      .eq('tenant_id', tenantId);
+      .select('method, amount, transactions!inner(tenant_id)')
+      .eq('transactions.tenant_id', tenantId);
 
     if (paymentError) {
       throw new BadRequestException(paymentError.message);

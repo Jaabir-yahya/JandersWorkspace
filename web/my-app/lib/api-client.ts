@@ -250,7 +250,7 @@ export async function deleteAttachment(id: string, parentId: string, parentType:
 // ====================
 
 export function useDashboardStats() {
-  return useSWR<DashboardStats>("/dashboard/stats", fetcher, {
+  return useSWR<DashboardStats>(`/dashboard/stats?tenant_id=${DEFAULT_TENANT_ID}`, fetcher, {
     refreshInterval: 30000, // Refresh every 30 seconds
   });
 }

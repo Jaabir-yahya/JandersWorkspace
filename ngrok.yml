@@ -1,0 +1,16 @@
+version: 2
+# Get your authtoken from https://dashboard.ngrok.com/get-started/your-authtoken
+# Then run: ngrok config add-authtoken YOUR_TOKEN
+
+# Optional: Custom domain (requires paid plan)
+# hostname: your-domain.ngrok.io
+
+tunnels:
+  web:
+    proto: http
+    addr: 3001
+    inspect: true
+  api:
+    proto: http
+    addr: 3000
+    inspect: true

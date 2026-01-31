@@ -1,6 +1,6 @@
 # JandersWorkspace — Project Bridge (Phase 1)
 
-Universal Truth Ledger (Phase 1) — a headless backend that guarantees immutable, auditable bookkeeping for Retail, Services, and Rentals.
+Universal Truth Ledger (Phase 3) — a headless backend that guarantees immutable, auditable bookkeeping for Retail, Services, and Rentals.
 
 Quick start:
 - Read the PRD: `docs/PRD.md`

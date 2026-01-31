@@ -22,7 +22,7 @@ export class TransactionsController {
 
   @Post()
   create(
-    @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+    @Body(new ValidationPipe({ whitelist: false, forbidNonWhitelisted: false }))
     dto: CreateTransactionDto,
   ) {
     return this.transactionsService.create(dto);

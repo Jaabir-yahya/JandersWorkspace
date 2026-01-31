@@ -1,4 +1,4 @@
-import { IsString, IsUUID, IsArray, IsOptional, IsNumber, IsObject, ValidateNested, ArrayMinSize, Matches } from 'class-validator';
+import { IsString, IsUUID, IsArray, IsOptional, IsNumber, IsObject, ValidateNested, ArrayMinSize, Matches, IsDateString } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class TransactionLineDto {
@@ -24,6 +24,23 @@ export class TransactionLineDto {
   @IsOptional()
   @IsObject()
   metadata?: Record<string, any>;
+}
+
+export class PaymentRecordDto {
+  @IsString()
+  method: 'CASH' | 'M-PESA' | 'BANK_TRANSFER' | 'CARD' | 'CREDIT';
+
+  @IsNumber()
+  @Type(() => Number)
+  amount: number;
+
+  @IsOptional()
+  @IsString()
+  reference?: string;
+
+  @IsOptional()
+  @IsDateString()
+  paid_at?: string;
 }
 
 export class CreateTransactionDto {
@@ -61,6 +78,19 @@ export class CreateTransactionDto {
   transaction_date?: string;
 
   @IsOptional()
+  @IsDateString()
+  due_date?: string;
+
+  @IsOptional()
+  @IsString()
+  context?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @IsOptional()
   @IsObject()
   metadata?: Record<string, any>;
 
@@ -69,4 +99,10 @@ export class CreateTransactionDto {
   @Type(() => TransactionLineDto)
   @ArrayMinSize(1)
   lines: TransactionLineDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PaymentRecordDto)
+  payment_records?: PaymentRecordDto[];
 }

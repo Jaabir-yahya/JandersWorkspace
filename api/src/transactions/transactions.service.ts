@@ -46,6 +46,14 @@ export class TransactionsService {
       metadata: line.metadata || {},
     }));
 
+    // Transform payment records if provided
+    const paymentRecords = dto.payment_records?.map(pr => ({
+      method: pr.method,
+      amount: pr.amount,
+      reference: pr.reference || null,
+      paid_at: pr.paid_at || new Date().toISOString(),
+    })) || null;
+
     const { data, error } = await this.supabase.rpc('create_transaction', {
       p_tenant_id: dto.tenant_id,
       p_entity_id: dto.entity_id || null,
@@ -53,9 +61,11 @@ export class TransactionsService {
       p_txn_type: dto.type,
       p_currency_code: dto.currency_code,
       p_lines: lines,
-      p_transaction_date: dto.transaction_date || new Date().toISOString(),
       p_reference: dto.reference || null,
-      p_metadata: dto.metadata || {},
+      p_due_date: dto.due_date || null,
+      p_context: dto.context || null,
+      p_tags: dto.tags || [],
+      p_payment_records: paymentRecords,
     });
 
     if (error) {
@@ -446,11 +456,6 @@ export class TransactionsService {
         type: dto.type,
         display_name: dto.display_name,
         phone_number: dto.phone_number || null,
-        linked_phones: dto.linked_phones || [],
-        alternate_names: dto.alternate_names || [],
-        location: dto.location || null,
-        notes: dto.notes || null,
-        trust_score: dto.trust_score || 50,
         metadata: dto.metadata || {},
         created_by_user_id: dto.created_by_user_id,
       })

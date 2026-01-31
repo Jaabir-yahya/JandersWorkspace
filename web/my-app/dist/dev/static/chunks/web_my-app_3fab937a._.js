@@ -12,15 +12,12 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$web$2f$my$2d$app$2f$node_mod
 ;
 ;
 function ThemeProvider({ children, ...props }) {
-    // Only render on client to avoid hydration mismatch
-    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
-    ;
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$web$2f$my$2d$app$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$web$2f$my$2d$app$2f$node_modules$2f$next$2d$themes$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ThemeProvider"], {
         ...props,
         children: children
     }, void 0, false, {
         fileName: "[project]/web/my-app/components/theme-provider.tsx",
-        lineNumber: 14,
+        lineNumber: 10,
         columnNumber: 10
     }, this);
 }

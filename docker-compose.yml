@@ -1,0 +1,24 @@
+services:
+  db:
+    image: supabase/postgres:15.1.0.117
+    ports:
+      - '54322:5432'
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./supabase/migrations:/docker-entrypoint-initdb.d
+    command: postgres -c max_connections=200
+    
+  kong:
+    image: kong:3.4
+    ports:
+      - '54321:8000'
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /kong/declarative/kong.yml
+    volumes:
+      - ./supabase/kong.yml:/kong/declarative/kong.yml
+    depends_on:
+      - db

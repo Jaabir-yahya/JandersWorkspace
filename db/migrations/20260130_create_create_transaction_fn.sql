@@ -29,7 +29,7 @@ BEGIN
   END IF;
 
   INSERT INTO transactions (tenant_id, entity_id, transaction_date, total_amount, currency_code, status, type, payment_status, created_at)
-  VALUES (p_tenant_id, p_entity_id, now(), 0, p_currency_code, 'DRAFT', p_txn_type, 'PENDING', now())
+  VALUES (p_tenant_id, p_entity_id, now(), 0, p_currency_code, 'DRAFT'::txn_status, p_txn_type::txn_type, 'PENDING'::payment_status, now())
   RETURNING id INTO txn_id;
 
   FOR l IN SELECT * FROM jsonb_array_elements(p_lines) LOOP
