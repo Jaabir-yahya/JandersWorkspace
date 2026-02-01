@@ -164,7 +164,7 @@ JandersWorkspace/                    # Monorepo Root
 │   │   └── prisma/
 │   │       ├── schema.prisma        # Database schema
 │   │       └── seed.ts              # Seed data
-│   └── web/                         # Next.js 15 Frontend (@project-bridge/web)
+│   └── bridge-manual/               # Next.js Frontend (manual-first)
 │       ├── app/                     # App Router structure
 │       │   ├── (optimized)/         # Optimized layout for core features
 │       │   ├── dashboard/           # Main dashboard page
@@ -355,14 +355,22 @@ npm run build
 npm run clean
 ```
 
+### Solo dev maintenance
+
+- **First-time setup:** `./scripts/setup-env.sh` then `npm run setup`; migrations: `cd apps/api && npx prisma migrate dev`
+- **Health check:** `node scripts/health-check.js` (expects API on 3000, web on 3001)
+- **Full test run:** `./scripts/test-all.sh` (unit, integration, optional API smoke) or `npm test` / `npm run test:cov`
+- **Run one app:** `npm run dev:api` or `npm run dev:web` (bridge-manual on 3001)
+
 ---
 
 ## Documentation
 
+- **[Full plan and user experience](docs/PROJECT_BRIDGE_PLAN.md)** – single source of truth: product, manual tenants, terminology, current state, plan, deployment, dev workflow
+- [Documentation index](docs/README.md) – quick links to API, Contributing, deploy
 - [API Documentation](http://localhost:3000/api/docs) (when running locally)
-- [Deployment Guide](DEPLOYMENT.md)
+- [Deployment Guide](DEPLOYMENT_SIMPLE.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
-- [Frontend Architecture](docs/FRONTEND_ARCHITECTURE.md)
 - [Changelog](CHANGELOG.md)
 
 ---
@@ -377,7 +385,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 For questions or support:
 
-- Check the [documentation](docs/)
+- Check the [full plan](docs/PROJECT_BRIDGE_PLAN.md) and [docs index](docs/README.md)
 - Review [existing issues](https://github.com/project-bridge/issues)
 - Open a new issue for bugs or feature requests
 

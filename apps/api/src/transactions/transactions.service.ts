@@ -40,6 +40,30 @@ export interface EntityHistoryItem {
 export class TransactionsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /**
+   * Resolve created_by_user_id for quick-capture (no JWT).
+   * Uses per-tenant "manual" user (metadata.manual_capture) or first user, or creates one.
+   */
+  async getOrCreateManualUserForTenant(tenantId: string): Promise<string> {
+    const users = await this.prisma.user.findMany({
+      where: { tenantId },
+      orderBy: { createdAt: 'asc' },
+    });
+    const manual = users.find((u) => (u.metadata as Record<string, unknown>)?.manual_capture === true);
+    if (manual) return manual.id;
+    if (users.length > 0) return users[0].id;
+    const created = await this.prisma.user.create({
+      data: {
+        tenantId,
+        phoneNumber: `+manual-${tenantId}`,
+        displayName: 'Manual Capture',
+        role: 'user',
+        metadata: { manual_capture: true } as Prisma.InputJsonValue,
+      },
+    });
+    return created.id;
+  }
+
   async create(dto: CreateTransactionDto) {
     // Create transaction with lines in a single transaction
     const transaction = await this.prisma.$transaction(async (tx) => {
@@ -149,6 +173,74 @@ export class TransactionsService {
     });
 
     return transactions;
+  }
+
+  /**
+   * Bulk export for manual tier: CSV or JSON.
+   * Reuses findAll filters; optional limit for CSV/JSON.
+   */
+  async exportBulk(
+    tenantId: string,
+    filters?: TransactionFilters,
+    format: 'json' | 'csv' = 'json',
+    limit = 10_000,
+  ): Promise<unknown[] | string> {
+    const where: Prisma.TransactionWhereInput = { tenantId };
+
+    if (filters?.status) where.status = filters.status as TxnStatus;
+    if (filters?.type) where.type = filters.type as any;
+    if (filters?.entity_id) where.entityId = filters.entity_id;
+    if (filters?.payment_status) where.paymentStatus = filters.payment_status as PaymentStatus;
+    if (filters?.date_from || filters?.date_to) {
+      where.createdAt = {};
+      if (filters.date_from) where.createdAt.gte = new Date(filters.date_from);
+      if (filters.date_to) where.createdAt.lte = new Date(filters.date_to);
+    }
+    if (filters?.search) {
+      where.OR = [
+        { reference: { contains: filters.search, mode: 'insensitive' } },
+        { entity: { displayName: { contains: filters.search, mode: 'insensitive' } } },
+      ];
+    }
+
+    const transactions = await this.prisma.transaction.findMany({
+      where,
+      include: {
+        entity: { select: { id: true, displayName: true, phoneNumber: true } },
+        lines: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+
+    if (format === 'json') {
+      return transactions.map((t) => ({
+        id: t.id,
+        tenantId: t.tenantId,
+        type: t.type,
+        totalAmount: Number(t.totalAmount),
+        currencyCode: t.currencyCode,
+        createdAt: t.createdAt.toISOString(),
+        status: t.status,
+        paymentStatus: t.paymentStatus,
+        reference: t.reference,
+        entity: t.entity,
+        lines: t.lines.map((l) => ({
+          description: l.description,
+          quantity: Number(l.quantity),
+          unitPrice: Number(l.unitPrice),
+          totalLineAmount: Number(l.totalLineAmount),
+        })),
+      }));
+    }
+
+    const header = 'date,type,amount,currency,description,reference';
+    const rows = transactions.map((t) => {
+      const desc = t.lines?.[0]?.description ?? '';
+      const escaped = desc.replace(/"/g, '""');
+      return `${t.createdAt.toISOString().split('T')[0]},${t.type},${t.totalAmount},${t.currencyCode},"${escaped}",${(t.reference ?? '').replace(/"/g, '""')}`;
+    });
+    return [header, ...rows].join('\n');
   }
 
   async findOne(id: string) {

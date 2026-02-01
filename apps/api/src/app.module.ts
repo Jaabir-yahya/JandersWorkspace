@@ -13,7 +13,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { HealthModule } from './health/health.module';
 import { NairobiModule } from './nairobi/nairobi.module';
-import { TenantsController } from './tenants/tenants.controller';
+import { TenantsModule } from './tenants/tenants.module';
 
 @Module({
   imports: [
@@ -32,6 +32,7 @@ import { TenantsController } from './tenants/tenants.controller';
     ]),
     AuthModule,
     PrismaModule,
+    TenantsModule,
     TransactionsModule,
     PaymentRecordsModule,
     AttachmentsModule,
@@ -40,7 +41,7 @@ import { TenantsController } from './tenants/tenants.controller';
     NairobiModule,
     HealthModule,
   ],
-  controllers: [AppController, TenantsController],
+  controllers: [AppController],
   providers: [
     AppService,
     {

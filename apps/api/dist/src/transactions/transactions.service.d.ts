@@ -28,24 +28,25 @@ export interface EntityHistoryItem {
 export declare class TransactionsService {
     private readonly prisma;
     constructor(prisma: PrismaService);
+    getOrCreateManualUserForTenant(tenantId: string): Promise<string>;
     create(dto: CreateTransactionDto): Promise<{
         entity: {
             id: string;
             tenantId: string;
             type: import("@prisma/client").$Enums.EntityType;
-            metadata: Prisma.JsonValue;
             createdAt: Date;
-            createdByUserId: string;
-            displayName: string;
             phoneNumber: string | null;
+            displayName: string;
+            metadata: Prisma.JsonValue;
+            createdByUserId: string;
         } | null;
         lines: {
             id: string;
+            createdAt: Date;
             description: string | null;
+            metadata: Prisma.JsonValue;
             sku: string | null;
             quantity: Prisma.Decimal;
-            metadata: Prisma.JsonValue;
-            createdAt: Date;
             unitPrice: Prisma.Decimal;
             totalLineAmount: Prisma.Decimal;
             accountCode: string;
@@ -56,12 +57,12 @@ export declare class TransactionsService {
         id: string;
         tenantId: string;
         type: import("@prisma/client").$Enums.TxnType;
+        createdAt: Date;
+        updatedAt: Date;
         metadata: Prisma.JsonValue;
         reference: string | null;
         totalAmount: Prisma.Decimal;
         currencyCode: string;
-        createdAt: Date;
-        updatedAt: Date;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         entityId: string | null;
         createdByUserId: string;
@@ -70,16 +71,16 @@ export declare class TransactionsService {
     findAll(tenantId: string, filters?: TransactionFilters): Promise<({
         entity: {
             id: string;
-            displayName: string;
             phoneNumber: string | null;
+            displayName: string;
         } | null;
         lines: {
             id: string;
+            createdAt: Date;
             description: string | null;
+            metadata: Prisma.JsonValue;
             sku: string | null;
             quantity: Prisma.Decimal;
-            metadata: Prisma.JsonValue;
-            createdAt: Date;
             unitPrice: Prisma.Decimal;
             totalLineAmount: Prisma.Decimal;
             accountCode: string;
@@ -90,35 +91,36 @@ export declare class TransactionsService {
         id: string;
         tenantId: string;
         type: import("@prisma/client").$Enums.TxnType;
+        createdAt: Date;
+        updatedAt: Date;
         metadata: Prisma.JsonValue;
         reference: string | null;
         totalAmount: Prisma.Decimal;
         currencyCode: string;
-        createdAt: Date;
-        updatedAt: Date;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         entityId: string | null;
         createdByUserId: string;
         reversedTransactionId: string | null;
     })[]>;
+    exportBulk(tenantId: string, filters?: TransactionFilters, format?: 'json' | 'csv', limit?: number): Promise<unknown[] | string>;
     findOne(id: string): Promise<{
         entity: {
             id: string;
             tenantId: string;
             type: import("@prisma/client").$Enums.EntityType;
-            metadata: Prisma.JsonValue;
             createdAt: Date;
-            createdByUserId: string;
-            displayName: string;
             phoneNumber: string | null;
+            displayName: string;
+            metadata: Prisma.JsonValue;
+            createdByUserId: string;
         } | null;
         lines: {
             id: string;
+            createdAt: Date;
             description: string | null;
+            metadata: Prisma.JsonValue;
             sku: string | null;
             quantity: Prisma.Decimal;
-            metadata: Prisma.JsonValue;
-            createdAt: Date;
             unitPrice: Prisma.Decimal;
             totalLineAmount: Prisma.Decimal;
             accountCode: string;
@@ -129,11 +131,11 @@ export declare class TransactionsService {
                 status: import("@prisma/client").$Enums.PaymentStatus;
                 id: string;
                 tenantId: string;
+                createdAt: Date;
                 metadata: Prisma.JsonValue;
                 amount: Prisma.Decimal;
                 reference: string | null;
                 currencyCode: string;
-                createdAt: Date;
                 createdByUserId: string;
             };
         } & {
@@ -148,12 +150,12 @@ export declare class TransactionsService {
         id: string;
         tenantId: string;
         type: import("@prisma/client").$Enums.TxnType;
+        createdAt: Date;
+        updatedAt: Date;
         metadata: Prisma.JsonValue;
         reference: string | null;
         totalAmount: Prisma.Decimal;
         currencyCode: string;
-        createdAt: Date;
-        updatedAt: Date;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         entityId: string | null;
         createdByUserId: string;
@@ -162,11 +164,11 @@ export declare class TransactionsService {
     findByEntity(entityId: string): Promise<({
         lines: {
             id: string;
+            createdAt: Date;
             description: string | null;
+            metadata: Prisma.JsonValue;
             sku: string | null;
             quantity: Prisma.Decimal;
-            metadata: Prisma.JsonValue;
-            createdAt: Date;
             unitPrice: Prisma.Decimal;
             totalLineAmount: Prisma.Decimal;
             accountCode: string;
@@ -177,12 +179,12 @@ export declare class TransactionsService {
         id: string;
         tenantId: string;
         type: import("@prisma/client").$Enums.TxnType;
+        createdAt: Date;
+        updatedAt: Date;
         metadata: Prisma.JsonValue;
         reference: string | null;
         totalAmount: Prisma.Decimal;
         currencyCode: string;
-        createdAt: Date;
-        updatedAt: Date;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         entityId: string | null;
         createdByUserId: string;
@@ -193,19 +195,19 @@ export declare class TransactionsService {
             id: string;
             tenantId: string;
             type: import("@prisma/client").$Enums.EntityType;
-            metadata: Prisma.JsonValue;
             createdAt: Date;
-            createdByUserId: string;
-            displayName: string;
             phoneNumber: string | null;
+            displayName: string;
+            metadata: Prisma.JsonValue;
+            createdByUserId: string;
         } | null;
         lines: {
             id: string;
+            createdAt: Date;
             description: string | null;
+            metadata: Prisma.JsonValue;
             sku: string | null;
             quantity: Prisma.Decimal;
-            metadata: Prisma.JsonValue;
-            createdAt: Date;
             unitPrice: Prisma.Decimal;
             totalLineAmount: Prisma.Decimal;
             accountCode: string;
@@ -216,12 +218,12 @@ export declare class TransactionsService {
         id: string;
         tenantId: string;
         type: import("@prisma/client").$Enums.TxnType;
+        createdAt: Date;
+        updatedAt: Date;
         metadata: Prisma.JsonValue;
         reference: string | null;
         totalAmount: Prisma.Decimal;
         currencyCode: string;
-        createdAt: Date;
-        updatedAt: Date;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         entityId: string | null;
         createdByUserId: string;
@@ -230,11 +232,11 @@ export declare class TransactionsService {
     reverseTransaction(id: string, dto: ReverseTransactionDto): Promise<{
         lines: {
             id: string;
+            createdAt: Date;
             description: string | null;
+            metadata: Prisma.JsonValue;
             sku: string | null;
             quantity: Prisma.Decimal;
-            metadata: Prisma.JsonValue;
-            createdAt: Date;
             unitPrice: Prisma.Decimal;
             totalLineAmount: Prisma.Decimal;
             accountCode: string;
@@ -245,12 +247,12 @@ export declare class TransactionsService {
         id: string;
         tenantId: string;
         type: import("@prisma/client").$Enums.TxnType;
+        createdAt: Date;
+        updatedAt: Date;
         metadata: Prisma.JsonValue;
         reference: string | null;
         totalAmount: Prisma.Decimal;
         currencyCode: string;
-        createdAt: Date;
-        updatedAt: Date;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         entityId: string | null;
         createdByUserId: string;
@@ -261,19 +263,19 @@ export declare class TransactionsService {
             id: string;
             tenantId: string;
             type: import("@prisma/client").$Enums.EntityType;
-            metadata: Prisma.JsonValue;
             createdAt: Date;
-            createdByUserId: string;
-            displayName: string;
             phoneNumber: string | null;
+            displayName: string;
+            metadata: Prisma.JsonValue;
+            createdByUserId: string;
         } | null;
         lines: {
             id: string;
+            createdAt: Date;
             description: string | null;
+            metadata: Prisma.JsonValue;
             sku: string | null;
             quantity: Prisma.Decimal;
-            metadata: Prisma.JsonValue;
-            createdAt: Date;
             unitPrice: Prisma.Decimal;
             totalLineAmount: Prisma.Decimal;
             accountCode: string;
@@ -284,12 +286,12 @@ export declare class TransactionsService {
         id: string;
         tenantId: string;
         type: import("@prisma/client").$Enums.TxnType;
+        createdAt: Date;
+        updatedAt: Date;
         metadata: Prisma.JsonValue;
         reference: string | null;
         totalAmount: Prisma.Decimal;
         currencyCode: string;
-        createdAt: Date;
-        updatedAt: Date;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         entityId: string | null;
         createdByUserId: string;
@@ -304,16 +306,16 @@ export declare class TransactionsService {
     searchTransactions(tenantId: string, searchTerm: string, filters?: Omit<TransactionFilters, 'search'>): Promise<({
         entity: {
             id: string;
-            displayName: string;
             phoneNumber: string | null;
+            displayName: string;
         } | null;
         lines: {
             id: string;
+            createdAt: Date;
             description: string | null;
+            metadata: Prisma.JsonValue;
             sku: string | null;
             quantity: Prisma.Decimal;
-            metadata: Prisma.JsonValue;
-            createdAt: Date;
             unitPrice: Prisma.Decimal;
             totalLineAmount: Prisma.Decimal;
             accountCode: string;
@@ -324,12 +326,12 @@ export declare class TransactionsService {
         id: string;
         tenantId: string;
         type: import("@prisma/client").$Enums.TxnType;
+        createdAt: Date;
+        updatedAt: Date;
         metadata: Prisma.JsonValue;
         reference: string | null;
         totalAmount: Prisma.Decimal;
         currencyCode: string;
-        createdAt: Date;
-        updatedAt: Date;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         entityId: string | null;
         createdByUserId: string;
@@ -342,42 +344,42 @@ export declare class TransactionsService {
         id: string;
         tenantId: string;
         type: import("@prisma/client").$Enums.EntityType;
-        metadata: Prisma.JsonValue;
         createdAt: Date;
-        createdByUserId: string;
-        displayName: string;
         phoneNumber: string | null;
+        displayName: string;
+        metadata: Prisma.JsonValue;
+        createdByUserId: string;
     }[]>;
     createEntity(dto: any): Promise<{
         id: string;
         tenantId: string;
         type: import("@prisma/client").$Enums.EntityType;
-        metadata: Prisma.JsonValue;
         createdAt: Date;
-        createdByUserId: string;
-        displayName: string;
         phoneNumber: string | null;
+        displayName: string;
+        metadata: Prisma.JsonValue;
+        createdByUserId: string;
     }>;
     findEntityById(id: string): Promise<{
         id: string;
         tenantId: string;
         type: import("@prisma/client").$Enums.EntityType;
-        metadata: Prisma.JsonValue;
         createdAt: Date;
-        createdByUserId: string;
-        displayName: string;
         phoneNumber: string | null;
+        displayName: string;
+        metadata: Prisma.JsonValue;
+        createdByUserId: string;
     }>;
     getEntityBalance(entityId: string, tenantId: string): Promise<{
         entity: {
             id: string;
             tenantId: string;
             type: import("@prisma/client").$Enums.EntityType;
-            metadata: Prisma.JsonValue;
             createdAt: Date;
-            createdByUserId: string;
-            displayName: string;
             phoneNumber: string | null;
+            displayName: string;
+            metadata: Prisma.JsonValue;
+            createdByUserId: string;
         };
         balance: {
             total_credit: number;
@@ -391,11 +393,11 @@ export declare class TransactionsService {
             id: string;
             tenantId: string;
             type: import("@prisma/client").$Enums.EntityType;
-            metadata: Prisma.JsonValue;
             createdAt: Date;
-            createdByUserId: string;
-            displayName: string;
             phoneNumber: string | null;
+            displayName: string;
+            metadata: Prisma.JsonValue;
+            createdByUserId: string;
         };
         balance: {
             total_credit: number;
@@ -406,11 +408,11 @@ export declare class TransactionsService {
         recent_transactions: ({
             lines: {
                 id: string;
+                createdAt: Date;
                 description: string | null;
+                metadata: Prisma.JsonValue;
                 sku: string | null;
                 quantity: Prisma.Decimal;
-                metadata: Prisma.JsonValue;
-                createdAt: Date;
                 unitPrice: Prisma.Decimal;
                 totalLineAmount: Prisma.Decimal;
                 accountCode: string;
@@ -421,12 +423,12 @@ export declare class TransactionsService {
             id: string;
             tenantId: string;
             type: import("@prisma/client").$Enums.TxnType;
+            createdAt: Date;
+            updatedAt: Date;
             metadata: Prisma.JsonValue;
             reference: string | null;
             totalAmount: Prisma.Decimal;
             currencyCode: string;
-            createdAt: Date;
-            updatedAt: Date;
             paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
             entityId: string | null;
             createdByUserId: string;
@@ -438,30 +440,30 @@ export declare class TransactionsService {
         id: string;
         tenantId: string;
         type: import("@prisma/client").$Enums.EntityType;
-        metadata: Prisma.JsonValue;
         createdAt: Date;
-        createdByUserId: string;
-        displayName: string;
         phoneNumber: string | null;
+        displayName: string;
+        metadata: Prisma.JsonValue;
+        createdByUserId: string;
     }[]>;
     addLinkedPhone(entityId: string, phone: string): Promise<{
         id: string;
         tenantId: string;
         type: import("@prisma/client").$Enums.EntityType;
-        metadata: Prisma.JsonValue;
         createdAt: Date;
-        createdByUserId: string;
-        displayName: string;
         phoneNumber: string | null;
+        displayName: string;
+        metadata: Prisma.JsonValue;
+        createdByUserId: string;
     }>;
     removeLinkedPhone(entityId: string, phone: string): Promise<{
         id: string;
         tenantId: string;
         type: import("@prisma/client").$Enums.EntityType;
-        metadata: Prisma.JsonValue;
         createdAt: Date;
-        createdByUserId: string;
-        displayName: string;
         phoneNumber: string | null;
+        displayName: string;
+        metadata: Prisma.JsonValue;
+        createdByUserId: string;
     }>;
 }

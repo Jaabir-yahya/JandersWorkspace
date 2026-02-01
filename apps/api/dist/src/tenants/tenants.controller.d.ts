@@ -1,9 +1,11 @@
 import { TenantConfigService } from '../integrations/tenant-config.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { TenantsService } from './tenants.service';
 export declare class TenantsController {
     private readonly tenantConfigService;
     private readonly prismaService;
-    constructor(tenantConfigService: TenantConfigService, prismaService: PrismaService);
+    private readonly tenantsService;
+    constructor(tenantConfigService: TenantConfigService, prismaService: PrismaService, tenantsService: TenantsService);
     getMyFeatures(req: any): Promise<Record<string, boolean>>;
     getMyConfig(req: any): Promise<import("../integrations/types/integration.types").TenantConfig>;
     createTenant(body: {
@@ -57,24 +59,17 @@ export declare class TenantsController {
     listTenants(req: any): Promise<{
         features: any;
         id: string;
-        name: string;
-        createdAt: Date;
         slug: string;
+        name: string;
         tier: string;
         country: string;
         settings: import("@prisma/client/runtime/library").JsonValue;
+        createdAt: Date;
     }[]>;
-    getTenantBySlug(slug: string): Promise<{
-        id: string;
-        name: string;
-        slug: string;
-        tier: string;
-        country: string;
-        settings: {
-            businessType: any;
-            location: any;
-            features: any;
-        };
-        features: any;
+    setTenantApiKey(tenantId: string, body: {
+        apiKey: string;
+    }, req: any): Promise<{
+        success: boolean;
+        message: string;
     }>;
 }

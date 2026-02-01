@@ -6,49 +6,31 @@ This document defines the standards and conventions for the Project Bridge repos
 
 ## Repository Structure
 
-### Current Structure (Phase 3)
-
-```
-JandersWorkspace/
-├── 📁 api/                          # NestJS backend
-│   ├── 📁 src/
-│   │   ├── 📁 attachments/
-│   │   ├── 📁 dashboard/
-│   │   ├── 📁 payment-records/
-│   │   ├── 📁 prisma/
-│   │   ├── 📁 supabase/
-│   │   └── 📁 transactions/
-│   ├── 📁 prisma/
-│   │   └── schema.prisma
-│   └── package.json
-├── 📁 web/                          # Next.js frontend
-│   └── 📁 my-app/
-│       ├── 📁 app/
-│       ├── 📁 components/
-│       └── 📁 lib/
-├── 📁 db/                           # Database migrations
-├── 📁 docs/                         # Documentation
-├── 📁 plans/                        # Architecture plans
-├── 📁 scripts/                      # Utility scripts
-├── 📁 tests/                        # Integration tests
-├── 📄 package.json                  # Root package.json
-└── 📄 README.md
-```
-
-### Future Structure (Post-Turborepo)
+### Current Structure (Turborepo)
 
 ```
 JandersWorkspace/
 ├── 📁 apps/
-│   ├── 📁 api/                      # NestJS backend
-│   └── 📁 web/                      # Next.js frontend
+│   ├── 📁 api/                      # NestJS backend (@project-bridge/api)
+│   │   ├── 📁 src/                  # auth, dashboard, health, integrations, etc.
+│   │   ├── 📁 prisma/
+│   │   └── package.json
+│   └── 📁 bridge-manual/            # Next.js frontend (manual-first tier)
+│       ├── 📁 app/
+│       ├── 📁 components/
+│       └── package.json
 ├── 📁 packages/
-│   ├── 📁 config/                   # Shared configs
-│   ├── 📁 database/                 # Prisma schema
-│   └── 📁 types/                    # Shared types
-├── 📁 docs/
-├── 📁 plans/
-└── 📄 turbo.json
+│   ├── 📁 config/                   # Shared ESLint/TS configs
+│   ├── 📁 database/                 # Shared Prisma client
+│   └── 📁 types/                    # Shared TypeScript types
+├── 📁 db/                            # Database migrations (SQL)
+├── 📁 docs/                          # Documentation
+├── 📁 plans/                         # Architecture plans
+├── 📁 scripts/                       # Utility scripts (solo-dev friendly)
+├── 📁 tests/                         # Integration tests
+├── 📄 package.json                   # Root (workspaces, turbo)
+├── 📄 turbo.json
+└── 📄 README.md
 ```
 
 ## Naming Conventions

@@ -167,6 +167,20 @@ async function main() {
         },
     });
     console.log('✅ Dogfood admin user created:', dogfoodUser.displayName);
+    const dogfoodManualUser = await prisma.user.upsert({
+        where: { id: '33333333-3333-3333-3333-333333333333' },
+        update: {},
+        create: {
+            id: '33333333-3333-3333-3333-333333333333',
+            tenantId: dogfoodTenant.id,
+            phoneNumber: '+254700000002',
+            email: null,
+            displayName: 'Manual Capture',
+            role: 'user',
+            metadata: { manual_capture: true },
+        },
+    });
+    console.log('✅ Dogfood manual user created:', dogfoodManualUser.displayName);
     console.log('Creating default user...');
     const defaultUser = await prisma.user.upsert({
         where: { id: '00000000-0000-0000-0000-000000000000' },

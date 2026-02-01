@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const auth_guard_1 = require("../auth/auth.guard");
 const tenant_config_service_1 = require("../integrations/tenant-config.service");
 const prisma_service_1 = require("../prisma/prisma.service");
+const tenants_service_1 = require("./tenants.service");
 const DEFAULT_TENANT_FEATURES = {
     manual_transactions: true,
     entity_management: true,
@@ -32,9 +33,11 @@ const DEFAULT_TENANT_FEATURES = {
 let TenantsController = class TenantsController {
     tenantConfigService;
     prismaService;
-    constructor(tenantConfigService, prismaService) {
+    tenantsService;
+    constructor(tenantConfigService, prismaService, tenantsService) {
         this.tenantConfigService = tenantConfigService;
         this.prismaService = prismaService;
+        this.tenantsService = tenantsService;
     }
     async getMyFeatures(req) {
         const tenantId = req.user?.tenantId;
@@ -160,37 +163,19 @@ let TenantsController = class TenantsController {
             features: tenant.settings?.features || DEFAULT_TENANT_FEATURES,
         }));
     }
-    async getTenantBySlug(slug) {
-        const tenant = await this.prismaService.tenant.findUnique({
-            where: { slug, isActive: true },
-            select: {
-                id: true,
-                name: true,
-                slug: true,
-                tier: true,
-                country: true,
-                settings: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-        });
-        if (!tenant) {
-            throw new common_1.NotFoundException(`Tenant with slug '${slug}' not found`);
+    async setTenantApiKey(tenantId, body, req) {
+        if (req.user?.role !== 'admin') {
+            throw new common_1.ForbiddenException('Only admins can set tenant API key');
         }
-        const settings = tenant.settings;
-        return {
-            id: tenant.id,
-            name: tenant.name,
-            slug: tenant.slug,
-            tier: tenant.tier,
-            country: tenant.country,
-            settings: {
-                businessType: settings?.businessType,
-                location: settings?.location,
-                features: settings?.features || DEFAULT_TENANT_FEATURES,
-            },
-            features: settings?.features || DEFAULT_TENANT_FEATURES,
-        };
+        if (!body?.apiKey?.trim()) {
+            throw new common_1.BadRequestException('apiKey is required');
+        }
+        const tenant = await this.prismaService.tenant.findUnique({ where: { id: tenantId } });
+        if (!tenant) {
+            throw new common_1.NotFoundException(`Tenant ${tenantId} not found`);
+        }
+        await this.tenantsService.setTenantApiKey(tenantId, body.apiKey);
+        return { success: true, message: 'API key set. Share the key with the tenant (e.g. via link ?key=...).' };
     }
 };
 exports.TenantsController = TenantsController;
@@ -232,16 +217,19 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], TenantsController.prototype, "listTenants", null);
 __decorate([
-    (0, common_1.Get)('slug/:slug'),
-    __param(0, (0, common_1.Param)('slug')),
+    (0, common_1.Patch)(':id/api-key'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
-], TenantsController.prototype, "getTenantBySlug", null);
+], TenantsController.prototype, "setTenantApiKey", null);
 exports.TenantsController = TenantsController = __decorate([
-    (0, common_1.Controller)('api/v1/tenants'),
+    (0, common_1.Controller)('tenants'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     __metadata("design:paramtypes", [tenant_config_service_1.TenantConfigService,
-        prisma_service_1.PrismaService])
+        prisma_service_1.PrismaService,
+        tenants_service_1.TenantsService])
 ], TenantsController);
 //# sourceMappingURL=tenants.controller.js.map

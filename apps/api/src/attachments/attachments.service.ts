@@ -1,11 +1,10 @@
 import {
-  Inject,
   Injectable,
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { SupabaseClient } from '@supabase/supabase-js';
-import { SUPABASE_AUTH_CLIENT } from '../auth/auth.module';
+import { ConfigService } from '@nestjs/config';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { UploadAttachmentDto } from './dto/upload-attachment.dto';
 
 interface MulterFile {
@@ -33,10 +32,25 @@ export interface Attachment {
 @Injectable()
 export class AttachmentsService {
   private readonly bucketName = 'attachments';
+  private readonly supabase: SupabaseClient;
 
-  constructor(
-    @Inject(SUPABASE_AUTH_CLIENT) private readonly supabase: SupabaseClient,
-  ) {}
+  constructor(private readonly configService: ConfigService) {
+    const url = this.configService.get<string>('SUPABASE_URL');
+    const serviceRoleKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY');
+
+    if (!url || !serviceRoleKey) {
+      throw new Error(
+        'Missing required Supabase environment variables: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set',
+      );
+    }
+
+    this.supabase = createClient(url, serviceRoleKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
+  }
 
   async upload(
     file: MulterFile,
