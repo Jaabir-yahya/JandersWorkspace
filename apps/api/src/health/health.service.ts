@@ -1,9 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
-import { SupabaseClient } from '@supabase/supabase-js';
-import { Inject } from '@nestjs/common';
-import { SUPABASE_AUTH_CLIENT } from '../auth/auth.module';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 export interface HealthCheckResult {
   status: 'healthy' | 'degraded' | 'unhealthy';
@@ -54,14 +52,25 @@ export interface LivenessCheckResult {
 export class HealthService {
   private readonly logger = new Logger(HealthService.name);
   private readonly startTime: number;
+  private readonly supabaseClient: SupabaseClient;
 
   constructor(
     private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
-    @Inject(SUPABASE_AUTH_CLIENT)
-    private readonly supabaseClient: SupabaseClient,
   ) {
     this.startTime = Date.now();
+    
+    const url = this.configService.get<string>('SUPABASE_URL');
+    const serviceRoleKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (url && serviceRoleKey) {
+      this.supabaseClient = createClient(url, serviceRoleKey, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      });
+    }
   }
 
   /**
@@ -182,6 +191,14 @@ export class HealthService {
    */
   private async checkSupabase(): Promise<HealthCheckDetail> {
     const startTime = Date.now();
+
+    if (!this.supabaseClient) {
+      return {
+        status: 'unhealthy',
+        responseTime: Date.now() - startTime,
+        message: 'Supabase client not initialized - missing environment variables',
+      };
+    }
 
     try {
       // Try to get session to verify Supabase is accessible

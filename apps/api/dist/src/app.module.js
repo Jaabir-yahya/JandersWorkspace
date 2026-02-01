@@ -22,7 +22,7 @@ const dashboard_module_1 = require("./dashboard/dashboard.module");
 const integrations_module_1 = require("./integrations/integrations.module");
 const health_module_1 = require("./health/health.module");
 const nairobi_module_1 = require("./nairobi/nairobi.module");
-const tenants_controller_1 = require("./tenants/tenants.controller");
+const tenants_module_1 = require("./tenants/tenants.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -44,6 +44,7 @@ exports.AppModule = AppModule = __decorate([
             ]),
             auth_module_1.AuthModule,
             prisma_module_1.PrismaModule,
+            tenants_module_1.TenantsModule,
             transactions_module_1.TransactionsModule,
             payment_records_module_1.PaymentRecordsModule,
             attachments_module_1.AttachmentsModule,
@@ -52,7 +53,7 @@ exports.AppModule = AppModule = __decorate([
             nairobi_module_1.NairobiModule,
             health_module_1.HealthModule,
         ],
-        controllers: [app_controller_1.AppController, tenants_controller_1.TenantsController],
+        controllers: [app_controller_1.AppController],
         providers: [
             app_service_1.AppService,
             {

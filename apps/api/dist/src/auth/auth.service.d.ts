@@ -1,4 +1,5 @@
-import { SupabaseClient } from '@supabase/supabase-js';
+import { ConfigService } from '@nestjs/config';
+export declare const SUPABASE_AUTH_CLIENT = "SUPABASE_AUTH_CLIENT";
 export interface AuthenticatedUser {
     id: string;
     email: string;
@@ -6,8 +7,9 @@ export interface AuthenticatedUser {
     role: string;
 }
 export declare class AuthService {
+    private readonly configService;
     private readonly supabase;
-    constructor(supabase: SupabaseClient);
+    constructor(configService: ConfigService);
     verifyToken(token: string): Promise<AuthenticatedUser>;
     getUserById(userId: string): Promise<import("@supabase/supabase-js").AuthUser>;
     signIn(email: string, password: string): Promise<{

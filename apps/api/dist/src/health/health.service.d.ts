@@ -1,6 +1,5 @@
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
-import { SupabaseClient } from '@supabase/supabase-js';
 export interface HealthCheckResult {
     status: 'healthy' | 'degraded' | 'unhealthy';
     timestamp: string;
@@ -44,10 +43,10 @@ export interface LivenessCheckResult {
 export declare class HealthService {
     private readonly configService;
     private readonly prismaService;
-    private readonly supabaseClient;
     private readonly logger;
     private readonly startTime;
-    constructor(configService: ConfigService, prismaService: PrismaService, supabaseClient: SupabaseClient);
+    private readonly supabaseClient;
+    constructor(configService: ConfigService, prismaService: PrismaService);
     getBasicHealth(): {
         status: string;
         timestamp: string;

@@ -1,4 +1,4 @@
-import { SupabaseClient } from '@supabase/supabase-js';
+import { ConfigService } from '@nestjs/config';
 import { UploadAttachmentDto } from './dto/upload-attachment.dto';
 interface MulterFile {
     fieldname: string;
@@ -21,9 +21,10 @@ export interface Attachment {
     metadata: Record<string, unknown>;
 }
 export declare class AttachmentsService {
-    private readonly supabase;
+    private readonly configService;
     private readonly bucketName;
-    constructor(supabase: SupabaseClient);
+    private readonly supabase;
+    constructor(configService: ConfigService);
     upload(file: MulterFile, dto: UploadAttachmentDto): Promise<Attachment>;
     findByTransactionId(transactionId: string): Promise<Attachment[]>;
     findByEntityId(entityId: string): Promise<Attachment[]>;

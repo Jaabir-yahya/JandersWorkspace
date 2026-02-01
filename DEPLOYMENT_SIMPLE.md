@@ -77,14 +77,61 @@ railway up
 
 **Environment Variables:**
 ```bash
-NEXT_PUBLIC_API_URL=https://your-api.railway.app/api/v1
+# Use API origin only (recommended) or full base including /api/v1
+NEXT_PUBLIC_API_URL=https://your-api.railway.app
 ```
+
+**API (Railway) — set CORS for your frontend:**
+```bash
+ALLOWED_ORIGINS=https://your-app.vercel.app,https://your-domain.com
+```
+
+**Health check after deploy:** `GET https://your-api.railway.app/api/v1/health`
 
 **Deploy:**
 ```bash
 cd apps/bridge-manual
 vercel --prod
 ```
+
+---
+
+## Environment checklist
+
+**API (e.g. Railway):**
+| Variable | Required | Notes |
+|----------|----------|--------|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `DIRECT_URL` | Yes | Direct DB URL (migrations) |
+| `ALLOWED_ORIGINS` | Yes (prod) | Frontend origin(s), comma-separated |
+| `JWT_SECRET` | Yes | For admin/auth |
+| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | If using Supabase Auth | Optional for manual-only |
+| `ENCRYPTION_KEY` | If using encrypted config | Optional |
+
+**Frontend (e.g. Vercel):**
+| Variable | Required | Notes |
+|----------|----------|--------|
+| `NEXT_PUBLIC_API_URL` | Yes | API origin only (e.g. `https://your-api.railway.app`) |
+
+**First deploy:** Run migrations and seed from repo root or `apps/api`: `npx prisma migrate deploy && npx prisma db seed`. Then build and deploy API and frontend.
+
+---
+
+## Tenant API key (optional, deployment-ready auth)
+
+For Nairobi locals and “usable with other tools,” you can set an optional API key per tenant. When set, clients can send `X-Tenant-Key` with `X-Tenant-Id` for list, export, and dashboard stats; quick-capture does not require the key.
+
+**Set tenant API key (admin, JWT required):**
+```bash
+curl -X PATCH https://your-api.railway.app/api/v1/tenants/{tenant-id}/api-key \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"apiKey":"your-secret-key"}'
+```
+
+**Share with locals:** Send a link that includes the key so the app stores it for the session, e.g.  
+`https://your-app.vercel.app/mama-mboga?key=your-secret-key`  
+The key is stored in sessionStorage and sent with API requests; if the tenant has no key set, `X-Tenant-Id` alone is enough.
 
 ---
 

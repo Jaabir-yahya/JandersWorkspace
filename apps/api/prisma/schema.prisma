@@ -130,15 +130,16 @@ model PaymentApplication {
 }
 
 model Tenant {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  slug      String   @unique
-  tier      String
-  country   String
-  isActive  Boolean  @default(true) @map("is_active")
-  settings  Json     @default("{}")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String    @unique
+  tier        String
+  country     String
+  isActive    Boolean   @default(true) @map("is_active")
+  settings    Json      @default("{}")
+  apiKeyHash  String?   @map("api_key_hash") @db.VarChar(64)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([slug])
   @@index([country])

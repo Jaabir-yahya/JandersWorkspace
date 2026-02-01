@@ -8,9 +8,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
 var HealthService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HealthService = void 0;
@@ -18,19 +15,26 @@ const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const prisma_service_1 = require("../prisma/prisma.service");
 const supabase_js_1 = require("@supabase/supabase-js");
-const common_2 = require("@nestjs/common");
-const auth_module_1 = require("../auth/auth.module");
 let HealthService = HealthService_1 = class HealthService {
     configService;
     prismaService;
-    supabaseClient;
     logger = new common_1.Logger(HealthService_1.name);
     startTime;
-    constructor(configService, prismaService, supabaseClient) {
+    supabaseClient;
+    constructor(configService, prismaService) {
         this.configService = configService;
         this.prismaService = prismaService;
-        this.supabaseClient = supabaseClient;
         this.startTime = Date.now();
+        const url = this.configService.get('SUPABASE_URL');
+        const serviceRoleKey = this.configService.get('SUPABASE_SERVICE_ROLE_KEY');
+        if (url && serviceRoleKey) {
+            this.supabaseClient = (0, supabase_js_1.createClient)(url, serviceRoleKey, {
+                auth: {
+                    persistSession: false,
+                    autoRefreshToken: false,
+                },
+            });
+        }
     }
     getBasicHealth() {
         return {
@@ -114,6 +118,13 @@ let HealthService = HealthService_1 = class HealthService {
     }
     async checkSupabase() {
         const startTime = Date.now();
+        if (!this.supabaseClient) {
+            return {
+                status: 'unhealthy',
+                responseTime: Date.now() - startTime,
+                message: 'Supabase client not initialized - missing environment variables',
+            };
+        }
         try {
             const { data, error } = await this.supabaseClient.auth.getSession();
             if (error) {
@@ -290,9 +301,7 @@ let HealthService = HealthService_1 = class HealthService {
 exports.HealthService = HealthService;
 exports.HealthService = HealthService = HealthService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __param(2, (0, common_2.Inject)(auth_module_1.SUPABASE_AUTH_CLIENT)),
     __metadata("design:paramtypes", [config_1.ConfigService,
-        prisma_service_1.PrismaService,
-        supabase_js_1.SupabaseClient])
+        prisma_service_1.PrismaService])
 ], HealthService);
 //# sourceMappingURL=health.service.js.map

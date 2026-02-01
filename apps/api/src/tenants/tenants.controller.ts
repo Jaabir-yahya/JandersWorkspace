@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   Param,
   Request,
@@ -13,6 +14,7 @@ import {
 import { AuthGuard } from '../auth/auth.guard';
 import { TenantConfigService } from '../integrations/tenant-config.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { TenantsService } from './tenants.service';
 import { TenantTier, TenantCountry } from '../integrations/types/integration.types';
 
 // Default features for new manual-only tenants (Nairobi focus)
@@ -29,12 +31,13 @@ const DEFAULT_TENANT_FEATURES = {
   advanced_reporting: false,
 };
 
-@Controller('api/v1/tenants')
+@Controller('tenants')
 @UseGuards(AuthGuard)
 export class TenantsController {
   constructor(
     private readonly tenantConfigService: TenantConfigService,
     private readonly prismaService: PrismaService,
+    private readonly tenantsService: TenantsService,
   ) {}
 
   /**
@@ -225,44 +228,25 @@ export class TenantsController {
   }
 
   /**
-   * Get tenant by slug (public endpoint for subdomain-based tenant detection)
-   * No authentication required - used for initial tenant lookup
+   * Set API key for a tenant (admin only). Used for deployment-ready Option B: share key with Nairobi locals.
    */
-  @Get('slug/:slug')
-  async getTenantBySlug(@Param('slug') slug: string) {
-    const tenant = await this.prismaService.tenant.findUnique({
-      where: { slug, isActive: true },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        tier: true,
-        country: true,
-        settings: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    if (!tenant) {
-      throw new NotFoundException(`Tenant with slug '${slug}' not found`);
+  @Patch(':id/api-key')
+  async setTenantApiKey(
+    @Param('id') tenantId: string,
+    @Body() body: { apiKey: string },
+    @Request() req: any,
+  ) {
+    if (req.user?.role !== 'admin') {
+      throw new ForbiddenException('Only admins can set tenant API key');
     }
-
-    // Extract settings for business type and location
-    const settings = tenant.settings as any;
-
-    return {
-      id: tenant.id,
-      name: tenant.name,
-      slug: tenant.slug,
-      tier: tenant.tier,
-      country: tenant.country,
-      settings: {
-        businessType: settings?.businessType,
-        location: settings?.location,
-        features: settings?.features || DEFAULT_TENANT_FEATURES,
-      },
-      features: settings?.features || DEFAULT_TENANT_FEATURES,
-    };
+    if (!body?.apiKey?.trim()) {
+      throw new BadRequestException('apiKey is required');
+    }
+    const tenant = await this.prismaService.tenant.findUnique({ where: { id: tenantId } });
+    if (!tenant) {
+      throw new NotFoundException(`Tenant ${tenantId} not found`);
+    }
+    await this.tenantsService.setTenantApiKey(tenantId, body.apiKey);
+    return { success: true, message: 'API key set. Share the key with the tenant (e.g. via link ?key=...).' };
   }
 }

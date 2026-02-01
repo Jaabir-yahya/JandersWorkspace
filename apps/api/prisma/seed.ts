@@ -190,6 +190,22 @@ async function main() {
 
   console.log('✅ Dogfood admin user created:', dogfoodUser.displayName);
 
+  // Dogfood manual-capture user (for quick-capture without JWT; FK for created_by_user_id)
+  const dogfoodManualUser = await prisma.user.upsert({
+    where: { id: '33333333-3333-3333-3333-333333333333' },
+    update: {},
+    create: {
+      id: '33333333-3333-3333-3333-333333333333',
+      tenantId: dogfoodTenant.id,
+      phoneNumber: '+254700000002',
+      email: null,
+      displayName: 'Manual Capture',
+      role: 'user',
+      metadata: { manual_capture: true },
+    },
+  });
+  console.log('✅ Dogfood manual user created:', dogfoodManualUser.displayName);
+
   // ============================================
   // 1. DEFAULT USER SETUP (Fixes foreign key issue!)
   // ============================================

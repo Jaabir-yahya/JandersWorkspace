@@ -1,0 +1,44 @@
+# CI: build and test (solo dev – manual-only focus)
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install
+        run: npm ci
+
+      - name: Generate (Prisma)
+        run: npx prisma generate
+        working-directory: apps/api
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://api.example.com
+
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Type check
+        run: npm run type-check
+        continue-on-error: true
+
+      - name: Unit tests (API)
+        run: npm test --workspace=@project-bridge/api
+        continue-on-error: true
