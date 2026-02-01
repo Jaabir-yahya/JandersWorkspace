@@ -1,0 +1,36 @@
+import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../../../prisma/prisma.service';
+import { IntegrationType, TenantTier, TenantCountry, IntegrationConfig, SyncRequest, SyncResult, WebhookResult, MpesaStkPushRequest, MpesaStkPushResponse, MpesaC2BRequest, MpesaB2CRequest, IIntegrationService, HealthStatus } from '../../types/integration.types';
+export declare class MpesaService implements IIntegrationService {
+    private readonly configService;
+    private readonly prismaService;
+    name: string;
+    type: IntegrationType;
+    country: TenantCountry;
+    tier: TenantTier;
+    private readonly logger;
+    private readonly sandboxUrl;
+    private readonly productionUrl;
+    private get consumerKey();
+    private get consumerSecret();
+    private get passkey();
+    private get environment();
+    private get baseUrl();
+    constructor(configService: ConfigService, prismaService: PrismaService);
+    authenticate(config: IntegrationConfig): Promise<boolean>;
+    private getAccessToken;
+    testConnection(config: IntegrationConfig): Promise<boolean>;
+    syncData(request: SyncRequest): Promise<SyncResult>;
+    handleWebhook(payload: any): Promise<WebhookResult>;
+    private persistWebhookEvent;
+    private determineEventType;
+    getHealthStatus(): Promise<HealthStatus>;
+    initiateStkPush(config: IntegrationConfig, request: MpesaStkPushRequest, transactionId?: string): Promise<MpesaStkPushResponse>;
+    registerC2bUrls(config: IntegrationConfig, request: MpesaC2BRequest): Promise<any>;
+    sendB2cPayment(config: IntegrationConfig, request: MpesaB2CRequest, transactionId?: string): Promise<any>;
+    private generateTimestamp;
+    private generatePassword;
+    private formatPhoneNumber;
+    private handleStkPushCallback;
+    private handleC2bCallback;
+}

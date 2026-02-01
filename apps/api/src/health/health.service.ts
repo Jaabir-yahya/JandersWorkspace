@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Inject } from '@nestjs/common';
-import { SUPABASE_CLIENT } from '../supabase/supabase.module';
+import { SUPABASE_AUTH_CLIENT } from '../auth/auth.module';
 
 export interface HealthCheckResult {
   status: 'healthy' | 'degraded' | 'unhealthy';
@@ -58,7 +58,8 @@ export class HealthService {
   constructor(
     private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
-    @Inject(SUPABASE_CLIENT) private readonly supabaseClient: SupabaseClient,
+    @Inject(SUPABASE_AUTH_CLIENT)
+    private readonly supabaseClient: SupabaseClient,
   ) {
     this.startTime = Date.now();
   }
@@ -117,11 +118,12 @@ export class HealthService {
    * Checks if the application is ready to serve traffic
    */
   async getReadiness(): Promise<ReadinessCheckResult> {
-    const [databaseHealthy, supabaseHealthy, envVarsHealthy] = await Promise.all([
-      this.isDatabaseReady(),
-      this.isSupabaseReady(),
-      this.areRequiredEnvVarsSet(),
-    ]);
+    const [databaseHealthy, supabaseHealthy, envVarsHealthy] =
+      await Promise.all([
+        this.isDatabaseReady(),
+        this.isSupabaseReady(),
+        this.areRequiredEnvVarsSet(),
+      ]);
 
     const ready = databaseHealthy && supabaseHealthy && envVarsHealthy;
 

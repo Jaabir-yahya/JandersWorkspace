@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { SUPABASE_CLIENT } from '../supabase/supabase.module';
+import { SUPABASE_AUTH_CLIENT } from '../auth/auth.module';
 import { UploadAttachmentDto } from './dto/upload-attachment.dto';
 
 interface MulterFile {
@@ -35,7 +35,7 @@ export class AttachmentsService {
   private readonly bucketName = 'attachments';
 
   constructor(
-    @Inject(SUPABASE_CLIENT) private readonly supabase: SupabaseClient,
+    @Inject(SUPABASE_AUTH_CLIENT) private readonly supabase: SupabaseClient,
   ) {}
 
   async upload(

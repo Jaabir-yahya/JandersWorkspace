@@ -38,6 +38,12 @@ export class IntegrationsController {
     return this.tenantConfigService.getAvailableFeatures(tenantId);
   }
 
+  @Get('tenant-features')
+  async getTenantFeatures(@Request() req: any) {
+    const tenantId = req.user?.tenantId || 'default';
+    return this.tenantConfigService.getTenantFeatures(tenantId);
+  }
+
   @Get('config')
   async getTenantConfig(@Request() req: any) {
     const tenantId = req.user?.tenantId || 'default';
@@ -61,7 +67,7 @@ export class IntegrationsController {
     // Check if tenant has access to M-Pesa
     await this.tenantConfigService.requireFeatureAccess(
       tenantId,
-      'mpesa_stk_push',
+      'mpesa_integration',
     );
 
     // Get M-Pesa configuration from environment variables
@@ -259,7 +265,11 @@ export class IntegrationsController {
         return this.mpesaService.testConnection(mpesaConfig);
       }
       default:
-        return { success: false, message: 'Integration not supported' };
+        // Integration temporarily disabled until Phase 4 implementation
+        return {
+          success: false,
+          message: `${integrationType} integration is temporarily disabled. Will be available in Phase 4.`,
+        };
     }
   }
 

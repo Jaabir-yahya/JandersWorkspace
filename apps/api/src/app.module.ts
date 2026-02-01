@@ -6,13 +6,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { SupabaseModule } from './supabase/supabase.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { PaymentRecordsModule } from './payment-records/payment-records.module';
 import { AttachmentsModule } from './attachments/attachments.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { HealthModule } from './health/health.module';
+import { NairobiModule } from './nairobi/nairobi.module';
+import { TenantsController } from './tenants/tenants.controller';
 
 @Module({
   imports: [
@@ -31,15 +32,15 @@ import { HealthModule } from './health/health.module';
     ]),
     AuthModule,
     PrismaModule,
-    SupabaseModule,
     TransactionsModule,
     PaymentRecordsModule,
     AttachmentsModule,
     DashboardModule,
     IntegrationsModule,
+    NairobiModule,
     HealthModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, TenantsController],
   providers: [
     AppService,
     {

@@ -1,5 +1,6 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { SUPABASE_AUTH_CLIENT } from './auth.module';
 
 export interface AuthenticatedUser {
   id: string;
@@ -10,25 +11,9 @@ export interface AuthenticatedUser {
 
 @Injectable()
 export class AuthService {
-  private readonly supabase: SupabaseClient;
-
-  constructor() {
-    const url = process.env.SUPABASE_URL;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!url || !serviceRoleKey) {
-      throw new Error(
-        'Missing required Supabase environment variables: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set',
-      );
-    }
-
-    this.supabase = createClient(url, serviceRoleKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    });
-  }
+  constructor(
+    @Inject(SUPABASE_AUTH_CLIENT) private readonly supabase: SupabaseClient,
+  ) {}
 
   /**
    * Verify a JWT token and return the authenticated user

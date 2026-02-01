@@ -10,6 +10,8 @@ export enum IntegrationType {
 export enum TenantTier {
   BASIC = 'BASIC',
   ADVANCED = 'ADVANCED',
+  PREMIUM = 'PREMIUM',
+  ENTERPRISE = 'ENTERPRISE',
 }
 
 export enum TenantCountry {

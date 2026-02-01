@@ -13,16 +13,38 @@ By turning chat-based transactions (WhatsApp/social) into structured, accessible
 
 ## Project Status
 
-**Current Phase: Phase 3 Complete** ✅
+**Current Phase: Phase 3 Complete - Manual-First Focus** ✅
 
-Phase 3 has been successfully finalized with all core features operational and **100% unit test pass rate**. The system is ready for Phase 4 development.
+Phase 3 has been successfully finalized with all core features operational and **100% unit test pass rate**. The system is now optimized for **80% manual-first approach** serving African informal economy businesses.
 
-| Phase | Status | Description |
-|-------|--------|-------------|
-| Phase 1 | ✅ Complete | Core data infrastructure (Truth Ledger) |
-| Phase 2 | ✅ Complete | State machine, search, entity history |
-| Phase 3 | ✅ Complete | Frontend, dashboard, attachments, webhook monitoring |
-| Phase 4 | 🚧 Planned | Enhanced auth, subscriptions, M-Pesa, WhatsApp, AI agents |
+| Phase     | Status         | Description                                          |
+| --------- | -------------- | ---------------------------------------------------- |
+| Phase 1   | ✅ Complete    | Core data infrastructure (Truth Ledger)              |
+| Phase 2   | ✅ Complete    | State machine, search, entity history                |
+| Phase 3   | ✅ Complete    | Frontend, dashboard, attachments, webhook monitoring |
+| Phase 3.5 | 🚀 In Progress | Manual-first features for 80% of tenants             |
+| Phase 4   | 📋 Planned     | Advanced integrations (Pro tier - 20% of tenants)    |
+
+## New: Manual-First Architecture 🎯
+
+We're now focusing on serving **80% of African informal economy businesses** with simple, powerful tools that don't require complex integrations.
+
+### Key Features for Manual Tenants
+
+- 🎤 **Voice Transaction Recording** - Speak your sales naturally
+- 📷 **Photo Receipt Scanning** - Capture receipts with your camera
+- 📱 **Mobile-First Dashboard** - Glanceable business insights
+- 👥 **Simple Customer Management** - Track customers and credit (Udhaari)
+- 💬 **SMS Business Management** - Daily summaries and alerts
+- 📊 **Smart Business Insights** - Automated recommendations
+
+### Target Market
+
+- **Small shops** (kiosks, dukas, vibandas)
+- **Service providers** (salons, mechanics, tailors)
+- **Farmers and traders** (produce, livestock)
+- **Informal manufacturers** (furniture, crafts)
+- **Street vendors** and market traders
 
 ---
 
@@ -33,6 +55,7 @@ African commerce happens in conversations (WhatsApp/SMS/in-person), trapping tra
 ## The Solution
 
 A monorepo SaaS platform with:
+
 - **Phase 1-3 (Complete)**: Core ledger, state machine, dashboard, and webhook monitoring
 - **Phase 4 (Planned)**: Enhanced M-Pesa integration, WhatsApp Business API, and AI agents
 
@@ -101,11 +124,11 @@ See [`.env.example`](.env.example) for complete configuration options.
 
 ### Development URLs
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| Web Dashboard | http://localhost:3001 | Next.js frontend |
-| API | http://localhost:3000 | NestJS backend |
-| API Documentation | http://localhost:3000/api/docs | Swagger/OpenAPI |
+| Service           | URL                            | Description      |
+| ----------------- | ------------------------------ | ---------------- |
+| Web Dashboard     | http://localhost:3001          | Next.js frontend |
+| API               | http://localhost:3000          | NestJS backend   |
+| API Documentation | http://localhost:3000/api/docs | Swagger/OpenAPI  |
 
 ### Individual Services
 
@@ -164,24 +187,25 @@ JandersWorkspace/                    # Monorepo Root
 
 ### Technology Stack
 
-| Layer | Technology | Version |
-|-------|------------|---------|
-| Frontend | Next.js | 15.x |
-| Frontend | React | 19.x |
-| Frontend | TypeScript | 5.x |
-| Frontend | Tailwind CSS | 4.x |
-| Frontend | shadcn/ui | Latest |
-| Backend | NestJS | 11.x |
-| Backend | Prisma | 6.x |
-| Database | PostgreSQL | 15+ |
-| Database | Supabase | Latest |
-| Monorepo | Turborepo | 1.x |
+| Layer    | Technology   | Version |
+| -------- | ------------ | ------- |
+| Frontend | Next.js      | 15.x    |
+| Frontend | React        | 19.x    |
+| Frontend | TypeScript   | 5.x     |
+| Frontend | Tailwind CSS | 4.x     |
+| Frontend | shadcn/ui    | Latest  |
+| Backend  | NestJS       | 11.x    |
+| Backend  | Prisma       | 6.x     |
+| Database | PostgreSQL   | 15+     |
+| Database | Supabase     | Latest  |
+| Monorepo | Turborepo    | 1.x     |
 
 ---
 
 ## Features
 
 ### Core Ledger
+
 - Double-entry bookkeeping foundation
 - Transaction state machine (DRAFT → POSTED → RECONCILED)
 - Multi-tenancy support with tenant isolation
@@ -189,6 +213,7 @@ JandersWorkspace/                    # Monorepo Root
 - Six immutability locks preventing modification of posted transactions
 
 ### Dashboard
+
 - Real-time transaction overview with statistics
 - Payment tracking and reconciliation
 - Entity search with 360° view and transaction history
@@ -196,6 +221,7 @@ JandersWorkspace/                    # Monorepo Root
 - Revenue, credit, and debt tracking
 
 ### Webhook Monitoring
+
 - Real-time webhook event monitoring dashboard
 - Integration support: M-Pesa, WhatsApp, QuickBooks, Xero, Shopify
 - Filter by integration type, status, date range
@@ -205,6 +231,7 @@ JandersWorkspace/                    # Monorepo Root
 - Statistics: Total events, success rate, failed/pending counts
 
 ### Integrations
+
 - **M-Pesa**: Payment processing and confirmation webhooks
 - **WhatsApp**: Message receiving and sending
 - **QuickBooks**: Accounting sync
@@ -252,16 +279,16 @@ http://localhost:3000/api/docs
 
 ### Key Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/v1/transactions` | GET | List transactions with filters |
-| `/api/v1/transactions` | POST | Create new transaction |
-| `/api/v1/transactions/:id/post` | POST | Post a draft transaction |
-| `/api/v1/transactions/:id/reverse` | POST | Reverse a posted transaction |
-| `/api/v1/entities` | GET | List entities (customers/suppliers) |
-| `/api/v1/dashboard/stats` | GET | Get dashboard statistics |
-| `/api/v1/webhooks/events` | GET | List webhook events |
-| `/api/v1/health` | GET | Health check |
+| Endpoint                           | Method | Description                         |
+| ---------------------------------- | ------ | ----------------------------------- |
+| `/api/v1/transactions`             | GET    | List transactions with filters      |
+| `/api/v1/transactions`             | POST   | Create new transaction              |
+| `/api/v1/transactions/:id/post`    | POST   | Post a draft transaction            |
+| `/api/v1/transactions/:id/reverse` | POST   | Reverse a posted transaction        |
+| `/api/v1/entities`                 | GET    | List entities (customers/suppliers) |
+| `/api/v1/dashboard/stats`          | GET    | Get dashboard statistics            |
+| `/api/v1/webhooks/events`          | GET    | List webhook events                 |
+| `/api/v1/health`                   | GET    | Health check                        |
 
 ---
 
@@ -298,6 +325,7 @@ See [`.env.example`](.env.example) for complete integration configuration includ
 See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
 
 Quick deployment options:
+
 - **Vercel**: Frontend deployment
 - **Railway/Render**: Backend deployment
 - **Supabase**: Database hosting
@@ -348,6 +376,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## Support
 
 For questions or support:
+
 - Check the [documentation](docs/)
 - Review [existing issues](https://github.com/project-bridge/issues)
 - Open a new issue for bugs or feature requests

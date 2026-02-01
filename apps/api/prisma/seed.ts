@@ -14,6 +14,183 @@ async function main() {
   console.log('🌱 Starting database seed...');
 
   // ============================================
+  // 0. FEATURE FLAGS (For tenant feature access control)
+  // ============================================
+  console.log('Creating feature flags...');
+
+  const featureFlags = [
+    {
+      name: 'manual_transactions',
+      description: 'Basic manual transaction recording',
+      tiers: ['BASIC', 'ADVANCED', 'PREMIUM', 'ENTERPRISE'],
+      countries: ['KE', 'TZ', 'UG', 'RW', 'NG', 'US', 'UK', 'EU'],
+    },
+    {
+      name: 'entity_management',
+      description: 'Customer and supplier management',
+      tiers: ['BASIC', 'ADVANCED', 'PREMIUM', 'ENTERPRISE'],
+      countries: ['KE', 'TZ', 'UG', 'RW', 'NG', 'US', 'UK', 'EU'],
+    },
+    {
+      name: 'payment_records',
+      description: 'Record and track payments',
+      tiers: ['BASIC', 'ADVANCED', 'PREMIUM', 'ENTERPRISE'],
+      countries: ['KE', 'TZ', 'UG', 'RW', 'NG', 'US', 'UK', 'EU'],
+    },
+    {
+      name: 'dashboard',
+      description: 'Analytics dashboard and reporting',
+      tiers: ['BASIC', 'ADVANCED', 'PREMIUM', 'ENTERPRISE'],
+      countries: ['KE', 'TZ', 'UG', 'RW', 'NG', 'US', 'UK', 'EU'],
+    },
+    {
+      name: 'mpesa_integration',
+      description: 'M-Pesa STK push and payment processing',
+      tiers: ['ADVANCED', 'PREMIUM', 'ENTERPRISE'],
+      countries: ['KE'],
+    },
+    {
+      name: 'whatsapp_integration',
+      description: 'WhatsApp Business API notifications',
+      tiers: ['ADVANCED', 'PREMIUM', 'ENTERPRISE'],
+      countries: ['KE', 'TZ', 'UG', 'RW', 'NG'],
+    },
+    {
+      name: 'quickbooks_sync',
+      description: 'QuickBooks Online synchronization',
+      tiers: ['PREMIUM', 'ENTERPRISE'],
+      countries: ['KE', 'TZ', 'UG', 'RW', 'NG', 'US', 'UK', 'EU'],
+    },
+    {
+      name: 'xero_sync',
+      description: 'Xero Accounting synchronization',
+      tiers: ['PREMIUM', 'ENTERPRISE'],
+      countries: ['KE', 'TZ', 'UG', 'RW', 'NG', 'US', 'UK', 'EU'],
+    },
+    {
+      name: 'shopify_sync',
+      description: 'Shopify store integration',
+      tiers: ['PREMIUM', 'ENTERPRISE'],
+      countries: ['KE', 'TZ', 'UG', 'RW', 'NG', 'US', 'UK', 'EU'],
+    },
+    {
+      name: 'advanced_reporting',
+      description: 'Advanced analytics and custom reports',
+      tiers: ['PREMIUM', 'ENTERPRISE'],
+      countries: ['KE', 'TZ', 'UG', 'RW', 'NG', 'US', 'UK', 'EU'],
+    },
+  ];
+
+  for (const flag of featureFlags) {
+    await prisma.featureFlag.upsert({
+      where: { name: flag.name },
+      update: {},
+      create: {
+        name: flag.name,
+        description: flag.description,
+        isActive: true,
+        tiers: flag.tiers,
+        countries: flag.countries,
+      },
+    });
+    console.log(`  ✅ Feature flag: ${flag.name}`);
+  }
+
+  console.log(`✅ Created ${featureFlags.length} feature flags`);
+
+  // ============================================
+  // 0b. CREATE DOGFOOD TENANT (janders-dogfood)
+  // ============================================
+  console.log('Creating dogfood tenant (janders-dogfood)...');
+
+  const dogfoodTenant = await prisma.tenant.upsert({
+    where: { slug: 'janders-dogfood' },
+    update: {},
+    create: {
+      id: '11111111-1111-1111-1111-111111111111',
+      name: 'Janders Dogfood',
+      slug: 'janders-dogfood',
+      tier: 'ENTERPRISE',
+      country: 'KE',
+      isActive: true,
+      settings: {
+        commissionRates: {
+          mpesa: 0.02,
+          whatsapp: 0.01,
+          quickbooks: 0.015,
+          xero: 0.015,
+          shopify: 0.01,
+        },
+        complianceData: {
+          dataRetention: { years: 7, anonymization: true },
+          mpesaCompliance: { kycRequired: true, amlChecks: true, reportingThreshold: 1000000 },
+        },
+        rateLimits: { daily: 10000, monthly: 300000 },
+        features: {
+          manual_transactions: true,
+          entity_management: true,
+          payment_records: true,
+          dashboard: true,
+          mpesa_integration: true,
+          whatsapp_integration: true,
+          quickbooks_sync: true,
+          xero_sync: true,
+          shopify_sync: true,
+          advanced_reporting: true,
+        },
+      },
+    },
+  });
+
+  console.log('✅ Dogfood tenant created:', dogfoodTenant.name);
+
+  // Create dogfood tenant integrations
+  const dogfoodIntegrations = [
+    { type: 'MPESA', config: { environment: 'sandbox', shortcode: '174379' } },
+    { type: 'WHATSAPP', config: { environment: 'sandbox' } },
+    { type: 'QUICKBOOKS', config: { environment: 'sandbox' } },
+    { type: 'XERO', config: { environment: 'sandbox' } },
+    { type: 'SHOPIFY', config: { environment: 'sandbox' } },
+  ];
+
+  for (const integration of dogfoodIntegrations) {
+    await prisma.tenantIntegration.upsert({
+      where: {
+        tenantId_integrationType: {
+          tenantId: dogfoodTenant.id,
+          integrationType: integration.type,
+        },
+      },
+      update: {},
+      create: {
+        tenantId: dogfoodTenant.id,
+        integrationType: integration.type,
+        encryptedConfig: integration.config,
+        isActive: true,
+        syncStatus: 'ACTIVE',
+      },
+    });
+    console.log(`  ✅ Integration: ${integration.type}`);
+  }
+
+  // Create dogfood admin user
+  const dogfoodUser = await prisma.user.upsert({
+    where: { id: '22222222-2222-2222-2222-222222222222' },
+    update: {},
+    create: {
+      id: '22222222-2222-2222-2222-222222222222',
+      tenantId: dogfoodTenant.id,
+      phoneNumber: '+254700000001',
+      email: 'dogfood@janders.app',
+      displayName: 'Janders Dogfood Admin',
+      role: 'admin',
+      metadata: { is_dogfood_user: true },
+    },
+  });
+
+  console.log('✅ Dogfood admin user created:', dogfoodUser.displayName);
+
+  // ============================================
   // 1. DEFAULT USER SETUP (Fixes foreign key issue!)
   // ============================================
   console.log('Creating default user...');
@@ -344,8 +521,14 @@ async function main() {
   console.log(`- ${entities.length} entities created`);
   console.log('- 4 transactions created (3 POSTED, 1 DRAFT)');
   console.log('- 2 payments created');
+  console.log('- 10 feature flags created');
+  console.log('- 1 dogfood tenant created (janders-dogfood) with full integrations');
   console.log('\n✨ Your foreign key constraint issue is now FIXED!');
   console.log('   The default user exists, so entity creation will work.');
+  console.log('\n🐕 Dogfood tenant ready for testing:');
+  console.log('   Tenant ID: 11111111-1111-1111-1111-111111111111');
+  console.log('   User ID: 22222222-2222-2222-2222-222222222222');
+  console.log('   Features: All integrations enabled (M-Pesa, WhatsApp, QuickBooks, Xero, Shopify)');
 }
 
 main()

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
+import { PrismaService } from '../../../prisma/prisma.service';
 import {
   IntegrationType,
   TenantTier,
@@ -57,7 +58,10 @@ export class MpesaService implements IIntegrationService {
       : this.sandboxUrl;
   }
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly prismaService: PrismaService,
+  ) {}
 
   async authenticate(config: IntegrationConfig): Promise<boolean> {
     try {
@@ -148,6 +152,9 @@ export class MpesaService implements IIntegrationService {
 
   async handleWebhook(payload: any): Promise<WebhookResult> {
     try {
+      // Store webhook event in database for persistence
+      await this.persistWebhookEvent('mpesa', JSON.stringify(payload));
+
       // Handle STK Push callback
       if (payload.Body?.stkCallback) {
         return this.handleStkPushCallback(payload);
@@ -164,12 +171,58 @@ export class MpesaService implements IIntegrationService {
         message: 'Unknown webhook payload structure',
       };
     } catch (error) {
+      this.logger.error(
+        `Webhook handling failed: ${error.message}`,
+        error.stack,
+      );
       return {
         success: false,
         status: 500,
         message: error.message,
       };
     }
+  }
+
+  /**
+   * Persist webhook event to database for audit trail and retry logic
+   */
+  private async persistWebhookEvent(
+    eventType: string,
+    payload: string,
+  ): Promise<void> {
+    try {
+      // Extract tenant ID from context (would need to be passed in request)
+      const tenantId = 'default'; // TODO: Extract from authenticated user
+
+      await this.prismaService.webhookEvent.create({
+        data: {
+          tenantId,
+          integrationType: 'MPESA',
+          eventType: this.determineEventType(payload),
+          payload: JSON.parse(payload),
+          processed: false,
+          retryCount: 0,
+        },
+      });
+
+      this.logger.debug(`Webhook event persisted: ${eventType}`);
+    } catch (error) {
+      this.logger.error(`Failed to persist webhook event: ${error.message}`);
+      // Don't throw - webhook processing should continue even if persistence fails
+    }
+  }
+
+  /**
+   * Determine event type from payload structure
+   */
+  private determineEventType(payload: any): string {
+    if (payload.Body?.stkCallback) {
+      return 'mpesa.stk_callback';
+    }
+    if (payload.TransID) {
+      return 'mpesa.c2b_payment';
+    }
+    return 'mpesa.unknown';
   }
 
   async getHealthStatus(): Promise<HealthStatus> {
@@ -329,22 +382,19 @@ export class MpesaService implements IIntegrationService {
         );
       }
 
-      const response = await fetch(
-        `${this.baseUrl}/mpesa/c2b/v1/registerurl`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ShortCode: request.ShortCode,
-            ResponseType: request.ResponseType,
-            ConfirmationURL: request.ConfirmationURL,
-            ValidationURL: request.ValidationURL,
-          }),
+      const response = await fetch(`${this.baseUrl}/mpesa/c2b/v1/registerurl`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
         },
-      );
+        body: JSON.stringify({
+          ShortCode: request.ShortCode,
+          ResponseType: request.ResponseType,
+          ConfirmationURL: request.ConfirmationURL,
+          ValidationURL: request.ValidationURL,
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
