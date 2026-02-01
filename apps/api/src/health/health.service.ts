@@ -61,10 +61,10 @@ export class HealthService {
     this.startTime = Date.now();
     
     const url = this.configService.get<string>('SUPABASE_URL');
-    const serviceRoleKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY');
+    const secretKey = this.configService.get<string>('SUPABASE_SECRET_KEY');
     
-    if (url && serviceRoleKey) {
-      this.supabaseClient = createClient(url, serviceRoleKey, {
+    if (url && secretKey) {
+      this.supabaseClient = createClient(url, secretKey, {
         auth: {
           persistSession: false,
           autoRefreshToken: false,
@@ -417,7 +417,7 @@ export class HealthService {
     const required = [
       'DATABASE_URL',
       'SUPABASE_URL',
-      'SUPABASE_SERVICE_ROLE_KEY',
+      'SUPABASE_SECRET_KEY',
     ];
 
     return required.every((key) => !!this.configService.get(key));

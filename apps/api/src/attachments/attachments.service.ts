@@ -36,15 +36,15 @@ export class AttachmentsService {
 
   constructor(private readonly configService: ConfigService) {
     const url = this.configService.get<string>('SUPABASE_URL');
-    const serviceRoleKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY');
+    const secretKey = this.configService.get<string>('SUPABASE_SECRET_KEY');
 
-    if (!url || !serviceRoleKey) {
+    if (!url || !secretKey) {
       throw new Error(
-        'Missing required Supabase environment variables: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set',
+        'Missing required Supabase environment variables: SUPABASE_URL and SUPABASE_SECRET_KEY must be set',
       );
     }
 
-    this.supabase = createClient(url, serviceRoleKey, {
+    this.supabase = createClient(url, secretKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
