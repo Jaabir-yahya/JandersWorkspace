@@ -56,6 +56,7 @@ export class TransactionsService {
       data: {
         tenantId,
         phoneNumber: `+manual-${tenantId}`,
+        email: `manual-${tenantId}@placeholder.local`,
         displayName: 'Manual Capture',
         role: 'user',
         metadata: { manual_capture: true } as Prisma.InputJsonValue,
@@ -94,6 +95,7 @@ export class TransactionsService {
               sku: line.sku || null,
               quantity: line.quantity,
               unitPrice: line.unit_price,
+              lineTotal: line.quantity * line.unit_price,
               totalLineAmount: line.quantity * line.unit_price,
               accountCode: line.account_code || '200-SALES',
               metadata: (line.metadata || {}) as Prisma.InputJsonValue,

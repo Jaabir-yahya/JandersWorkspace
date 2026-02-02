@@ -569,8 +569,6 @@ export class TenantConfigService {
         update: {
           encryptedConfig: integrationConfig, // TODO: Implement encryption
           isActive: true,
-          lastSyncAt: new Date(),
-          syncStatus: 'ACTIVE',
           updatedAt: new Date(),
         },
         create: {
@@ -578,7 +576,6 @@ export class TenantConfigService {
           integrationType,
           encryptedConfig: integrationConfig, // TODO: Implement encryption
           isActive: true,
-          syncStatus: 'ACTIVE',
         },
       });
 

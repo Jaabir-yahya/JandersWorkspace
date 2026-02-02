@@ -142,6 +142,7 @@ let MpesaService = MpesaService_1 = class MpesaService {
             await this.prismaService.webhookEvent.create({
                 data: {
                     tenantId,
+                    source: 'MPESA',
                     integrationType: 'MPESA',
                     eventType: this.determineEventType(payload),
                     payload: JSON.parse(payload),

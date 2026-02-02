@@ -15,13 +15,15 @@ export declare class TransactionsPublicController {
         lines: {
             id: string;
             createdAt: Date;
-            description: string | null;
+            description: string;
             metadata: import("@prisma/client/runtime/library").JsonValue;
             sku: string | null;
             quantity: import("@prisma/client/runtime/library").Decimal;
             unitPrice: import("@prisma/client/runtime/library").Decimal;
+            lineTotal: import("@prisma/client/runtime/library").Decimal;
             totalLineAmount: import("@prisma/client/runtime/library").Decimal;
-            accountCode: string;
+            accountCode: string | null;
+            itemId: string | null;
             transactionId: string;
         }[];
     } & {
@@ -36,6 +38,16 @@ export declare class TransactionsPublicController {
         totalAmount: import("@prisma/client/runtime/library").Decimal;
         currencyCode: string;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
+        transactionChannel: string | null;
+        businessPurpose: string | null;
+        customerSegment: string | null;
+        marketDayType: string | null;
+        locationGps: string | null;
+        locationDescription: string | null;
+        paymentConfirmedVia: string | null;
+        businessNotes: string | null;
+        systemTags: string;
+        customTags: string;
         entityId: string | null;
         createdByUserId: string;
         reversedTransactionId: string | null;

@@ -61,6 +61,7 @@ let WebhooksService = WebhooksService_1 = class WebhooksService {
         const event = await this.prisma.webhookEvent.create({
             data: {
                 tenantId: data.tenantId,
+                source: data.integrationType,
                 integrationType: data.integrationType,
                 eventType: data.eventType,
                 payload: data.payload,

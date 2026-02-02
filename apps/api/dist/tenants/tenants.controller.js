@@ -95,7 +95,7 @@ let TenantsController = class TenantsController {
             data: {
                 tenantId: tenant.id,
                 phoneNumber,
-                email: email || null,
+                email: email || `${phoneNumber}@placeholder.local`,
                 displayName,
                 role: 'admin',
                 metadata: { is_tenant_owner: true },

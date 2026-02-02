@@ -442,8 +442,6 @@ let TenantConfigService = class TenantConfigService {
                 update: {
                     encryptedConfig: integrationConfig,
                     isActive: true,
-                    lastSyncAt: new Date(),
-                    syncStatus: 'ACTIVE',
                     updatedAt: new Date(),
                 },
                 create: {
@@ -451,7 +449,6 @@ let TenantConfigService = class TenantConfigService {
                     integrationType,
                     encryptedConfig: integrationConfig,
                     isActive: true,
-                    syncStatus: 'ACTIVE',
                 },
             });
             console.log(`Updated ${integrationType} config for tenant ${tenantId}`);

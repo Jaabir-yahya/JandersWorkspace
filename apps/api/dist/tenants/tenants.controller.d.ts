@@ -18,14 +18,14 @@ export declare class TenantsController {
         tenant: {
             id: string;
             name: string;
-            slug: string;
-            tier: string;
-            country: string;
+            slug: string | null;
+            tier: string | null;
+            country: string | null;
         };
         user: {
             id: string;
-            displayName: string | null;
-            phoneNumber: string;
+            displayName: string;
+            phoneNumber: string | null;
             role: string | null;
         };
         features: {
@@ -61,9 +61,9 @@ export declare class TenantsController {
         id: string;
         name: string;
         createdAt: Date;
-        slug: string;
-        tier: string;
-        country: string;
+        slug: string | null;
+        tier: string | null;
+        country: string | null;
         settings: import("@prisma/client/runtime/library").JsonValue;
     }[]>;
     setTenantApiKey(tenantId: string, body: {

@@ -197,6 +197,7 @@ export class MpesaService implements IIntegrationService {
       await this.prismaService.webhookEvent.create({
         data: {
           tenantId,
+          source: 'MPESA',
           integrationType: 'MPESA',
           eventType: this.determineEventType(payload),
           payload: JSON.parse(payload),

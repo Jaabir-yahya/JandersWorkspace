@@ -38,7 +38,6 @@ let PaymentRecordsService = class PaymentRecordsService {
                     tenantId: dto.tenant_id,
                     createdByUserId: dto.created_by_user_id,
                     amount: dto.amount,
-                    currencyCode: dto.currency_code || 'KES',
                     status: client_1.PaymentStatus.SETTLED,
                     reference: dto.reference || null,
                     metadata: {
@@ -52,7 +51,7 @@ let PaymentRecordsService = class PaymentRecordsService {
                 data: {
                     paymentId: newPayment.id,
                     transactionId: dto.transaction_id,
-                    appliedAmount: dto.amount,
+                    amount: dto.amount,
                 },
             });
             return newPayment;
@@ -76,20 +75,20 @@ let PaymentRecordsService = class PaymentRecordsService {
                 payment: true,
             },
             orderBy: {
-                createdAt: 'desc',
+                appliedAt: 'desc',
             },
         });
         return paymentApps.map((app) => {
-            const metadata = app.payment.metadata;
+            const metadata = app.payment?.metadata;
             return {
-                id: app.payment.id,
+                id: app.paymentId,
                 transaction_id: transactionId,
                 method: metadata?.method || 'unknown',
-                amount: Number(app.appliedAmount),
-                reference: app.payment.reference || undefined,
-                paid_at: metadata?.paid_at || app.payment.createdAt.toISOString(),
-                metadata: app.payment.metadata,
-                created_at: app.payment.createdAt.toISOString(),
+                amount: Number(app.amount),
+                reference: app.payment?.reference || undefined,
+                paid_at: metadata?.paid_at || app.payment?.paidAt?.toISOString(),
+                metadata: app.payment?.metadata,
+                created_at: app.appliedAt.toISOString(),
             };
         });
     }
