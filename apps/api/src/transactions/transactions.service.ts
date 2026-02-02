@@ -80,7 +80,6 @@ export class TransactionsService {
           entityId: dto.entity_id || null,
           createdByUserId: dto.created_by_user_id,
           type: dto.type as any,
-          currencyCode: dto.currency_code,
           totalAmount: totalAmount,
           status: TxnStatus.DRAFT,
           paymentStatus: PaymentStatus.PENDING,
@@ -89,6 +88,8 @@ export class TransactionsService {
             context: dto.context,
             tags: dto.tags,
           } as Prisma.InputJsonValue,
+          systemTags: '',
+          customTags: '',
           lines: {
             create: dto.lines.map((line, index) => ({
               description: line.description,
@@ -124,7 +125,7 @@ export class TransactionsService {
     }
 
     if (filters?.type) {
-      where.type = filters.type as any;
+      where.entityType = filters.type as any;
     }
 
     if (filters?.entity_id) {
@@ -538,7 +539,7 @@ export class TransactionsService {
     }
 
     if (filters?.type) {
-      where.type = filters.type as any;
+      where.entityType = filters.type as any;
     }
 
     if (filters?.entity_id) {
@@ -588,7 +589,7 @@ export class TransactionsService {
     };
 
     if (filters?.type) {
-      where.type = filters.type as any;
+      where.entityType = filters.type as any;
     }
 
     if (filters?.search) {
@@ -612,7 +613,7 @@ export class TransactionsService {
     const entity = await this.prisma.entity.create({
       data: {
         tenantId: dto.tenant_id,
-        type: dto.type,
+        type: dto.type as any,
         displayName: dto.display_name,
         phoneNumber: dto.phone_number || null,
         metadata: (dto.metadata || {}) as Prisma.InputJsonValue,

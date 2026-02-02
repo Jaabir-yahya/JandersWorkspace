@@ -7,6 +7,44 @@ export declare class TransactionsController {
     private readonly transactionsService;
     constructor(transactionsService: TransactionsService);
     create(dto: CreateTransactionDto): Promise<{
+        entity: {
+            id: string;
+            tenantId: string;
+            email: string | null;
+            createdAt: Date;
+            metadata: import("@prisma/client/runtime/library").JsonValue;
+            phoneNumber: string | null;
+            displayName: string;
+            systemTags: string;
+            customTags: string;
+            createdByUserId: string;
+            entityType: import("@prisma/client").$Enums.EntityType;
+            businessRegistration: string | null;
+            businessScale: string | null;
+            registrationNumber: string | null;
+            creditLimit: import("@prisma/client/runtime/library").Decimal | null;
+            paymentTerms: number | null;
+            trustScore: number | null;
+            preferredContactMethod: string | null;
+            languagePreference: string | null;
+            locationNotes: string | null;
+            businessContext: import("@prisma/client/runtime/library").JsonValue;
+        } | null;
+        lines: {
+            id: string;
+            createdAt: Date;
+            description: string;
+            metadata: import("@prisma/client/runtime/library").JsonValue;
+            sku: string | null;
+            quantity: import("@prisma/client/runtime/library").Decimal;
+            unitPrice: import("@prisma/client/runtime/library").Decimal;
+            lineTotal: import("@prisma/client/runtime/library").Decimal;
+            totalLineAmount: import("@prisma/client/runtime/library").Decimal;
+            accountCode: string | null;
+            itemId: string | null;
+            transactionId: string;
+        }[];
+    } & {
         status: import("@prisma/client").$Enums.TxnStatus;
         id: string;
         tenantId: string;

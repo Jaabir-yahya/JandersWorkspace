@@ -446,6 +446,7 @@ let TenantConfigService = class TenantConfigService {
                 },
                 create: {
                     tenantId,
+                    provider: integrationType,
                     integrationType,
                     encryptedConfig: integrationConfig,
                     isActive: true,

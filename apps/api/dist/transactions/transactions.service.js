@@ -52,7 +52,6 @@ let TransactionsService = class TransactionsService {
                     entityId: dto.entity_id || null,
                     createdByUserId: dto.created_by_user_id,
                     type: dto.type,
-                    currencyCode: dto.currency_code,
                     totalAmount: totalAmount,
                     status: client_1.TxnStatus.DRAFT,
                     paymentStatus: client_1.PaymentStatus.PENDING,
@@ -61,6 +60,8 @@ let TransactionsService = class TransactionsService {
                         context: dto.context,
                         tags: dto.tags,
                     },
+                    systemTags: '',
+                    customTags: '',
                     lines: {
                         create: dto.lines.map((line, index) => ({
                             description: line.description,
@@ -91,7 +92,7 @@ let TransactionsService = class TransactionsService {
             where.status = filters.status;
         }
         if (filters?.type) {
-            where.type = filters.type;
+            where.entityType = filters.type;
         }
         if (filters?.entity_id) {
             where.entityId = filters.entity_id;
@@ -407,7 +408,7 @@ let TransactionsService = class TransactionsService {
             where.status = filters.status;
         }
         if (filters?.type) {
-            where.type = filters.type;
+            where.entityType = filters.type;
         }
         if (filters?.entity_id) {
             where.entityId = filters.entity_id;
@@ -444,7 +445,7 @@ let TransactionsService = class TransactionsService {
             tenantId,
         };
         if (filters?.type) {
-            where.type = filters.type;
+            where.entityType = filters.type;
         }
         if (filters?.search) {
             where.OR = [

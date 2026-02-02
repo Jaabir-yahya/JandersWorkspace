@@ -573,6 +573,7 @@ export class TenantConfigService {
         },
         create: {
           tenantId,
+          provider: integrationType,
           integrationType,
           encryptedConfig: integrationConfig, // TODO: Implement encryption
           isActive: true,

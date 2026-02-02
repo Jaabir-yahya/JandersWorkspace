@@ -50,7 +50,7 @@ export class PaymentRecordsService {
         data: {
           tenantId: dto.tenant_id,
           createdByUserId: dto.created_by_user_id,
-          amount: dto.amount,
+          appliedAmount: dto.amount,
           status: PaymentStatus.SETTLED,
           reference: dto.reference || null,
           metadata: {
@@ -66,7 +66,7 @@ export class PaymentRecordsService {
         data: {
           paymentId: newPayment.id,
           transactionId: dto.transaction_id,
-          amount: dto.amount,
+          appliedAmount: dto.amount,
         },
       });
 
@@ -80,7 +80,7 @@ export class PaymentRecordsService {
       id: payment.id,
       transaction_id: dto.transaction_id,
       method: dto.method,
-      amount: dto.amount,
+      appliedAmount: dto.amount,
       reference: dto.reference,
       paid_at: dto.paid_at || new Date().toISOString(),
       metadata: payment.metadata as Record<string, unknown>,

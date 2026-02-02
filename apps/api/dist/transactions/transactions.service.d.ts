@@ -30,6 +30,44 @@ export declare class TransactionsService {
     constructor(prisma: PrismaService);
     getOrCreateManualUserForTenant(tenantId: string): Promise<string>;
     create(dto: CreateTransactionDto): Promise<{
+        entity: {
+            id: string;
+            tenantId: string;
+            email: string | null;
+            createdAt: Date;
+            metadata: Prisma.JsonValue;
+            phoneNumber: string | null;
+            displayName: string;
+            systemTags: string;
+            customTags: string;
+            createdByUserId: string;
+            entityType: import("@prisma/client").$Enums.EntityType;
+            businessRegistration: string | null;
+            businessScale: string | null;
+            registrationNumber: string | null;
+            creditLimit: Prisma.Decimal | null;
+            paymentTerms: number | null;
+            trustScore: number | null;
+            preferredContactMethod: string | null;
+            languagePreference: string | null;
+            locationNotes: string | null;
+            businessContext: Prisma.JsonValue;
+        } | null;
+        lines: {
+            id: string;
+            createdAt: Date;
+            description: string;
+            metadata: Prisma.JsonValue;
+            sku: string | null;
+            quantity: Prisma.Decimal;
+            unitPrice: Prisma.Decimal;
+            lineTotal: Prisma.Decimal;
+            totalLineAmount: Prisma.Decimal;
+            accountCode: string | null;
+            itemId: string | null;
+            transactionId: string;
+        }[];
+    } & {
         status: import("@prisma/client").$Enums.TxnStatus;
         id: string;
         tenantId: string;
