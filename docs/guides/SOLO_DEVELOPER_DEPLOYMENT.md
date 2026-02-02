@@ -1,5 +1,10 @@
 # SOLO DEVELOPER DEPLOYMENT GUIDE
 
+## 📚 Related Guides
+
+- **📘 Comprehensive Workflow Guide**: See [`SOLO_DEVELOPER_DEPLOYMENT_WORKFLOW.md`](./SOLO_DEVELOPER_DEPLOYMENT_WORKFLOW.md) for detailed deployment workflows, troubleshooting, and best practices across all platforms (GitHub Actions, Railway, Vercel, Supabase)
+- **🔧 Integration Development**: See [`INTEGRATION_DEVELOPMENT.md`](./INTEGRATION_DEVELOPMENT.md) for building new integrations
+
 ## 🎯 Core Philosophy
 
 "I'm not just deploying code - I'm launching African SME digital infrastructure"
