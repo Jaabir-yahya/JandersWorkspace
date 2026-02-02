@@ -37,7 +37,7 @@ let PaymentRecordsService = class PaymentRecordsService {
                 data: {
                     tenantId: dto.tenant_id,
                     createdByUserId: dto.created_by_user_id,
-                    appliedAmount: dto.amount,
+                    amount: dto.amount,
                     status: client_1.PaymentStatus.SETTLED,
                     reference: dto.reference || null,
                     metadata: {
@@ -51,6 +51,7 @@ let PaymentRecordsService = class PaymentRecordsService {
                 data: {
                     paymentId: newPayment.id,
                     transactionId: dto.transaction_id,
+                    amount: dto.amount,
                     appliedAmount: dto.amount,
                 },
             });
@@ -61,7 +62,7 @@ let PaymentRecordsService = class PaymentRecordsService {
             id: payment.id,
             transaction_id: dto.transaction_id,
             method: dto.method,
-            appliedAmount: dto.amount,
+            amount: dto.amount,
             reference: dto.reference,
             paid_at: dto.paid_at || new Date().toISOString(),
             metadata: payment.metadata,

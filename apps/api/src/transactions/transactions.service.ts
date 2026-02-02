@@ -125,7 +125,9 @@ export class TransactionsService {
     }
 
     if (filters?.type) {
-      where.entityType = filters.type as any;
+      where.entity = {
+        entityType: filters.type as any,
+      };
     }
 
     if (filters?.entity_id) {
@@ -335,6 +337,8 @@ export class TransactionsService {
           paymentStatus: original.paymentStatus,
           reference: `REV-${original.reference || id}`,
           reversedTransactionId: original.id,
+          systemTags: original.systemTags || '',
+          customTags: original.customTags || '',
           metadata: {
             reversal_reason: dto.reason,
             original_reference: original.reference,
@@ -345,6 +349,7 @@ export class TransactionsService {
               sku: line.sku,
               quantity: -line.quantity,
               unitPrice: line.unitPrice,
+              lineTotal: -line.lineTotal,
               totalLineAmount: -line.totalLineAmount,
               accountCode: line.accountCode,
               metadata: line.metadata as Prisma.InputJsonValue,
@@ -539,7 +544,9 @@ export class TransactionsService {
     }
 
     if (filters?.type) {
-      where.entityType = filters.type as any;
+      where.entity = {
+        entityType: filters.type as any,
+      };
     }
 
     if (filters?.entity_id) {
@@ -613,9 +620,11 @@ export class TransactionsService {
     const entity = await this.prisma.entity.create({
       data: {
         tenantId: dto.tenant_id,
-        type: dto.type as any,
+        entityType: dto.type as any,
         displayName: dto.display_name,
         phoneNumber: dto.phone_number || null,
+        systemTags: dto.system_tags || '',
+        customTags: dto.custom_tags || '',
         metadata: (dto.metadata || {}) as Prisma.InputJsonValue,
         createdByUserId: dto.created_by_user_id,
       },

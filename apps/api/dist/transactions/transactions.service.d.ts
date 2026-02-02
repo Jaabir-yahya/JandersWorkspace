@@ -332,6 +332,21 @@ export declare class TransactionsService {
         reversedTransactionId: string | null;
     }>;
     reverseTransaction(id: string, dto: ReverseTransactionDto): Promise<{
+        lines: {
+            id: string;
+            createdAt: Date;
+            description: string;
+            metadata: Prisma.JsonValue;
+            sku: string | null;
+            quantity: Prisma.Decimal;
+            unitPrice: Prisma.Decimal;
+            lineTotal: Prisma.Decimal;
+            totalLineAmount: Prisma.Decimal;
+            accountCode: string | null;
+            itemId: string | null;
+            transactionId: string;
+        }[];
+    } & {
         status: import("@prisma/client").$Enums.TxnStatus;
         id: string;
         tenantId: string;

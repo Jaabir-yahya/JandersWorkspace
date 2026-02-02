@@ -92,7 +92,9 @@ let TransactionsService = class TransactionsService {
             where.status = filters.status;
         }
         if (filters?.type) {
-            where.entityType = filters.type;
+            where.entity = {
+                entityType: filters.type,
+            };
         }
         if (filters?.entity_id) {
             where.entityId = filters.entity_id;
@@ -264,6 +266,8 @@ let TransactionsService = class TransactionsService {
                     paymentStatus: original.paymentStatus,
                     reference: `REV-${original.reference || id}`,
                     reversedTransactionId: original.id,
+                    systemTags: original.systemTags || '',
+                    customTags: original.customTags || '',
                     metadata: {
                         reversal_reason: dto.reason,
                         original_reference: original.reference,
@@ -274,6 +278,7 @@ let TransactionsService = class TransactionsService {
                             sku: line.sku,
                             quantity: -line.quantity,
                             unitPrice: line.unitPrice,
+                            lineTotal: -line.lineTotal,
                             totalLineAmount: -line.totalLineAmount,
                             accountCode: line.accountCode,
                             metadata: line.metadata,
@@ -408,7 +413,9 @@ let TransactionsService = class TransactionsService {
             where.status = filters.status;
         }
         if (filters?.type) {
-            where.entityType = filters.type;
+            where.entity = {
+                entityType: filters.type,
+            };
         }
         if (filters?.entity_id) {
             where.entityId = filters.entity_id;
@@ -465,9 +472,11 @@ let TransactionsService = class TransactionsService {
         const entity = await this.prisma.entity.create({
             data: {
                 tenantId: dto.tenant_id,
-                type: dto.type,
+                entityType: dto.type,
                 displayName: dto.display_name,
                 phoneNumber: dto.phone_number || null,
+                systemTags: dto.system_tags || '',
+                customTags: dto.custom_tags || '',
                 metadata: (dto.metadata || {}),
                 createdByUserId: dto.created_by_user_id,
             },
