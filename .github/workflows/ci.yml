@@ -23,8 +23,7 @@ jobs:
         run: npm ci
 
       - name: Generate (Prisma)
-        run: npx prisma generate
-        working-directory: apps/api
+        run: cd packages/database && npx prisma generate --schema=./prisma/schema.prisma
 
       - name: Build
         run: npm run build
