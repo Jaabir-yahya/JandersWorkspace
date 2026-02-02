@@ -40,7 +40,7 @@ jobs:
       - name: Deploy to Vercel
         run: npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
         env:
-          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_ORG_ID: ${{ vars.VERCFIORGID }}
           VERCEL_PROJECT_ID: ${{ vars.VERCEL_ADMIN_PROJECT_ID }}
 
   deploy-manual:
@@ -71,5 +71,5 @@ jobs:
       - name: Deploy to Vercel
         run: npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
         env:
-          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_ORG_ID: ${{ vars.VERCFIORGID }}
           VERCEL_PROJECT_ID: ${{ vars.VERCEL_MANUAL_PROJECT_ID }}

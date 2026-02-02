@@ -23,10 +23,10 @@ jobs:
 
       - name: Deploy to Railway
         run: |
-          railway login --token ${{ secrets.RAILWAY_TOKEN }}
+          railway login --token ${{ secrets.RAILWAY_APITOKEN }}
           railway up --service=${{ vars.RAILWAY_SERVICE_NAME || 'JandersWorkspace' }}
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_APITOKEN }}
 
       - name: Wait for deployment to be ready
         run: |
