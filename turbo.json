@@ -1,18 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [
-    "**/.env.*local",
-    "tsconfig.json"
-  ],
+  "globalDependencies": ["**/.env.*local", "tsconfig.json"],
   "pipeline": {
     "build": {
       "dependsOn": ["^build", "^generate"],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "dist/**",
-        "!.turbo/**"
-      ]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", "!.turbo/**"]
     },
     "dev": {
       "cache": false,
@@ -20,7 +12,7 @@
     },
     "generate": {
       "cache": false,
-      "outputs": ["prisma/generated/**"]
+      "outputs": ["dist/**", "node_modules/.prisma/**"]
     },
     "lint": {
       "outputs": []
@@ -35,6 +27,13 @@
     },
     "clean": {
       "cache": false
+    },
+    "migrate": {
+      "cache": false
+    },
+    "studio": {
+      "cache": false,
+      "persistent": true
     }
   }
 }

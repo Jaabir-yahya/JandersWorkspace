@@ -17,6 +17,6 @@
     }
   ],
   "env": {
-    "VITE_API_URL": "https://api.bridge.app/api/v1"
+    "VITE_API_URL": "https://your-api.up.railway.app/api/v1"
   }
 }

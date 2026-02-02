@@ -3,4 +3,4 @@
 # Process: web (for HTTP applications)
 # Start command: npm start (runs the built application)
 
-web: npm start
+web: cd /app && node dist/main

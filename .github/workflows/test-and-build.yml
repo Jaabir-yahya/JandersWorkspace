@@ -1,0 +1,76 @@
+name: Test and Build API
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "apps/api/**"
+      - "packages/**"
+      - "package.json"
+      - "turbo.json"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/api/**"
+      - "packages/**"
+      - "package.json"
+      - "turbo.json"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: cd packages/database && npx prisma generate
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Lint code
+        run: npm run lint
+
+      - name: Test API
+        run: npm run test:api
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          JWT_SECRET: test-jwt-secret
+          NODE_ENV: test
+
+      - name: Build API
+        run: npm run build:api
+
+      - name: Build Docker image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker build -f apps/api/Dockerfile -t project-bridge-api:test .
+          docker run --rm -d -p 3000:3000 --name api-test project-bridge-api:test
+          sleep 10
+          curl -f http://localhost:3000/api/v1/health || exit 1
+          docker stop api-test

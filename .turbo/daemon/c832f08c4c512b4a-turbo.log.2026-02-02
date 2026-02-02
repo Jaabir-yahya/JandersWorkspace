@@ -1,0 +1,8 @@
+2026-02-02T08:04:29.208007Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("")}
+2026-02-02T08:04:29.209023Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({}))
+2026-02-02T08:04:29.287094Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/daemon/c832f08c4c512b4a-turbo.log.2026-02-01"), AnchoredSystemPathBuf(".turbo/daemon/c832f08c4c512b4a-turbo.log.2026-02-02")}
+2026-02-02T08:04:29.287679Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2026-02-02T08:04:43.683909Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/api/package.json")}
+2026-02-02T08:04:43.683946Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@project-bridge/api"), path: AnchoredSystemPathBuf("apps/api") }}))
+2026-02-02T08:04:43.887076Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("package-lock.json")}
+2026-02-02T08:04:43.887087Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))

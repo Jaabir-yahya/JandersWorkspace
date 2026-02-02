@@ -9,11 +9,14 @@
   ],
   "scripts": {
     "build": "turbo run build",
+    "build:api": "turbo run build --filter=@project-bridge/api",
     "dev": "turbo run dev",
     "dev:api": "turbo run dev --filter=@project-bridge/api",
-    "dev:web": "turbo run dev --filter=bridge-manual",
+    "dev:admin": "turbo run dev --filter=bridge-admin",
+    "dev:all": "turbo run dev",
     "lint": "turbo run lint",
     "test": "turbo run test",
+    "test:api": "turbo run test --filter=@project-bridge/api",
     "test:cov": "turbo run test:cov",
     "test:integration": "jest --runInBand tests/integration/ --detectOpenHandles",
     "verify": "node scripts/verify-env-and-build.js",
@@ -24,7 +27,7 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "tunnel": "npx ngrok http 3001",
     "tunnel:api": "npx ngrok http 3000",
-    "deploy:db": "cd apps/api && npx prisma migrate deploy && npx prisma db seed"
+    "deploy:db": "cd packages/database && npx prisma migrate deploy && npx prisma db seed"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
@@ -41,7 +44,8 @@
     "yaml": "^2.8.2"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.0.0"
+    "@supabase/supabase-js": "^2.0.0",
+    "supabase": "^2.74.5"
   },
   "engines": {
     "node": ">=18.0.0",

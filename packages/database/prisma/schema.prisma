@@ -8,41 +8,47 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model User {
+// Enhanced Entity Model for Nairobi Business Realities
+model Entity {
   id                  String        @id @default(uuid()) @db.Uuid
   tenantId            String        @map("tenant_id") @db.Uuid
-  phoneNumber         String        @map("phone_number")
-  email               String?
-  displayName         String?       @map("display_name")
-  role                String?
-  metadata            Json          @default("{}")
-  createdAt           DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
-  createdEntities     Entity[]      @relation("EntityCreator")
-  createdPayments     Payment[]     @relation("PaymentCreator")
-  createdTransactions Transaction[] @relation("TransactionCreator")
-
+  displayName          String        @map("display_name")
+  phoneNumber          String?       @map("phone_number")
+  email                String?
+  metadata             Json          @default("{}")
+  createdAt            DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  createdByUserId       String        @map("created_by_user_id") @db.Uuid
+  
+  // Nairobi business flexibility (NEW)
+  entityType           EntityType     @default(CUSTOMER) // CUSTOMER, SUPPLIER, PARTNER, EMPLOYEE, AGENT, VENDOR, GOVERNMENT, BANK, CHAMA_MEMBER
+  businessRegistration  String?       @map("business_registration") // INFORMAL, REGISTERED, COMPANY, CHAMA, SOLE_PROPRIETOR
+  businessScale         String?       @map("business_scale") // MICRO, SMALL, MEDIUM, LARGE
+  registrationNumber     String?       @map("registration_number") // Business registration or tax ID
+  
+  // Credit management (critical for informal economy)
+  creditLimit          Decimal?      @map("credit_limit")
+  paymentTerms         Int?           @map("payment_terms") // Net days
+  trustScore           Int?           @map("trust_score") // 0-100 from payment history
+  
+  // Nairobi-specific context (NEW)
+  preferredContactMethod String?   @map("preferred_contact_method") // PHONE, WHATSAPP, SMS, EMAIL
+  languagePreference    String?   @map("language_preference") // en, sw
+  locationNotes        String?   @map("location_notes") // Market, estate, neighborhood
+  
+  // Smart tagging foundation (NEW)
+  systemTags           String     @map("system_tags") // Predefined Nairobi business tags
+  customTags          String     @map("custom_tags") // User-defined innovation tags
+  businessContext       Json       @default("{}") @map("business_context") // Store relationship specifics
+  
+  createdBy           User          @relation("EntityCreator", fields: [createdByUserId], references: [id])
+  transactions        Transaction[] @relation("TransactionEntity")
+  
   @@unique([tenantId, phoneNumber])
-  @@index([tenantId])
-  @@map("users")
-}
-
-model Entity {
-  id              String        @id @default(uuid()) @db.Uuid
-  tenantId        String        @map("tenant_id") @db.Uuid
-  displayName     String        @map("display_name")
-  phoneNumber     String?       @map("phone_number")
-  metadata        Json          @default("{}")
-  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
-  createdByUserId String        @map("created_by_user_id") @db.Uuid
-  type            EntityType
-  createdBy       User          @relation("EntityCreator", fields: [createdByUserId], references: [id])
-  transactions    Transaction[]
-
-  @@unique([tenantId, phoneNumber])
-  @@index([tenantId])
+  @@index([tenantId, entityType])
   @@map("entities")
 }
 
+// Enhanced Transaction Model with Business Context
 model Transaction {
   id                    String               @id @default(uuid()) @db.Uuid
   tenantId              String               @map("tenant_id") @db.Uuid
@@ -61,9 +67,23 @@ model Transaction {
   paymentApplications   PaymentApplication[]
   lines                 TransactionLine[]
   createdBy             User                 @relation("TransactionCreator", fields: [createdByUserId], references: [id])
-  entity                Entity?              @relation(fields: [entityId], references: [id])
+  entity                Entity?              @relation("TransactionEntity", fields: [entityId], references: [id])
   reversedTransaction   Transaction?         @relation("TransactionReversal", fields: [reversedTransactionId], references: [id])
   reversingTransactions Transaction[]        @relation("TransactionReversal")
+
+  // Money movement context (NEW - critical for Nairobi SMEs)
+  transactionChannel      String?     @map("transaction_channel") // WALK_IN, PHONE_ORDER, WHATSAPP, MPESA, USSD, BANK
+  businessPurpose        String?     @map("business_purpose") // RENT, SALARIES, INVENTORY, MARKETING, TRANSPORT
+  customerSegment       String?     @map("customer_segment") // WALK_IN, WHOLESALE, TOURIST, CORPORATE
+  marketDayType        String?     @map("market_day_type") // NORMAL, HOLIDAY, MARKET_DAY, RAINY_DAY
+  locationGps          String?     @map("location_gps") // GPS coordinates
+  locationDescription     String?     @map("location_description") // "Kibuye Market", "Eastleigh", "Kawangware"
+  paymentConfirmedVia    String?     @map("payment_confirmed_via") // PHONE_VERIFICATION, RECEIPT, WITNESS
+  businessNotes         String?     @map("business_notes") // Free text for context
+
+  // Smart tagging foundation (NEW)
+  systemTags           String     @map("system_tags") // Predefined Nairobi business tags
+  customTags          String     @map("custom_tags") // User-defined innovation tags
 
   @@unique([tenantId, reference])
   @@index([tenantId, status])
@@ -75,147 +95,119 @@ model Transaction {
   @@map("transactions")
 }
 
-model TransactionLine {
-  id              String      @id @default(uuid()) @db.Uuid
-  transactionId   String      @map("transaction_id") @db.Uuid
-  description     String?
-  quantity        Decimal     @default(1.0) @db.Decimal(18, 4)
-  unitPrice       Decimal     @map("unit_price") @db.Decimal(18, 4)
-  totalLineAmount Decimal     @map("total_line_amount") @db.Decimal(18, 4)
-  accountCode     String      @map("account_code")
-  metadata        Json        @default("{}")
-  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
-  sku             String?
-  transaction     Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
-
-  @@index([transactionId])
-  @@index([accountCode])
-  @@index([sku])
-  @@map("transaction_lines")
-}
-
-model Payment {
+// Money Movement Tracking (NEW - Critical for Nairobi SMEs)
+model MoneyMovement {
   id              String               @id @default(uuid()) @db.Uuid
   tenantId        String               @map("tenant_id") @db.Uuid
-  reference       String?
-  amount          Decimal              @db.Decimal(18, 4)
-  currencyCode    String               @default("KES") @map("currency_code") @db.VarChar(3)
-  status          PaymentStatus        @default(PENDING)
+  transactionId   String?              @map("transaction_id") @db.Uuid
+  movementType    String               @map("movement_type") // INFLOW, OUTFLOW, TRANSFER
+  sourceType      String               @map("source_type") // CASH, MPESA, BANK, MOBILE_MONEY, CREDIT
+  amount          Decimal              @db.Decimal(18,4)
+  referenceNumber String?              @map("reference_number")
+  businessPurpose String?               @map("business_purpose") // SALES, RENT, SALARIES, INVENTORY, TRANSPORT
+  description     String?
+  isSettled      Boolean              @default(false) @map("is_settled")
+  settledDate     DateTime?            @map("settled_date") @db.Timestamptz(6)
+  settlementMethod String?               @map("settlement_method") // CASH_HANDOVER, BANK_DEPOSIT, MOBILE_TRANSFER
+  tags            String     @map("tags")
   metadata        Json                 @default("{}")
-  createdByUserId String               @map("created_by_user_id") @db.Uuid
   createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
-  applications    PaymentApplication[]
-  createdBy       User                 @relation("PaymentCreator", fields: [createdByUserId], references: [id])
-
-  @@index([tenantId])
-  @@index([tenantId, status])
-  @@index([reference])
-  @@index([createdAt])
-  @@map("payments")
+  
+  @@unique([tenantId, referenceNumber])
+  @@index([tenantId, transactionId])
+  @@index([movementType, sourceType])
+  @@index([isSettled, settledDate])
+  @@map("money_movements")
 }
 
-model PaymentApplication {
-  id            String      @id @default(uuid()) @db.Uuid
-  paymentId     String      @map("payment_id") @db.Uuid
-  transactionId String      @map("transaction_id") @db.Uuid
-  appliedAmount Decimal     @map("applied_amount") @db.Decimal(18, 4)
-  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
-  payment       Payment     @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-  transaction   Transaction @relation(fields: [transactionId], references: [id])
-
-  @@unique([paymentId, transactionId])
-  @@index([transactionId])
-  @@index([paymentId])
-  @@map("payment_applications")
+// Universal Item Catalog for Nairobi SMEs
+model Item {
+  id              String               @id @default(uuid()) @db.Uuid
+  tenantId        String               @map("tenant_id") @db.Uuid
+  sku             String               @unique
+  name            String               
+  description     String?
+  itemType        String               @map("item_type") // PRODUCT, SERVICE, ASSET, EXPENSE, TAX, FEE, MATERIAL
+  category        String?
+  unitOfMeasure  String               @default("PCS") @map("unit_of_measure")
+  defaultPrice    Decimal              @db.Decimal(18,4)
+  costPrice      Decimal?             @map("cost_price") @db.Decimal(18,4)
+  priceTiers      Json                 @default("{}") @map("price_tiers") // {"retail": 50, "wholesale": 45, "bulk": 40}
+  currentStock    Decimal?             @map("current_stock") @db.Decimal(12,4)
+  minStockLevel   Decimal?             @map("min_stock_level") @db.Decimal(12,4)
+  reorderPoint    Decimal?             @map("reorder_point") @db.Decimal(12,4)
+  lastStockUpdate DateTime?            @map("last_stock_update") @db.Timestamptz(6)
+  supplierId      String?               @map("supplier_id") @db.Uuid
+  isPerishable   Boolean              @default(false) @map("is_perishable") // Important for food businesses
+  storageReq      String?               @map("storage_requirements") // "Keep dry", "Refrigerate"
+  tags            String     @map("tags")
+  metadata        Json                 @default("{}")
+  isActive       Boolean              @default(true)
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  @@unique([tenantId, sku])
+  @@index([tenantId, itemType])
+  @@index([currentStock, minStockLevel])
+  @@index([supplierId])
+  @@map("items")
 }
 
-model Tenant {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  slug      String   @unique
-  tier      String
-  country   String
-  isActive  Boolean  @default(true) @map("is_active")
-  settings  Json     @default("{}")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  @@index([slug])
-  @@index([country])
-  @@map("tenants")
+// Smart Tagging System for Nairobi SMEs
+model StandardTag {
+  id              String               @id @default(uuid()) @db.Uuid
+  tenantId        String               @map("tenant_id") @db.Uuid
+  category        String               @map("category") // CUSTOMER_TYPES, BUSINESS_CATEGORIES, PAYMENT_METHODS, LOCATIONS
+  tagName         String               @map("tag_name")
+  tagValue        String               @map("tag_value")
+  colorCode       String?               @map("color_code") // For UI visualization
+  isSystemDefined Boolean              @default(true) @map("is_system_defined") // Predefined vs user-created
+  parentTagId     String?               @map("parent_tag_id") @db.Uuid
+  isLocalRelevant Boolean              @default(false) @map("is_local_relevant") // Specific to Kenyan business context
+  usageCount      Int?                 @map("usage_count") // Popularity ranking
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  
+  @@index([tenantId, category])
+  @@index([isSystemDefined])
+  @@index([isLocalRelevant])
+  @@index([parentTagId])
+  @@map("standard_tags")
 }
 
-model TenantIntegration {
-  id              String    @id @default(uuid()) @db.Uuid
-  tenantId        String    @map("tenant_id") @db.Uuid
-  integrationType String    @map("integration_type")
-  encryptedConfig Json      @map("encrypted_config")
-  isActive        Boolean   @default(true) @map("is_active")
-  lastSyncAt      DateTime? @map("last_sync_at") @db.Timestamptz(6)
-  syncStatus      String    @default("PENDING") @map("sync_status")
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  @@unique([tenantId, integrationType])
-  @@index([tenantId])
-  @@index([integrationType])
-  @@map("tenant_integrations")
+// Auto-Tagging Rules Engine for Smart Learning
+model TaggingRule {
+  id              String               @id @default(uuid()) @db.Uuid
+  tenantId        String               @map("tenant_id") @db.Uuid
+  ruleName        String               @map("rule_name")
+  conditions      Json                 @map("conditions") // {"description_contains": "rent", "amount_gt": 5000, "entity_type": "SUPPLIER"}
+  actions         Json                 @map("actions") // {"add_tags": ["RENT", "FIXED_EXPENSE"], "set_category": "OFFICE_COSTS"}
+  confidenceScore Int?                 @map("confidence_score") // 0-100 how certain we are
+  patternExamples Json                 @map("pattern_examples") // Learning examples
+  matchCount      Int?                 @map("match_count") // How often it applies
+  successRate     Decimal?             @map("success_rate") @db.Decimal(5,2) // How accurate predictions are
+  isActive       Boolean              @default(true)
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  @@index([tenantId, isActive])
+  @@map("tagging_rules")
 }
 
-model FeatureFlag {
-  id          String   @id @default(uuid()) @db.Uuid
-  name        String   @unique
-  description String?
-  isActive    Boolean  @default(true) @map("is_active")
-  tiers       String[]
-  countries   String[]
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  @@index([name])
-  @@index([isActive])
-  @@map("feature_flags")
+// Transaction Tag Assignments for Learning System
+model TransactionTag {
+  id             String               @id @default(uuid()) @db.Uuid
+  transactionId String               @map("transaction_id") @db.Uuid
+  tagId          String               @map("tag_id") @db.Uuid
+  tagSource      String               @default("AUTO") @map("tag_source") // AUTO, MANUAL, SYSTEM, IMPORT
+  confidenceScore Int?                 @map("confidence_score") // 0-100 accuracy
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  
+  @@index([transactionId, tagId])
+  @@index([tagSource])
+  @@map("transaction_tags")
 }
 
-model WebhookEvent {
-  id              String    @id @default(uuid()) @db.Uuid
-  tenantId        String    @map("tenant_id") @db.Uuid
-  integrationType String    @map("integration_type")
-  eventType       String    @map("event_type")
-  payload         Json
-  processed       Boolean   @default(false)
-  retryCount      Int       @default(0) @map("retry_count")
-  errorMessage    String?   @map("error_message")
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  processedAt     DateTime? @map("processed_at") @db.Timestamptz(6)
-
-  @@index([tenantId, processed])
-  @@index([createdAt])
-  @@index([processed])
-  @@map("webhook_events")
-}
-
-model ExternalReference {
-  id             String    @id @default(uuid()) @db.Uuid
-  tenantId       String    @map("tenant_id") @db.Uuid
-  localId        String    @map("local_id")
-  localType      String    @map("local_type")
-  externalSystem String    @map("external_system")
-  externalId     String    @map("external_id")
-  externalData   Json      @map("external_data")
-  syncDirection  String    @map("sync_direction")
-  lastSyncAt     DateTime? @map("last_sync_at") @db.Timestamptz(6)
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  @@unique([tenantId, localId, localType, externalSystem])
-  @@index([tenantId])
-  @@index([externalSystem])
-  @@index([externalId])
-  @@index([localType])
-  @@map("external_references")
-}
-
+// Keep existing models (unchanged for now)
 enum TxnStatus {
   DRAFT
   POSTED
@@ -244,4 +236,11 @@ enum EntityType {
   CUSTOMER
   SUPPLIER
   BOTH
+  PARTNER
+  EMPLOYEE
+  AGENT
+  VENDOR
+  GOVERNMENT
+  BANK
+  CHAMA_MEMBER
 }

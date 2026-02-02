@@ -1,146 +1,40 @@
 # Project Bridge
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/project-bridge)
-[![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/project-bridge)
-[![Phase](https://img.shields.io/badge/phase-3%20complete-blue)](https://github.com/project-bridge)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+**Multi-tenant business management platform for African SMEs**
 
-**The data infrastructure to unlock African conversational commerce.**
+Built for the 80% of African businesses that operate informally - from kiosks and dukas to salons and market traders. Project Bridge provides a modern, mobile-first dashboard with optional integrations (M-Pesa, WhatsApp, QuickBooks) for businesses ready to digitize.
 
-By turning chat-based transactions (WhatsApp/social) into structured, accessible data, we bridge local African businesses with international digital tools and standards.
-
----
-
-## Project Status
-
-**Current Phase: Phase 3 Complete - Manual-First Focus** ✅
-
-Phase 3 has been successfully finalized with all core features operational and **100% unit test pass rate**. The system is now optimized for **80% manual-first approach** serving African informal economy businesses.
-
-| Phase     | Status         | Description                                          |
-| --------- | -------------- | ---------------------------------------------------- |
-| Phase 1   | ✅ Complete    | Core data infrastructure (Truth Ledger)              |
-| Phase 2   | ✅ Complete    | State machine, search, entity history                |
-| Phase 3   | ✅ Complete    | Frontend, dashboard, attachments, webhook monitoring |
-| Phase 3.5 | 🚀 In Progress | Manual-first features for 80% of tenants             |
-| Phase 4   | 📋 Planned     | Advanced integrations (Pro tier - 20% of tenants)    |
-
-## New: Manual-First Architecture 🎯
-
-We're now focusing on serving **80% of African informal economy businesses** with simple, powerful tools that don't require complex integrations.
-
-### Key Features for Manual Tenants
-
-- 🎤 **Voice Transaction Recording** - Speak your sales naturally
-- 📷 **Photo Receipt Scanning** - Capture receipts with your camera
-- 📱 **Mobile-First Dashboard** - Glanceable business insights
-- 👥 **Simple Customer Management** - Track customers and credit (Udhaari)
-- 💬 **SMS Business Management** - Daily summaries and alerts
-- 📊 **Smart Business Insights** - Automated recommendations
-
-### Target Market
-
-- **Small shops** (kiosks, dukas, vibandas)
-- **Service providers** (salons, mechanics, tailors)
-- **Farmers and traders** (produce, livestock)
-- **Informal manufacturers** (furniture, crafts)
-- **Street vendors** and market traders
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/Jaabir-yahya/JandersWorkspace)
+[![API Tests](https://img.shields.io/badge/api%20tests-23%20passing-brightgreen)](https://github.com/Jaabir-yahya/JandersWorkspace)
+[![TypeScript](https://img.shields.io/badge/typescript-5.9-blue)](https://www.typescriptlang.org/)
+[![NestJS](https://img.shields.io/badge/nestjs-11.0-red)](https://nestjs.com/)
+[![Prisma](https://img.shields.io/badge/prisma-6.0-2D3748)](https://prisma.io/)
 
 ---
 
-## The Problem
-
-African commerce happens in conversations (WhatsApp/SMS/in-person), trapping transaction data, limiting access to formal financing, and disconnecting businesses from global tools.
-
-## The Solution
-
-A monorepo SaaS platform with:
-
-- **Phase 1-3 (Complete)**: Core ledger, state machine, dashboard, and webhook monitoring
-- **Phase 4 (Planned)**: Enhanced M-Pesa integration, WhatsApp Business API, and AI agents
-
----
-
-## Quick Start
-
-### Prerequisites
-
-- Node.js 20+ (see [`.nvmrc`](.nvmrc))
-- PostgreSQL 15+ (or use Supabase)
-- npm 10+
-
-### Installation
+## Quick Start (Solo Developer)
 
 ```bash
-# Clone the repository
-git clone <repository-url>
+# 1. Clone and install
+git clone https://github.com/Jaabir-yahya/JandersWorkspace.git
 cd JandersWorkspace
-
-# Install dependencies
 npm install
 
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your configuration (see Environment Setup below)
+# 2. Set up environment
+cp apps/api/.env.example apps/api/.env
+# Edit apps/api/.env with your Supabase credentials
 
-# Build all packages
-npm run build
+# 3. Run database migrations
+cd apps/api && npx prisma migrate deploy
 
-# Run database migrations
-cd apps/api && npx prisma migrate dev
-
-# Seed the database (optional)
-npm run db:seed
-
-# Start development
-npm run dev
+# 4. Start development
+npm run dev          # Starts API (3000), bridge-admin (3003), bridge-perfect (3002)
 ```
 
-### Environment Setup
-
-Create your `.env` file from the example:
-
+**Test the setup:**
 ```bash
-cp .env.example .env
-```
-
-Required minimum configuration:
-
-```env
-# Database (Supabase PostgreSQL)
-DATABASE_URL="postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres"
-DIRECT_URL="postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres"
-
-# Supabase
-SUPABASE_URL="https://[project-ref].supabase.co"
-SUPABASE_ANON_KEY="[your-anon-key]"
-SUPABASE_SERVICE_KEY="[your-service-role-key]"
-
-# API & Web
-NEXT_PUBLIC_API_URL="http://localhost:3000/api/v1"
-```
-
-See [`.env.example`](.env.example) for complete configuration options.
-
-### Development URLs
-
-| Service           | URL                            | Description      |
-| ----------------- | ------------------------------ | ---------------- |
-| Web Dashboard     | http://localhost:3001          | Next.js frontend |
-| API               | http://localhost:3000          | NestJS backend   |
-| API Documentation | http://localhost:3000/api/docs | Swagger/OpenAPI  |
-
-### Individual Services
-
-```bash
-# API only
-npm run dev:api    # API on http://localhost:3000
-
-# Web only
-npm run dev:web    # Web on http://localhost:3001
-
-# Database Studio
-cd apps/api && npx prisma studio  # Prisma Studio on http://localhost:5555
+curl http://localhost:3000/api/v1/health
+# Visit: http://localhost:3003/janders-dogfood
 ```
 
 ---
@@ -148,247 +42,241 @@ cd apps/api && npx prisma studio  # Prisma Studio on http://localhost:5555
 ## Architecture
 
 ```
-JandersWorkspace/                    # Monorepo Root
+┌─────────────────────────────────────────────────────────────┐
+│                        Vercel                               │
+│  ┌──────────────────┐  ┌──────────────────┐                │
+│  │ bridge-admin     │  │ bridge-perfect   │                │
+│  │ (Desktop)        │  │ (Mobile)         │                │
+│  │ localhost:3003   │  │ localhost:3002   │                │
+│  └──────────────────┘  └──────────────────┘                │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                       Railway                               │
+│                    NestJS API                               │
+│              localhost:3000                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │   Tenants    │  │   Feature    │  │  Integrations    │  │
+│  │   (Multi)    │  │   Flags      │  │  (M-Pesa, etc)   │  │
+│  └──────────────┘  └──────────────┘  └──────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      Supabase                               │
+│              PostgreSQL + Auth                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | React 19 + Vite + Tailwind CSS + Zustand |
+| **Backend** | NestJS 11 + Prisma 6 + Swagger |
+| **Database** | PostgreSQL (Supabase) |
+| **Auth** | Supabase Auth (optional for MVP) |
+| **Integrations** | M-Pesa, WhatsApp Business API, QuickBooks, Xero |
+| **Deployment** | Railway (API) + Vercel (Frontend) |
+| **CI/CD** | GitHub Actions |
+
+---
+
+## Project Structure
+
+```
+JandersWorkspace/
 ├── apps/
-│   ├── api/                         # NestJS Backend (@project-bridge/api)
+│   ├── api/                    # NestJS API (Railway)
 │   │   ├── src/
-│   │   │   ├── auth/                # Authentication & authorization
-│   │   │   ├── dashboard/           # Dashboard statistics service
-│   │   │   ├── health/              # Health check endpoints
-│   │   │   ├── integrations/        # M-Pesa, WhatsApp, QuickBooks, Xero, Shopify
-│   │   │   ├── payment-records/     # Split payment management
-│   │   │   ├── prisma/              # Database service
-│   │   │   ├── transactions/        # Transaction CRUD & state machine
-│   │   │   ├── webhooks/            # Webhook processing & monitoring
-│   │   │   └── swagger/             # API documentation
-│   │   └── prisma/
-│   │       ├── schema.prisma        # Database schema
-│   │       └── seed.ts              # Seed data
-│   └── bridge-manual/               # Next.js Frontend (manual-first)
-│       ├── app/                     # App Router structure
-│       │   ├── (optimized)/         # Optimized layout for core features
-│       │   ├── dashboard/           # Main dashboard page
-│       │   ├── webhooks/            # Webhook monitoring dashboard
-│       │   ├── create/              # Create transaction page
-│       │   ├── manager/             # Transaction manager page
-│       │   ├── people/              # Entity/CRM page
-│       │   └── proof/               # Attachment gallery page
-│       ├── components/              # Reusable UI components
-│       │   └── ui/                  # shadcn/ui components
-│       └── lib/                     # Utilities, hooks, API clients
-├── packages/                        # Shared packages
-│   ├── database/                    # Shared Prisma client
-│   ├── types/                       # Shared TypeScript types
-│   └── config/                      # Shared ESLint/TS configs
-├── docs/                            # Documentation
-├── plans/                           # Architecture plans
-└── tests/                           # Integration tests
+│   │   │   ├── auth/          # JWT + Supabase Auth
+│   │   │   ├── integrations/  # M-Pesa, WhatsApp, QuickBooks, Xero
+│   │   │   ├── tenants/       # Multi-tenant logic
+│   │   │   └── health/        # Health checks
+│   │   └── prisma/            # Database schema + migrations
+│   ├── bridge-admin/          # Desktop dashboard (Vercel)
+│   └── bridge-perfect/        # Mobile dashboard (Vercel)
+├── packages/
+│   ├── types/                 # Shared TypeScript types
+│   └── database/              # Shared Prisma client
+├── docs/
+│   ├── guides/                # Developer guides
+│   ├── reference/             # API reference
+│   └── archive/               # Old documentation
+└── .github/workflows/         # CI/CD automation
 ```
-
-### Technology Stack
-
-| Layer    | Technology   | Version |
-| -------- | ------------ | ------- |
-| Frontend | Next.js      | 15.x    |
-| Frontend | React        | 19.x    |
-| Frontend | TypeScript   | 5.x     |
-| Frontend | Tailwind CSS | 4.x     |
-| Frontend | shadcn/ui    | Latest  |
-| Backend  | NestJS       | 11.x    |
-| Backend  | Prisma       | 6.x     |
-| Database | PostgreSQL   | 15+     |
-| Database | Supabase     | Latest  |
-| Monorepo | Turborepo    | 1.x     |
 
 ---
 
-## Features
+## Solo Developer Workflow
 
-### Core Ledger
-
-- Double-entry bookkeeping foundation
-- Transaction state machine (DRAFT → POSTED → RECONCILED)
-- Multi-tenancy support with tenant isolation
-- Entity management (customers, suppliers, employees)
-- Six immutability locks preventing modification of posted transactions
-
-### Dashboard
-
-- Real-time transaction overview with statistics
-- Payment tracking and reconciliation
-- Entity search with 360° view and transaction history
-- Attachment support (receipts, proofs)
-- Revenue, credit, and debt tracking
-
-### Webhook Monitoring
-
-- Real-time webhook event monitoring dashboard
-- Integration support: M-Pesa, WhatsApp, QuickBooks, Xero, Shopify
-- Filter by integration type, status, date range
-- Auto-refresh every 10 seconds
-- Retry failed webhooks with one click
-- 24-hour activity charts
-- Statistics: Total events, success rate, failed/pending counts
-
-### Integrations
-
-- **M-Pesa**: Payment processing and confirmation webhooks
-- **WhatsApp**: Message receiving and sending
-- **QuickBooks**: Accounting sync
-- **Xero**: Accounting sync
-- **Shopify**: E-commerce integration
-
----
-
-## Test Results
-
-**All unit tests passing** ✅
-
-```
-Test Suites: 8 passed, 8 total
-Tests:       47 passed, 47 total
-Snapshots:   0 total
-Time:        12.345s
-```
-
-### Running Tests
+### Daily Development
 
 ```bash
-# Run all tests
-npm test
+# Start all services
+npm run dev
 
-# Run with coverage
-npm run test:cov
+# Work on API
+cd apps/api && npm run dev
 
-# Run E2E tests
-npm run test:e2e
+# Work on bridge-admin
+cd apps/bridge-admin && npm run dev
 
-# Run integration tests
-npm run test:integration
+# Work on bridge-perfect
+cd apps/bridge-perfect && npm run dev
 ```
 
----
+### Testing
 
-## API Documentation
+```bash
+# Run API tests
+npm test --workspace=@project-bridge/api
 
-The API is documented using Swagger/OpenAPI. When running locally:
+# Type checking
+npm run type-check
 
+# Build check (catches deployment issues)
+npm run build
 ```
-http://localhost:3000/api/docs
+
+### Deployment
+
+```bash
+# 1. Commit and push
+git add .
+git commit -m "feat: your changes"
+git push origin main
+
+# 2. GitHub Actions auto-deploys:
+#    - API → Railway
+#    - Frontends → Vercel
+
+# 3. Monitor deployments
+#    - Railway Dashboard: https://railway.app
+#    - Vercel Dashboard: https://vercel.com
 ```
-
-### Key Endpoints
-
-| Endpoint                           | Method | Description                         |
-| ---------------------------------- | ------ | ----------------------------------- |
-| `/api/v1/transactions`             | GET    | List transactions with filters      |
-| `/api/v1/transactions`             | POST   | Create new transaction              |
-| `/api/v1/transactions/:id/post`    | POST   | Post a draft transaction            |
-| `/api/v1/transactions/:id/reverse` | POST   | Reverse a posted transaction        |
-| `/api/v1/entities`                 | GET    | List entities (customers/suppliers) |
-| `/api/v1/dashboard/stats`          | GET    | Get dashboard statistics            |
-| `/api/v1/webhooks/events`          | GET    | List webhook events                 |
-| `/api/v1/health`                   | GET    | Health check                        |
 
 ---
 
 ## Environment Variables
 
-### Required
+### Required (Supabase)
 
 ```env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/project_bridge"
-DIRECT_URL="postgresql://user:password@localhost:5432/project_bridge"
-
-# Supabase
-SUPABASE_URL="https://your-project.supabase.co"
-SUPABASE_ANON_KEY="your-anon-key"
-SUPABASE_SERVICE_KEY="your-service-role-key"
-
-# API
-API_PORT=3000
-API_PREFIX="/api/v1"
-
-# Web
-NEXT_PUBLIC_API_URL="http://localhost:3000/api/v1"
+# apps/api/.env
+DATABASE_URL=postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres
+DIRECT_URL=postgresql://postgres:[password]@db.[ref].supabase.co:6543/postgres?pgbouncer=true
+SUPABASE_URL=https://[ref].supabase.co
+SUPABASE_SECRET_KEY=eyJhbG...
+JWT_SECRET=your-random-secret
+ENCRYPTION_KEY=your-32-char-key
 ```
 
-### Integration Secrets (Optional)
+### Optional (Integrations)
 
-See [`.env.example`](.env.example) for complete integration configuration including M-Pesa, WhatsApp, QuickBooks, Xero, and Shopify.
+```env
+# M-Pesa (Safaricom)
+MPESA_ENVIRONMENT=sandbox
+MPESA_CONSUMER_KEY=...
+MPESA_CONSUMER_SECRET=...
+MPESA_SHORTCODE=174379
+MPESA_PASSKEY=...
+
+# WhatsApp (Meta)
+WHATSAPP_PHONE_NUMBER_ID=...
+WHATSAPP_ACCESS_TOKEN=...
+```
 
 ---
 
-## Deployment
+## Integration Development
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
+### Adding a New Integration
 
-Quick deployment options:
+1. **Create service** in `apps/api/src/integrations/[name]/`
+2. **Extend tenant config** in `apps/api/src/integrations/tenant-config.service.ts`
+3. **Add feature flag** in database seed
+4. **Update frontend** to show integration UI when flag enabled
 
-- **Vercel**: Frontend deployment
-- **Railway/Render**: Backend deployment
-- **Supabase**: Database hosting
+### Integration Pattern
+
+```typescript
+// apps/api/src/integrations/mpesa/mpesa.service.ts
+@Injectable()
+export class MpesaService {
+  async initiatePayment(tenantId: string, amount: number, phone: string) {
+    // 1. Check tenant has integration enabled
+    const config = await this.tenantConfig.getIntegration(tenantId, 'MPESA');
+    if (!config.enabled) throw new ForbiddenException();
+    
+    // 2. Make API call
+    // 3. Store transaction
+    // 4. Return result
+  }
+}
+```
 
 ---
 
-## Contributing
+## Key Features
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
+### For Tenants (Businesses)
 
-### Quick Commands
+- **Dashboard** - Business overview with charts
+- **Transactions** - Record sales, purchases, expenses
+- **People** - Customer/supplier management with credit tracking
+- **Quick Add** - Fast transaction entry (mobile-optimized)
+- **Integrations** - M-Pesa payments, WhatsApp notifications (optional)
 
-```bash
-# Format code
-npm run format
+### For You (Developer)
 
-# Lint
-npm run lint
+- **Multi-tenancy** - Slug-based isolation (`/janders-dogfood`)
+- **Feature flags** - Enable features per tenant/tier
+- **Public API** - Headless design, works from any frontend
+- **Health checks** - `/api/v1/health` for monitoring
+- **MCP Servers** - Monitor Vercel/Railway deployments
 
-# Type check
-npm run type-check
+---
 
-# Build
-npm run build
+## Deployment Checklist
 
-# Clean
-npm run clean
-```
+- [ ] Supabase project created
+- [ ] Railway project linked to GitHub
+- [ ] Vercel projects for bridge-admin and bridge-perfect
+- [ ] GitHub secrets: `RAILWAY_API_TOKEN`, `VERCEL_TOKEN`
+- [ ] Environment variables set in Railway
+- [ ] Database migrations run
+- [ ] Seed data loaded (includes `janders-dogfood` tenant)
 
-### Solo dev maintenance
-
-- **First-time setup:** `./scripts/setup-env.sh` then `npm run setup`; migrations: `cd apps/api && npx prisma migrate dev`
-- **Health check:** `node scripts/health-check.js` (expects API on 3000, web on 3001)
-- **Full test run:** `./scripts/test-all.sh` (unit, integration, optional API smoke) or `npm test` / `npm run test:cov`
-- **Run one app:** `npm run dev:api` or `npm run dev:web` (bridge-manual on 3001)
+See [DEPLOYMENT_SETUP.md](DEPLOYMENT_SETUP.md) for detailed instructions.
 
 ---
 
 ## Documentation
 
-- **[Full plan and user experience](docs/PROJECT_BRIDGE_PLAN.md)** – single source of truth: product, manual tenants, terminology, current state, plan, deployment, dev workflow
-- [Documentation index](docs/README.md) – quick links to API, Contributing, deploy
-- [API Documentation](http://localhost:3000/api/docs) (when running locally)
-- [Deployment Guide](DEPLOYMENT_SIMPLE.md)
-- [Contributing Guidelines](CONTRIBUTING.md)
-- [Changelog](CHANGELOG.md)
-
----
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
+| Document | Purpose |
+|----------|---------|
+| [DEPLOYMENT_SETUP.md](DEPLOYMENT_SETUP.md) | Production deployment guide |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Development standards |
+| [docs/guides/](docs/guides/) | Developer guides |
+| [docs/reference/](docs/reference/) | API reference |
+| [docs/archive/](docs/archive/) | Historical docs |
 
 ---
 
 ## Support
 
-For questions or support:
-
-- Check the [full plan](docs/PROJECT_BRIDGE_PLAN.md) and [docs index](docs/README.md)
-- Review [existing issues](https://github.com/project-bridge/issues)
-- Open a new issue for bugs or feature requests
+- **Issues**: GitHub Issues
+- **API Docs**: `/api/docs` when running locally
+- **Health Check**: `/api/v1/health`
 
 ---
 
-**Built with ❤️ for African businesses**
+## License
+
+MIT License - see [LICENSE](LICENSE) file.
+
+---
+
+**Built for African SMEs. Made in Nairobi.** 🇰🇪

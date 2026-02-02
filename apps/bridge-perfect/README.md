@@ -1,73 +1,73 @@
-# Project Bridge: Perfect Frontend
+# React + TypeScript + Vite
 
-## For African Informal Economy - 80% Manual Use Case
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-### Core Features for Tenants:
+Currently, two official plugins are available:
 
-**People Management (Customers, Suppliers, Employees)**
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-- Quick add with photo
-- Phone-based lookup
-- Credit/debt tracking
-- Purchase/service history
-- Tags and notes
+## React Compiler
 
-**Transactions (Nairobi Use Case)**
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-- Cash sales (mama mboga, duka)
-- M-Pesa payments
-- Credit/Udhaari tracking
-- Expenses (stock, rent, transport)
-- Voice-first entry
-- Photo receipts
+## Expanding the ESLint configuration
 
-**Items & Services**
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-- Stock tracking with photos
-- Low stock alerts
-- Price history
-- Profit margins per item
-- Quick stock-in/stock-out
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-**Notekeeping & Organization**
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-- Free-form notes on anything
-- Tag system (customizable)
-- Voice memos
-- Photo attachments
-- Search and filter
-
-### Tech Stack
-
-- React 18 + TypeScript
-- Vite (fast builds)
-- Tailwind CSS (utility-first)
-- Zustand (simple state)
-- IndexedDB (offline storage)
-- Web Speech API (voice)
-- PWA capabilities
-
-### Mobile-First Design
-
-- Large touch targets (48dp minimum)
-- Works offline
-- Swahili/Sheng support
-- Big fonts for low-literacy
-- 2G network optimized
-
-## Getting Started
-
-```bash
-npm install
-npm run dev
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-## Building for Production
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-```bash
-npm run build
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-
-## Deployment
-
-Deploy `dist/` folder to Vercel, Netlify, or any static host.
