@@ -1,0 +1,57 @@
+name: Deploy API to Railway
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/api/**"
+      - "packages/**"
+      - "railway.json"
+      - "apps/api/Dockerfile"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        run: |
+          railway login --token ${{ secrets.RAILWAY_TOKEN }}
+          railway up --service=${{ vars.RAILWAY_SERVICE_NAME || 'JandersWorkspace' }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Wait for deployment to be ready
+        run: |
+          sleep 30
+          railway status
+          timeout 300 bash -c 'until curl -f https://${{ vars.RAILWAY_SERVICE_NAME || 'jandersworkspace' }}-production.up.railway.app/api/v1/health; do sleep 10; done'
+
+      - name: Test Production Endpoints
+        run: |
+          # Test health endpoint
+          curl -f https://${{ vars.RAILWAY_SERVICE_NAME || 'jandersworkspace' }}-production.up.railway.app/api/v1/health
+
+          # Test quick-capture endpoint
+          curl -X POST "https://${{ vars.RAILWAY_SERVICE_NAME || 'jandersworkspace' }}-production.up.railway.app/api/v1/transactions/quick-capture" \
+            -H "Content-Type: application/json" \
+            -H "X-Tenant-ID: test-tenant" \
+            -d '{"totalAmount": 2500, "businessPurpose": "SALES", "customerSegment": "WALK_IN"}' || true
+
+      - name: Notify Deployment Status
+        if: always()
+        run: |
+          if [ ${{ job.status }} == "success" ]; then
+            echo "🚀 Nairobi SME API deployed successfully!"
+            echo "📍 Production URL: https://${{ vars.RAILWAY_SERVICE_NAME || 'jandersworkspace' }}-production.up.railway.app"
+            echo "🔗 Health Check: https://${{ vars.RAILWAY_SERVICE_NAME || 'jandersworkspace' }}-production.up.railway.app/api/v1/health"
+          else
+            echo "❌ Deployment failed - check Railway logs"
+          fi

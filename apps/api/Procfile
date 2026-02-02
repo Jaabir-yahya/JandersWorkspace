@@ -1,6 +1,0 @@
-# Railway Procfile for Project Bridge API
-# This file tells Railway how to run your application
-# Process: web (for HTTP applications)
-# Start command: npm start (runs the built application)
-
-web: cd /app && node dist/main
