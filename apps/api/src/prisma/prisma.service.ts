@@ -4,6 +4,7 @@ import {
   OnModuleDestroy,
   Logger,
 } from '@nestjs/common';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@project-bridge/database/client';
 
 /** Instance type of the generated Prisma client (for declaration merge so PrismaService is typed as full client). */
@@ -15,28 +16,41 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   private readonly prisma: PrismaClient;
 
   constructor() {
-    // In Prisma 7, accelerateUrl is required for the client
-    // We'll use the DATABASE_URL environment variable
-    let databaseUrl = process.env.DATABASE_URL;
-
-    // For test environment, use a mock URL if DATABASE_URL is not set
-    if (!databaseUrl && process.env.NODE_ENV === 'test') {
-      databaseUrl = 'postgresql://test:test@localhost:5432/test_db';
-    }
+    const databaseUrl =
+      process.env.DATABASE_URL ||
+      (process.env.NODE_ENV === 'test'
+        ? 'postgresql://test:test@localhost:5432/test_db'
+        : undefined);
 
     if (!databaseUrl) {
       throw new Error('DATABASE_URL environment variable is required');
     }
 
-    this.prisma = new PrismaClient({
-      accelerateUrl: databaseUrl,
+    const isAccelerateUrl =
+      databaseUrl.startsWith('prisma://') ||
+      databaseUrl.startsWith('prisma+postgres://');
+
+    const clientOptions = {
       log: [
-        { emit: 'event', level: 'query' },
-        { emit: 'stdout', level: 'info' },
-        { emit: 'stdout', level: 'warn' },
-        { emit: 'stdout', level: 'error' },
+        { emit: 'event' as const, level: 'query' as const },
+        { emit: 'stdout' as const, level: 'info' as const },
+        { emit: 'stdout' as const, level: 'warn' as const },
+        { emit: 'stdout' as const, level: 'error' as const },
       ],
-    });
+    };
+
+    if (isAccelerateUrl) {
+      this.prisma = new PrismaClient({
+        ...clientOptions,
+        accelerateUrl: databaseUrl,
+      });
+    } else {
+      const adapter = new PrismaPg({ connectionString: databaseUrl });
+      this.prisma = new PrismaClient({
+        ...clientOptions,
+        adapter,
+      });
+    }
 
     // Log queries in development
     this.prisma.$on('query' as never, (e: any) => {

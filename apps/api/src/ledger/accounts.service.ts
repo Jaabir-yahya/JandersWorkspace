@@ -150,13 +150,13 @@ export class AccountsService {
     if (updateAccountDto.balance !== undefined) {
       updateData.quantity = updateAccountDto.balance;
       updateData.metadata = {
-        ...(existing.metadata as any),
+        ...existing.metadata,
         balance: updateAccountDto.balance,
       };
     }
     if (updateAccountDto.metadata) {
       updateData.metadata = {
-        ...(existing.metadata as any),
+        ...existing.metadata,
         ...updateAccountDto.metadata,
       };
     }
@@ -217,7 +217,7 @@ export class AccountsService {
       throw new NotFoundException(`Account with ID ${id} not found`);
     }
 
-    const metadata = item.metadata as any;
+    const metadata = item.metadata;
     const balance = metadata?.balance || 0;
     return { balance: Number(balance) };
   }
@@ -251,46 +251,45 @@ export class AccountsService {
       totalDebit: number;
       totalCredit: number;
     };
-    const trialBalance = (items as Array<{ id: string; metadata: unknown; name: string }>).reduce<Record<string, TrialBalanceGroup>>(
-      (acc, item) => {
-        const metadata = item.metadata as Record<string, unknown> | null;
-        const accountType =
-          (typeof metadata?.accountType === 'string'
-            ? metadata.accountType
-            : undefined) ?? 'UNKNOWN';
-        const balance = Number(metadata?.balance ?? 0);
+    const trialBalance = (
+      items as Array<{ id: string; metadata: unknown; name: string }>
+    ).reduce<Record<string, TrialBalanceGroup>>((acc, item) => {
+      const metadata = item.metadata as Record<string, unknown> | null;
+      const accountType =
+        (typeof metadata?.accountType === 'string'
+          ? metadata.accountType
+          : undefined) ?? 'UNKNOWN';
+      const balance = Number(metadata?.balance ?? 0);
 
-        if (!acc[accountType]) {
-          acc[accountType] = {
-            accountType,
-            accounts: [],
-            totalDebit: 0,
-            totalCredit: 0,
-          };
-        }
-
-        const debitTypes = ['CASH', 'BANK', 'INVENTORY', 'ASSET'];
-        const isDebit = debitTypes.includes(accountType) || balance < 0;
-
-        const accountEntry = {
-          id: item.id,
-          name: item.name,
-          balance: Math.abs(balance),
-          isDebitBalance: isDebit,
+      if (!acc[accountType]) {
+        acc[accountType] = {
+          accountType,
+          accounts: [],
+          totalDebit: 0,
+          totalCredit: 0,
         };
+      }
 
-        acc[accountType].accounts.push(accountEntry);
+      const debitTypes = ['CASH', 'BANK', 'INVENTORY', 'ASSET'];
+      const isDebit = debitTypes.includes(accountType) || balance < 0;
 
-        if (isDebit) {
-          acc[accountType].totalDebit += Math.abs(balance);
-        } else {
-          acc[accountType].totalCredit += balance;
-        }
+      const accountEntry = {
+        id: item.id,
+        name: item.name,
+        balance: Math.abs(balance),
+        isDebitBalance: isDebit,
+      };
 
-        return acc;
-      },
-      {},
-    );
+      acc[accountType].accounts.push(accountEntry);
+
+      if (isDebit) {
+        acc[accountType].totalDebit += Math.abs(balance);
+      } else {
+        acc[accountType].totalCredit += balance;
+      }
+
+      return acc;
+    }, {});
 
     return Object.values(trialBalance);
   }

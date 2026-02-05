@@ -49,8 +49,14 @@ export class RpcService {
         creditAccountType,
       );
 
-      const debitBalanceBefore = (debitAccount.metadata as JsonRecord)?.balance as number | undefined || 0;
-      const creditBalanceBefore = (creditAccount.metadata as JsonRecord)?.balance as number | undefined || 0;
+      const debitBalanceBefore =
+        ((debitAccount.metadata as JsonRecord)?.balance as
+          | number
+          | undefined) || 0;
+      const creditBalanceBefore =
+        ((creditAccount.metadata as JsonRecord)?.balance as
+          | number
+          | undefined) || 0;
       const debitBalanceAfter = debitBalanceBefore + amount;
       const creditBalanceAfter = creditBalanceBefore - amount;
 
@@ -213,8 +219,14 @@ export class RpcService {
         throw new Error('Accounts not found');
       }
 
-      const debitBalanceBefore = (debitAccount.metadata as JsonRecord)?.balance as number | undefined || 0;
-      const creditBalanceBefore = (creditAccount.metadata as JsonRecord)?.balance as number | undefined || 0;
+      const debitBalanceBefore =
+        ((debitAccount.metadata as JsonRecord)?.balance as
+          | number
+          | undefined) || 0;
+      const creditBalanceBefore =
+        ((creditAccount.metadata as JsonRecord)?.balance as
+          | number
+          | undefined) || 0;
       const debitBalanceAfter = debitBalanceBefore - amount;
       const creditBalanceAfter = creditBalanceBefore + amount;
 
@@ -365,7 +377,7 @@ export class RpcService {
     ];
 
     const accounts = accountItems.map((item) => {
-      const metadata = item.metadata as any;
+      const metadata = item.metadata;
       const balance = Number(metadata?.balance || 0);
       const accountType = metadata?.accountType || 'UNKNOWN';
 
@@ -444,7 +456,7 @@ export class RpcService {
     });
 
     const filteredTransactions = transactions.filter((t) => {
-      const metadata = t.metadata as any;
+      const metadata = t.metadata;
       return metadata?.transactionPairId === transactionPairId;
     });
 
@@ -458,10 +470,10 @@ export class RpcService {
     }
 
     const debitTransaction = filteredTransactions.find(
-      (t) => (t.metadata as any)?.entryType === 'DEBIT',
+      (t) => t.metadata?.entryType === 'DEBIT',
     );
     const creditTransaction = filteredTransactions.find(
-      (t) => (t.metadata as any)?.entryType === 'CREDIT',
+      (t) => t.metadata?.entryType === 'CREDIT',
     );
 
     if (!debitTransaction || !creditTransaction) {

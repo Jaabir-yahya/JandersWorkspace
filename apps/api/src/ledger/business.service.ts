@@ -121,7 +121,10 @@ export class BusinessService {
         // Update existing inventory
         const currentQuantity = Number(inventoryItem.quantity);
         const newQuantity = currentQuantity + createSupplyDto.quantity;
-        const currentTotalValue = (inventoryItem.metadata as JsonRecord)?.totalValue as number | undefined || 0;
+        const currentTotalValue =
+          ((inventoryItem.metadata as JsonRecord)?.totalValue as
+            | number
+            | undefined) || 0;
         const newTotalValue = currentTotalValue + total;
         const newAveragePrice = newTotalValue / newQuantity;
 
@@ -131,7 +134,7 @@ export class BusinessService {
             quantity: newQuantity,
             costPrice: createSupplyDto.unitPrice,
             metadata: {
-              ...(inventoryItem.metadata as JsonRecord || {}),
+              ...((inventoryItem.metadata as JsonRecord) || {}),
               averagePrice: newAveragePrice,
               totalValue: newTotalValue,
               lastStockUpdate: new Date(),
@@ -158,7 +161,7 @@ export class BusinessService {
         where: { id: supply.id },
         data: {
           context: {
-            ...(supply.context as JsonRecord || {}),
+            ...((supply.context as JsonRecord) || {}),
             transactionPairId: transactionResult.transactionPairId,
             linkedInventoryItems: [inventoryItem.id],
           },
@@ -219,7 +222,7 @@ export class BusinessService {
       }
 
       const context = existingSupply.context as SupplyContext | null;
-      const transactionPairId = context?.transactionPairId as string | undefined;
+      const transactionPairId = context?.transactionPairId;
 
       // Reverse the original transaction if it exists
       if (transactionPairId) {
@@ -236,7 +239,7 @@ export class BusinessService {
       }
 
       // Update inventory (remove old quantity)
-      const linkedIds = (context?.linkedInventoryItems || []) as string[];
+      const linkedIds = context?.linkedInventoryItems || [];
       if (linkedIds.length) {
         for (const inventoryId of linkedIds) {
           const inventoryItem = await tx.item.findFirst({
@@ -246,7 +249,10 @@ export class BusinessService {
           if (inventoryItem) {
             const newQuantity =
               Number(inventoryItem.quantity) - Number(context!.quantity ?? 0);
-            const currentTotalValue = (inventoryItem.metadata as JsonRecord)?.totalValue as number | undefined || 0;
+            const currentTotalValue =
+              ((inventoryItem.metadata as JsonRecord)?.totalValue as
+                | number
+                | undefined) || 0;
             const oldValue = Number(context!.total ?? 0);
             const newTotalValue = currentTotalValue - oldValue;
             const newAveragePrice =
@@ -257,7 +263,7 @@ export class BusinessService {
               data: {
                 quantity: newQuantity,
                 metadata: {
-                  ...(inventoryItem.metadata as JsonRecord || {}),
+                  ...((inventoryItem.metadata as JsonRecord) || {}),
                   averagePrice: newAveragePrice,
                   totalValue: newTotalValue,
                   lastStockUpdate: new Date(),
@@ -271,7 +277,8 @@ export class BusinessService {
       // Create new supply with updated values
       const ctx = context!;
       const newQuantity = updateSupplyDto.quantity ?? Number(ctx.quantity ?? 0);
-      const newUnitPrice = updateSupplyDto.unitPrice ?? Number(ctx.unitPrice ?? 0);
+      const newUnitPrice =
+        updateSupplyDto.unitPrice ?? Number(ctx.unitPrice ?? 0);
       const newTotal = newQuantity * newUnitPrice;
       const newSupplierName =
         updateSupplyDto.supplierName || (ctx.supplierName as string);
@@ -291,7 +298,10 @@ export class BusinessService {
             total: newTotal,
             unit: updateSupplyDto.unit || (ctx.unit as string),
             notes: updateSupplyDto.notes || (ctx.notes as string),
-            metadata: { ...(ctx.metadata as JsonRecord || {}), ...updateSupplyDto.metadata },
+            metadata: {
+              ...((ctx.metadata as JsonRecord) || {}),
+              ...updateSupplyDto.metadata,
+            },
           },
         },
       });
@@ -327,7 +337,10 @@ export class BusinessService {
         // Update existing inventory
         const currentQuantity = Number(inventoryItem.quantity);
         const newQuantityTotal = currentQuantity + newQuantity;
-        const currentTotalValue = (inventoryItem.metadata as JsonRecord)?.totalValue as number | undefined || 0;
+        const currentTotalValue =
+          ((inventoryItem.metadata as JsonRecord)?.totalValue as
+            | number
+            | undefined) || 0;
         const newTotalValue = currentTotalValue + newTotal;
         const newAveragePrice = newTotalValue / newQuantityTotal;
 
@@ -337,7 +350,7 @@ export class BusinessService {
             quantity: newQuantityTotal,
             costPrice: newUnitPrice,
             metadata: {
-              ...(inventoryItem.metadata as JsonRecord || {}),
+              ...((inventoryItem.metadata as JsonRecord) || {}),
               averagePrice: newAveragePrice,
               totalValue: newTotalValue,
               lastStockUpdate: new Date(),
@@ -362,7 +375,7 @@ export class BusinessService {
         where: { id },
         data: {
           context: {
-            ...(updatedSupply.context as JsonRecord || {}),
+            ...((updatedSupply.context as JsonRecord) || {}),
             transactionPairId: transactionResult.transactionPairId,
             linkedInventoryItems: [inventoryItem.id],
           },
@@ -392,7 +405,7 @@ export class BusinessService {
       }
 
       const context = supply.context as SupplyContext | null;
-      const transactionPairId = context?.transactionPairId as string | undefined;
+      const transactionPairId = context?.transactionPairId;
 
       // Reverse the transaction
       if (transactionPairId) {
@@ -404,7 +417,7 @@ export class BusinessService {
       }
 
       // Update inventory
-      const linkedIdsDel = (context?.linkedInventoryItems || []) as string[];
+      const linkedIdsDel = context?.linkedInventoryItems || [];
       if (linkedIdsDel.length) {
         for (const inventoryId of linkedIdsDel) {
           const inventoryItem = await tx.item.findFirst({
@@ -414,7 +427,10 @@ export class BusinessService {
           if (inventoryItem) {
             const newQuantity =
               Number(inventoryItem.quantity) - Number(context!.quantity ?? 0);
-            const currentTotalValue = (inventoryItem.metadata as JsonRecord)?.totalValue as number | undefined || 0;
+            const currentTotalValue =
+              ((inventoryItem.metadata as JsonRecord)?.totalValue as
+                | number
+                | undefined) || 0;
             const oldValue = Number(context!.total ?? 0);
             const newTotalValue = currentTotalValue - oldValue;
             const newAveragePrice =
@@ -425,7 +441,7 @@ export class BusinessService {
               data: {
                 quantity: newQuantity,
                 metadata: {
-                  ...(inventoryItem.metadata as JsonRecord || {}),
+                  ...((inventoryItem.metadata as JsonRecord) || {}),
                   averagePrice: newAveragePrice,
                   totalValue: newTotalValue,
                   lastStockUpdate: new Date(),
@@ -762,7 +778,7 @@ export class BusinessService {
         where: { id: payment.id },
         data: {
           metadata: {
-            ...(payment.metadata as JsonRecord || {}),
+            ...((payment.metadata as JsonRecord) || {}),
             transactionPairId: transactionResult.transactionPairId,
           },
         },
@@ -788,7 +804,7 @@ export class BusinessService {
             where: { id: createPaymentDto.invoiceId },
             data: {
               context: {
-                ...(invContext as JsonRecord || {}),
+                ...((invContext as JsonRecord) || {}),
                 settledAmount: newSettledAmount,
                 isSettled,
                 status: isSettled ? 'SETTLED' : 'PARTIAL',
@@ -847,11 +863,11 @@ export class BusinessService {
       unitPrice: Number(context.unitPrice ?? 0),
       total: Number(context.total ?? 0),
       unit: (context.unit as string) || 'PCS',
-      entityId: context.entityId as string | undefined,
-      notes: context.notes as string | undefined,
+      entityId: context.entityId,
+      notes: context.notes,
       metadata: (context.metadata as Record<string, unknown>) || {},
       linkedInventoryItems: (context.linkedInventoryItems as string[]) || [],
-      transactionPairId: context.transactionPairId as string | undefined,
+      transactionPairId: context.transactionPairId,
       createdByUserId: '', // Note model doesn't have this
       createdAt: supply.createdAt,
       updatedAt: supply.updatedAt,
@@ -896,9 +912,9 @@ export class BusinessService {
       subtotal: Number(context.subtotal ?? 0),
       total: Number(context.total ?? 0),
       status: (context.status as string) || 'DRAFT',
-      entityId: context.entityId as string | undefined,
-      dueDate: context.dueDate ? new Date(context.dueDate as string) : undefined,
-      notes: context.notes as string | undefined,
+      entityId: context.entityId,
+      dueDate: context.dueDate ? new Date(context.dueDate) : undefined,
+      notes: context.notes,
       metadata: (context.metadata as Record<string, unknown>) || {},
       isSettled: Boolean(context.isSettled),
       settledAmount: Number(context.settledAmount ?? 0),

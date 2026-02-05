@@ -79,7 +79,9 @@ export class UniversalAccountsService {
     }
 
     if (accountData?.p_account_id == null) {
-      throw new BadRequestException('Stored procedure did not return account id');
+      throw new BadRequestException(
+        'Stored procedure did not return account id',
+      );
     }
     return accountData.p_account_id as string;
   }

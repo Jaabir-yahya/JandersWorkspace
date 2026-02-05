@@ -76,7 +76,9 @@ export class UniversalTransactionsService {
     }
 
     if (transactionData?.p_transaction_id == null) {
-      throw new BadRequestException('Stored procedure did not return transaction id');
+      throw new BadRequestException(
+        'Stored procedure did not return transaction id',
+      );
     }
     return transactionData.p_transaction_id as string;
   }

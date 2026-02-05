@@ -144,16 +144,20 @@ export class TransactionsService {
 
       // Update account balances
       const newDebitBalance =
-        ((debitAccount.metadata as JsonRecord)?.balance as number | undefined || 0) + createDoubleEntryDto.amount;
+        (((debitAccount.metadata as JsonRecord)?.balance as
+          | number
+          | undefined) || 0) + createDoubleEntryDto.amount;
       const newCreditBalance =
-        ((creditAccount.metadata as JsonRecord)?.balance as number | undefined || 0) - createDoubleEntryDto.amount;
+        (((creditAccount.metadata as JsonRecord)?.balance as
+          | number
+          | undefined) || 0) - createDoubleEntryDto.amount;
 
       await tx.item.update({
         where: { id: debitAccount.id },
         data: {
           quantity: newDebitBalance,
           metadata: {
-            ...(debitAccount.metadata as JsonRecord || {}),
+            ...((debitAccount.metadata as JsonRecord) || {}),
             balance: newDebitBalance,
           },
         },
@@ -164,7 +168,7 @@ export class TransactionsService {
         data: {
           quantity: newCreditBalance,
           metadata: {
-            ...(creditAccount.metadata as JsonRecord || {}),
+            ...((creditAccount.metadata as JsonRecord) || {}),
             balance: newCreditBalance,
           },
         },
@@ -346,15 +350,21 @@ export class TransactionsService {
       });
 
       // Update account balances (reverse the original amounts)
-      const newDebitBalance = ((debitAccount.metadata as JsonRecord)?.balance as number | undefined || 0) - amount;
-      const newCreditBalance = ((creditAccount.metadata as JsonRecord)?.balance as number | undefined || 0) + amount;
+      const newDebitBalance =
+        (((debitAccount.metadata as JsonRecord)?.balance as
+          | number
+          | undefined) || 0) - amount;
+      const newCreditBalance =
+        (((creditAccount.metadata as JsonRecord)?.balance as
+          | number
+          | undefined) || 0) + amount;
 
       await tx.item.update({
         where: { id: debitAccount.id },
         data: {
           quantity: newDebitBalance,
           metadata: {
-            ...(debitAccount.metadata as JsonRecord || {}),
+            ...((debitAccount.metadata as JsonRecord) || {}),
             balance: newDebitBalance,
           },
         },
@@ -365,7 +375,7 @@ export class TransactionsService {
         data: {
           quantity: newCreditBalance,
           metadata: {
-            ...(creditAccount.metadata as JsonRecord || {}),
+            ...((creditAccount.metadata as JsonRecord) || {}),
             balance: newCreditBalance,
           },
         },
