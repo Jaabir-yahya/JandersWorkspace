@@ -8,6 +8,7 @@ on:
       - "packages/**"
       - "tests/**"
       - "package.json"
+      - "package-lock.json"
       - "turbo.json"
   pull_request:
     branches: [main]
@@ -16,6 +17,7 @@ on:
       - "packages/**"
       - "tests/**"
       - "package.json"
+      - "package-lock.json"
       - "turbo.json"
 
 jobs:
@@ -43,8 +45,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20"
           cache: "npm"
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm ci

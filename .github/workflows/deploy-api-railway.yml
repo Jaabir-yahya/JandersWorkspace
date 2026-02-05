@@ -22,9 +22,7 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        run: |
-          railway login --token ${{ secrets.RAILWAY_APITOKEN }}
-          railway up --service=${{ vars.RAILWAY_SERVICE_NAME || 'JandersWorkspace' }}
+        run: railway up --service=${{ vars.RAILWAY_SERVICE_NAME || 'JandersWorkspace' }}
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_APITOKEN }}
 

@@ -33,8 +33,11 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
 
+      # Vercel project must have Root Directory = "apps/web" (or be linked from apps/web).
+      # If you still use a project created for bridge-admin, set its Root Directory to apps/web in Vercel dashboard.
       - name: Deploy to Vercel
-        run: npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --cwd apps/web
+        working-directory: apps/web
+        run: npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --yes
         env:
           VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ vars.VERCEL_WEB_PROJECT_ID }}

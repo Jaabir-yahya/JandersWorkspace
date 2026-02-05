@@ -21,7 +21,8 @@ This document confirms finalization, sanitation, and readiness to publish the ba
 - **Required secrets:** `VERCEL_TOKEN`
 - **Required vars:** `NEXT_PUBLIC_API_URL`, `VERCEL_ORG_ID`, `VERCEL_WEB_PROJECT_ID` (Vercel project ID for the `apps/web` app).
 
-If your Vercel project uses a different variable name (e.g. `VERCEL_PROJECT_ID` or `VERCEL_ADMIN_PROJECT_ID`), set that var in the repo and update the workflow’s `VERCEL_PROJECT_ID` env to match.
+- **Vercel Root Directory:** The project linked by `VERCEL_WEB_PROJECT_ID` must have **Root Directory** set to **`apps/web`** in Vercel → Project Settings → General. If the project was created for `apps/bridge-admin`, change it to `apps/web` or create a new project with root `apps/web`.
+- If you use a different GitHub variable name (e.g. `VERCEL_PROJECT_ID`), set the workflow’s `VERCEL_PROJECT_ID` env to that var.
 
 ## CI: Test and Build
 

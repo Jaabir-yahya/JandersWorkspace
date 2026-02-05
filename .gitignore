@@ -7,6 +7,11 @@ node_modules/
 /dist/
 /build/
 
+# Build outputs (do not commit)
+apps/api/dist/
+apps/web/.next/
+.turbo/
+
 # Logs
 logs
 *.log
