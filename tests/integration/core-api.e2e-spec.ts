@@ -152,7 +152,7 @@ describe('Core API (e2e) – truth verification', () => {
       const res = await request(app.getHttpServer())
         .post(`/api/v1/transactions/${createdTransactionId}/reverse`)
         .set('Authorization', 'Bearer mock')
-        .send({ tenant_id: TEST_TENANT_ID, reason: 'E2e reversal' })
+        .send({ created_by_user_id: TEST_USER_ID, reason: 'E2e reversal' })
         .expect(201);
       expect(res.body.status).toBe('REVERSED');
     });
@@ -165,7 +165,9 @@ describe('Core API (e2e) – truth verification', () => {
         .query({ tenant_id: TEST_TENANT_ID })
         .set('Authorization', 'Bearer mock')
         .expect(200);
-      expect(res.body).toHaveProperty('tenantId', TEST_TENANT_ID);
+      expect(res.body).toHaveProperty('total_revenue_today');
+      expect(res.body).toHaveProperty('top_customers');
+      expect(Array.isArray(res.body.top_customers)).toBe(true);
     });
   });
 });

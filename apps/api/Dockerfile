@@ -1,3 +1,5 @@
+# Build from repository root only: docker build -f apps/api/Dockerfile .
+# (Context must be . so COPY packages/database and COPY apps/api resolve.)
 FROM node:24-alpine AS deps
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
@@ -14,10 +16,10 @@ RUN npm ci --only=production
 FROM node:24-alpine AS builder
 WORKDIR /app
 
-# Copy source files
+# Copy source files (context must be repo root so packages/ and apps/ exist)
 COPY package.json package-lock.json* turbo.json ./
 COPY apps/api ./apps/api
-COPY packages/database ./packages/database
+COPY packages ./packages
 
 # Install all dependencies (including dev)
 RUN npm ci
