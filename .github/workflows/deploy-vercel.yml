@@ -12,18 +12,30 @@ on:
 
 jobs:
   deploy-web:
+    name: Build and Deploy Web
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout repository
+      - name: Check out code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
-          cache: 'npm'
+          node-version: "24"
+          cache: "npm"
           cache-dependency-path: package-lock.json
+
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-web-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-web-
 
       - name: Install dependencies
         run: npm ci
@@ -31,7 +43,7 @@ jobs:
       - name: Build frontend (apps/web)
         run: npx turbo run build --filter=ledger-system-frontend
         env:
-          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || '' }}
 
       # Vercel project: set Root Directory to "apps/web" in Project Settings → General.
       - name: Deploy to Vercel

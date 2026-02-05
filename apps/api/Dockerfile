@@ -1,7 +1,7 @@
 # Nairobi SME API - Production Deployment
 # Optimized for Railway with monorepo structure
 
-FROM node:18-alpine AS base
+FROM node:24-alpine AS base
 WORKDIR /app
 
 # Install dependencies only when needed
@@ -18,7 +18,7 @@ WORKDIR /app
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY packages ./packages
 COPY apps/api ./apps/api
-COPY package.json ./
+COPY package.json package-lock.json* turbo.json ./
 WORKDIR /app/apps/api
 
 # Generate Prisma client

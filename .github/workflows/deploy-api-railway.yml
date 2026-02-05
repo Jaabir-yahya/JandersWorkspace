@@ -1,3 +1,4 @@
+# Deploy API to Railway (Docker build on Railway side)
 name: Deploy API to Railway
 
 on:
@@ -12,11 +13,15 @@ on:
 
 jobs:
   deploy:
+    name: Deploy to Railway
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-      - name: Checkout repository
+      - name: Check out code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Railway CLI
         run: npm install -g @railway/cli
@@ -26,30 +31,25 @@ jobs:
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
-      - name: Wait for deployment to be ready
+      - name: Wait for deployment
         run: |
           sleep 30
           railway status
-          timeout 300 bash -c 'until curl -f ${{ vars.RAILWAY_PUBLIC_URL }}/api/v1/health; do sleep 10; done'
+          timeout 300 bash -c 'until curl -sf ${{ vars.RAILWAY_PUBLIC_URL }}/api/v1/health; do sleep 10; done'
 
-      - name: Test Production Endpoints
+      - name: Smoke test production
         run: |
-          # Test health endpoint
-          curl -f ${{ vars.RAILWAY_PUBLIC_URL }}/api/v1/health
-
-          # Test quick-capture endpoint
-          curl -X POST "${{ vars.RAILWAY_PUBLIC_URL }}/api/v1/transactions/quick-capture" \
+          curl -sf ${{ vars.RAILWAY_PUBLIC_URL }}/api/v1/health
+          curl -sf -X POST "${{ vars.RAILWAY_PUBLIC_URL }}/api/v1/transactions/quick-capture" \
             -H "Content-Type: application/json" \
             -H "X-Tenant-ID: test-tenant" \
             -d '{"totalAmount": 2500, "businessPurpose": "SALES", "customerSegment": "WALK_IN"}' || true
 
-      - name: Notify Deployment Status
+      - name: Notify
         if: always()
         run: |
-          if [ ${{ job.status }} == "success" ]; then
-            echo "🚀 API deployed successfully!"
-            echo "📍 Production URL: ${{ vars.RAILWAY_PUBLIC_URL }}"
-            echo "🔗 Health Check: ${{ vars.RAILWAY_PUBLIC_URL }}/api/v1/health"
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "🚀 API deployed: ${{ vars.RAILWAY_PUBLIC_URL }}/api/v1/health"
           else
-            echo "❌ Deployment failed - check Railway logs"
+            echo "❌ Deploy failed – check Railway logs"
           fi

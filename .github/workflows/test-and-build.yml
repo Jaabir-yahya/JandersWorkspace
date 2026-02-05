@@ -1,3 +1,4 @@
+# Test and Build API (path-filtered; runs on api/packages/tests changes)
 name: Test and Build API
 
 on:
@@ -22,7 +23,9 @@ on:
 
 jobs:
   test:
+    name: Test and Build API
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
       DIRECT_URL: postgresql://postgres:postgres@localhost:5432/test_db
@@ -42,8 +45,10 @@ jobs:
           - 5432:5432
 
     steps:
-      - name: Checkout
+      - name: Check out code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -51,6 +56,14 @@ jobs:
           node-version: "24"
           cache: "npm"
           cache-dependency-path: package-lock.json
+
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-api-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-api-
 
       - name: Install dependencies
         run: npm ci
@@ -82,7 +95,7 @@ jobs:
       - name: Build API
         run: npm run build:api
 
-      - name: Build Docker image
+      - name: Build and verify Docker image
         if: github.ref == 'refs/heads/main'
         run: |
           docker build -f apps/api/Dockerfile -t project-bridge-api:test .
