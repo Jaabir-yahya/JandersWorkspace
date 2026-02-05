@@ -54,6 +54,7 @@ jobs:
           railway up \
             --project="${{ vars.RAILWAY_PROJECT_ID || 'abundant-clarity' }}" \
             --service="${{ vars.RAILWAY_SERVICE_NAME }}" \
+            --environment="${{ vars.RAILWAY_ENVIRONMENT || 'production' }}" \
             --ci
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
