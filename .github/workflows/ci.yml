@@ -47,25 +47,25 @@ jobs:
       - name: Generate Prisma Client
         run: cd packages/database && npx prisma generate --schema=./prisma/schema.prisma
 
-      - name: Build API
-        run: npm run build:api
+      - name: Build database package
+        run: npm run build --workspace=@project-bridge/database
 
-      - name: Build frontend (apps/web)
-        run: npx turbo run build --filter=ledger-system-frontend
-        env:
-          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://api.example.com' }}
-
-      - name: Lint API
-        run: npm run lint --workspace=@project-bridge/api
-
-      - name: Lint frontend (apps/web)
-        run: npm run lint --workspace=ledger-system-frontend
+      - name: Lint
+        run: npm run lint
 
       - name: Type check
         run: npm run type-check
 
       - name: Unit tests (API)
-        run: npm test --workspace=@project-bridge/api
+        run: npm run test:api
         env:
           JWT_SECRET: test-jwt-secret
           NODE_ENV: test
+
+      - name: Build API
+        run: npm run build:api
+
+      - name: Build frontend
+        run: npx turbo run build --filter=ledger-system-frontend
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://api.example.com' }}

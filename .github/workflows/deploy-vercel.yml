@@ -45,9 +45,9 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || '' }}
 
-      # Vercel project: set Root Directory to "apps/web" in Project Settings → General.
+      # Vercel project: Root Directory must be set to "apps/web" in Vercel Project Settings.
+      # Run from repo root since Vercel CLI will use the project's root directory setting.
       - name: Deploy to Vercel
-        working-directory: apps/web
         run: npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --yes
         env:
           VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}

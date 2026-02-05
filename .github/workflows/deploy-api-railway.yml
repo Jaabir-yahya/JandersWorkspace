@@ -26,45 +26,23 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
-      - name: Debug Railway Info
-        run: |
-          echo "=== Railway Debug Info ==="
-          echo "Project ID: ${{ vars.RAILWAY_PROJECT_ID }}"
-          echo "Service Name: ${{ vars.RAILWAY_SERVICE_NAME }}"
-          echo ""
-          echo "=== Listing Projects ==="
-          railway project list --json || true
-          echo ""
-          echo "=== Attempting to list services ==="
-          railway service list --project="${{ vars.RAILWAY_PROJECT_ID || 'abundant-clarity' }}" --json || true
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-
       - name: Deploy to Railway
         run: |
-          if [ -z "${{ vars.RAILWAY_SERVICE_NAME }}" ]; then
-            echo "::error::RAILWAY_SERVICE_NAME is not set!"
-            echo "Please set it at: Settings → Secrets and variables → Actions → Variables"
-            exit 1
+          if [ -n "${{ vars.RAILWAY_SERVICE_NAME }}" ]; then
+            if ! railway up --service=${{ vars.RAILWAY_SERVICE_NAME }}; then
+              echo "::error::Service '${{ vars.RAILWAY_SERVICE_NAME }}' not found in Railway. Either create a service with that name in your Railway project, or remove the RAILWAY_SERVICE_NAME repo variable (Settings → Secrets and variables → Actions) to use the default service."
+              exit 1
+            fi
+          else
+            railway up
           fi
-
-          echo "Deploying to project: ${{ vars.RAILWAY_PROJECT_ID || 'abundant-clarity' }}"
-          echo "Deploying to service: ${{ vars.RAILWAY_SERVICE_NAME }}"
-
-          # Link to the project first (required in CI)
-          railway link --project="${{ vars.RAILWAY_PROJECT_ID || 'abundant-clarity' }}" --environment="${{ vars.RAILWAY_ENVIRONMENT || 'production' }}"
-
-          # Now deploy
-          railway up \
-            --service="${{ vars.RAILWAY_SERVICE_NAME }}" \
-            --ci
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
       - name: Wait for deployment
         run: |
           sleep 30
-          echo "Checking deployment status..."
+          railway status
           timeout 300 bash -c 'until curl -sf ${{ vars.RAILWAY_PUBLIC_URL }}/api/v1/health; do sleep 10; done'
 
       - name: Smoke test production
