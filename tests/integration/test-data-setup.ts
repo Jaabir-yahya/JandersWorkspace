@@ -1,9 +1,14 @@
-import { PrismaClient } from "@prisma/client";
-import { TxnType, EntityType, TxnStatus, PaymentStatus } from "@prisma/client";
+const { PrismaClient } = require("@prisma/client");
+const {
+  TxnType,
+  EntityType,
+  TxnStatus,
+  PaymentStatus,
+} = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
-export async function setupTestData() {
+async function setupTestData() {
   console.log("Setting up test data...");
 
   const testTenantId = "00000000-0000-0000-0000-000000000000";
@@ -16,17 +21,18 @@ export async function setupTestData() {
     // Create test user
     const testUser = await prisma.user.upsert({
       where: {
-        tenantId_phoneNumber: {
+        tenantId_email: {
           tenantId: testTenantId,
-          phoneNumber: "+254700000000",
+          email: "test@example.com",
         },
       },
       update: {},
       create: {
         id: testUserId,
         tenantId: testTenantId,
-        phoneNumber: "+254700000000",
+        email: "test@example.com",
         displayName: "Test User",
+        phoneNumber: "+254700000000",
         role: "admin",
       },
     });
@@ -147,7 +153,7 @@ export async function setupTestData() {
   }
 }
 
-export async function cleanupTestData(tenantId: string) {
+async function cleanupTestData(tenantId) {
   console.log(`Cleaning up test data for tenant: ${tenantId}`);
 
   // Delete in order of dependencies
@@ -172,6 +178,16 @@ export async function cleanupTestData(tenantId: string) {
   });
 
   console.log("Test data cleaned up");
+}
+
+// If this file is run directly
+if (require.main === module) {
+  setupTestData()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
 }
 
 // If this file is run directly
