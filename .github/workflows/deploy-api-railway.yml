@@ -51,10 +51,12 @@ jobs:
           echo "Deploying to project: ${{ vars.RAILWAY_PROJECT_ID || 'abundant-clarity' }}"
           echo "Deploying to service: ${{ vars.RAILWAY_SERVICE_NAME }}"
 
+          # Link to the project first (required in CI)
+          railway link --project="${{ vars.RAILWAY_PROJECT_ID || 'abundant-clarity' }}" --environment="${{ vars.RAILWAY_ENVIRONMENT || 'production' }}"
+
+          # Now deploy
           railway up \
-            --project="${{ vars.RAILWAY_PROJECT_ID || 'abundant-clarity' }}" \
             --service="${{ vars.RAILWAY_SERVICE_NAME }}" \
-            --environment="${{ vars.RAILWAY_ENVIRONMENT || 'production' }}" \
             --ci
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
