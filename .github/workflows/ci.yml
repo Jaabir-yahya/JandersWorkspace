@@ -47,7 +47,7 @@ jobs:
       - name: Build (Turbo: generate then build all packages)
         run: npx turbo run build
         env:
-          TURBO_REMOTE_ONLY: false
+          TURBO_REMOTE_ONLY: "false"
           NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://api.example.com' }}
 
       - name: Lint

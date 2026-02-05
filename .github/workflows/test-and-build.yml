@@ -62,7 +62,7 @@ jobs:
       - name: Build (Turbo: generate then build all packages)
         run: npx turbo run build
         env:
-          TURBO_REMOTE_ONLY: false
+          TURBO_REMOTE_ONLY: "false"
 
       - name: Run migrations (test DB)
         run: npm run deploy --workspace=@project-bridge/database
