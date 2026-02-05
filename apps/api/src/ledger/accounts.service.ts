@@ -240,41 +240,57 @@ export class AccountsService {
     });
 
     // Group by account type and calculate debits/credits
-    const trialBalance = items.reduce((acc, item) => {
-      const metadata = item.metadata as any;
-      const accountType = metadata?.accountType || 'UNKNOWN';
-      const balance = Number(metadata?.balance || 0);
+    type TrialBalanceGroup = {
+      accountType: string;
+      accounts: Array<{
+        id: string;
+        name: string;
+        balance: number;
+        isDebitBalance: boolean;
+      }>;
+      totalDebit: number;
+      totalCredit: number;
+    };
+    const trialBalance = items.reduce<Record<string, TrialBalanceGroup>>(
+      (acc, item) => {
+        const metadata = item.metadata as Record<string, unknown> | null;
+        const accountType =
+          (typeof metadata?.accountType === 'string'
+            ? metadata.accountType
+            : undefined) ?? 'UNKNOWN';
+        const balance = Number(metadata?.balance ?? 0);
 
-      if (!acc[accountType]) {
-        acc[accountType] = {
-          accountType,
-          accounts: [],
-          totalDebit: 0,
-          totalCredit: 0,
+        if (!acc[accountType]) {
+          acc[accountType] = {
+            accountType,
+            accounts: [],
+            totalDebit: 0,
+            totalCredit: 0,
+          };
+        }
+
+        const debitTypes = ['CASH', 'BANK', 'INVENTORY', 'ASSET'];
+        const isDebit = debitTypes.includes(accountType) || balance < 0;
+
+        const accountEntry = {
+          id: item.id,
+          name: item.name,
+          balance: Math.abs(balance),
+          isDebitBalance: isDebit,
         };
-      }
 
-      // Determine if this is a debit or credit balance based on account type
-      const debitTypes = ['CASH', 'BANK', 'INVENTORY', 'ASSET'];
-      const isDebit = debitTypes.includes(accountType) || balance < 0;
+        acc[accountType].accounts.push(accountEntry);
 
-      const accountEntry = {
-        id: item.id,
-        name: item.name,
-        balance: Math.abs(balance),
-        isDebitBalance: isDebit,
-      };
+        if (isDebit) {
+          acc[accountType].totalDebit += Math.abs(balance);
+        } else {
+          acc[accountType].totalCredit += balance;
+        }
 
-      acc[accountType].accounts.push(accountEntry);
-
-      if (isDebit) {
-        acc[accountType].totalDebit += Math.abs(balance);
-      } else {
-        acc[accountType].totalCredit += balance;
-      }
-
-      return acc;
-    }, {} as any);
+        return acc;
+      },
+      {},
+    );
 
     return Object.values(trialBalance);
   }

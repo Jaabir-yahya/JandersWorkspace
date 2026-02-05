@@ -68,7 +68,7 @@ The **tests** workspace is included in root `package.json` workspaces so `npm ru
 
 ## Local deploy (verify before pushing)
 
-- **Railway (API):** From repo root with Railway project linked: `railway up --service=<SERVICE_NAME>`. Requires `RAILWAY_TOKEN` (or `railway login`). Use root `railway.json` so build context is repo root; or run from `apps/api` with `apps/api/railway.json` and context `..`.
+- **Railway (API):** From repo root: `railway up --service=<SERVICE_NAME>`. Requires `RAILWAY_TOKEN` (or `railway login`). The root `railway.json` points to the root `Dockerfile` so the build context is the full repo (needed for `packages/` and `apps/api`). In Railway dashboard, do **not** set a Root Directory for this service so the context stays repo root.
 - **Vercel (frontend):** From repo: `cd apps/web && npx vercel --prod` (or `vercel --prod`). Set **Root Directory** to `apps/web` in Vercel project settings. `apps/web/package.json` has `"engines":{"node":"20.x"}` so Vercel uses Node 20; set Node.js Version to 20.x in Vercel → Settings → General if needed.
 
 ## Summary

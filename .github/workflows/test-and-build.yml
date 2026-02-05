@@ -9,12 +9,18 @@ on:
       - "apps/api/**"
       - "packages/**"
       - "tests/**"
+      - "Dockerfile"
+      - "package.json"
+      - "package-lock.json"
   pull_request:
     branches: [main]
     paths:
       - "apps/api/**"
       - "packages/**"
       - "tests/**"
+      - "Dockerfile"
+      - "package.json"
+      - "package-lock.json"
 
 jobs:
   integration-test:
@@ -71,7 +77,7 @@ jobs:
       - name: Build and verify Docker image
         if: github.ref == 'refs/heads/main'
         run: |
-          docker build -f apps/api/Dockerfile -t project-bridge-api:test .
+          docker build -f Dockerfile -t project-bridge-api:test .
           docker run --rm -d -p 3000:3000 --name api-test project-bridge-api:test
           sleep 10
           curl -f http://localhost:3000/api/v1/health || exit 1
