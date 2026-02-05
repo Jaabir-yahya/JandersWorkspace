@@ -1,7 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/prisma/client.js";
 import { createHash } from "crypto";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ log: [] });
 
 async function createAdminTenant() {
   console.log("🏗️ Creating Universal Truth Admin Tenant...");

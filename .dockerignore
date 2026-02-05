@@ -58,3 +58,6 @@ docker-compose*
 # Cache
 .cache
 .parcel-cache
+
+# Allow packages directory for monorepo builds
+!packages
