@@ -37,8 +37,9 @@ async function bootstrap() {
   );
 
   // Enable CORS for frontend-backend communication
-  const allowedOrigins =
-    process.env.ALLOWED_ORIGINS?.split(',').map((o) => o.trim()) || [];
+  const allowedOriginsRaw =
+    process.env.ALLOWED_ORIGINS?.split(',').map((o) => o.trim().replace(/\/$/, '')) || [];
+  const allowedOrigins = allowedOriginsRaw.filter(Boolean);
   const isDevelopment = process.env.NODE_ENV === 'development';
 
   app.enableCors({
@@ -46,43 +47,43 @@ async function bootstrap() {
       origin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void,
     ) => {
-      // Allow requests with no origin (mobile apps, curl, etc.)
       if (!origin) {
         callback(null, true);
         return;
       }
+      const originNormalized = origin.replace(/\/$/, '');
 
-      // In development, allow localhost origins if not configured
       if (allowedOrigins.length === 0) {
         if (
           isDevelopment &&
-          (origin.includes('localhost') || origin.includes('127.0.0.1'))
+          (originNormalized.includes('localhost') || originNormalized.includes('127.0.0.1'))
         ) {
           callback(null, true);
           return;
         }
         callback(
           new Error(
-            'CORS not configured - Set ALLOWED_ORIGINS environment variable',
+            'CORS not configured - Set ALLOWED_ORIGINS on Railway (e.g. https://your-app.vercel.app)',
           ),
           false,
         );
         return;
       }
 
-      // Check if origin is allowed
-      if (allowedOrigins.includes(origin)) {
+      if (allowedOrigins.includes(originNormalized)) {
         callback(null, true);
       } else {
         callback(
           new Error(
-            `Origin ${origin} not allowed. Add to ALLOWED_ORIGINS environment variable`,
+            `Origin ${origin} not allowed. Add to ALLOWED_ORIGINS: ${origin}`,
           ),
           false,
         );
       }
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Tenant-Id'],
   });
 
   // Set global exception filters
