@@ -20,6 +20,9 @@ COPY packages ./packages
 RUN npm ci
 RUN npm install -g @nestjs/cli
 
+# Prisma 7 prisma.config.ts requires DATABASE_URL; generate only needs it to load config (no DB connection).
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+
 WORKDIR /app/packages/database
 RUN npx prisma generate
 

@@ -24,6 +24,7 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
     "db:local": "docker-compose up -d",
+    "db:generate": "npm run generate --workspace=@project-bridge/database",
     "db:studio": "turbo run studio",
     "db:migrate": "turbo run migrate",
     "db:seed": "node scripts/db-seed-ke.js",
