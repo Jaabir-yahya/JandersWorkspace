@@ -161,13 +161,14 @@ export class DashboardService {
     for (const txn of topTransactions) {
       if (!txn.entityId || !txn.entity) continue;
 
-      const existing = entityMap.get(txn.entityId);
+      const entityId = String(txn.entityId);
+      const existing = entityMap.get(entityId);
       if (existing) {
         existing.total_amount += Number(txn.amount);
         existing.transaction_count += 1;
       } else {
-        entityMap.set(txn.entityId, {
-          entity_id: txn.entityId,
+        entityMap.set(entityId, {
+          entity_id: entityId,
           display_name: txn.entity.name || 'Unknown',
           total_amount: Number(txn.amount),
           transaction_count: 1,
@@ -199,8 +200,12 @@ export class DashboardService {
     // Calculate payment method breakdown
     const paymentBreakdown = { cash: 0, mpesa: 0, bank: 0, credit: 0 };
     paymentData.forEach((payment) => {
-      const metadata = payment.metadata as any;
-      const method = metadata?.method?.toLowerCase() || 'unknown';
+      const metadata = payment.metadata as Record<string, unknown> | null;
+      const method =
+        (typeof metadata?.method === 'string'
+          ? metadata.method
+          : undefined
+        )?.toLowerCase() ?? 'unknown';
       const amount = Number(payment.amount);
       if (method === 'cash') paymentBreakdown.cash += amount;
       else if (method === 'm-pesa' || method === 'mpesa')

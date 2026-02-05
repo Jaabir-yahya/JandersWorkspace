@@ -17,7 +17,8 @@ FROM node:24-alpine AS builder
 WORKDIR /app
 
 # Copy source files (context must be repo root so packages/ and apps/ exist)
-COPY package.json package-lock.json* turbo.json ./
+# Note: turbo.json omitted so build works when context excludes it (e.g. Railway); this image only runs nest build.
+COPY package.json package-lock.json* ./
 COPY apps/api ./apps/api
 COPY packages ./packages
 
