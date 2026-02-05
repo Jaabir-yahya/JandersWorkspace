@@ -59,6 +59,12 @@ The **tests** workspace is included in root `package.json` workspaces so `npm ru
 - [ ] **DB:** Run migrations against production DB (e.g. Supabase); use `DATABASE_URL` / `DIRECT_URL` from `.env.example`.
 - [ ] **CORS:** In Railway API env, set `ALLOWED_ORIGINS` to include the Vercel app URL (e.g. `https://your-app.vercel.app`).
 
+## Sanity (local)
+
+- **API:** `npm run lint --workspace=@project-bridge/api` (exit 0), `npm run test:api` (44 tests), `npm run build` (nest build).
+- **Web:** `NEXT_PUBLIC_API_URL=... npm run build` from repo root or `cd apps/web && npm run build`.
+- **Lockfile:** `npm ci` at root works after adding `tests` to workspaces and running `npm install` once.
+
 ## Summary
 
 - Backend is ready to publish to Railway via the deploy workflow; API builds, tests, and lint pass.
