@@ -44,4 +44,11 @@ ALTER TABLE "inventory_containers" ADD CONSTRAINT "inventory_containers_tenant_i
 
 -- AddForeignKey
 ALTER TABLE "inventory_container_items" ADD CONSTRAINT "inventory_container_items_container_id_fkey" FOREIGN KEY ("container_id") REFERENCES "inventory_containers"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE "inventory_container_items" ADD CONSTRAINT "inventory_container_items_item_id_fkey" FOREIGN KEY ("item_id") REFERENCES "items"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey to items (only if items table exists)
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'items') THEN
+        ALTER TABLE "inventory_container_items" ADD CONSTRAINT "inventory_container_items_item_id_fkey" FOREIGN KEY ("item_id") REFERENCES "items"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
