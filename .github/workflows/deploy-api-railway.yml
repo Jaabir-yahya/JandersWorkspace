@@ -26,15 +26,27 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
+      - name: Debug - List Railway Services
+        run: |
+          echo "=== Railway Project Info ==="
+          echo "Project ID: ${{ vars.RAILWAY_PROJECT_ID }}"
+          echo "Configured Service Name: ${{ vars.RAILWAY_SERVICE_NAME }}"
+          echo ""
+          echo "=== Available Services ==="
+          railway service list --json 2>/dev/null || echo "Could not list services"
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
       - name: Deploy to Railway
         run: |
-          if [ -n "${{ vars.RAILWAY_SERVICE_NAME }}" ]; then
-            if ! railway up --service=${{ vars.RAILWAY_SERVICE_NAME }}; then
-              echo "::error::Service '${{ vars.RAILWAY_SERVICE_NAME }}' not found in Railway. Either create a service with that name in your Railway project, or remove the RAILWAY_SERVICE_NAME repo variable (Settings → Secrets and variables → Actions) to use the default service."
-              exit 1
-            fi
+          SERVICE_NAME="${{ vars.RAILWAY_SERVICE_NAME }}"
+
+          if [ -n "$SERVICE_NAME" ]; then
+            echo "Deploying to service: $SERVICE_NAME"
+            railway up --service="$SERVICE_NAME" --ci
           else
-            railway up
+            echo "No RAILWAY_SERVICE_NAME set, deploying to default service"
+            railway up --ci
           fi
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
