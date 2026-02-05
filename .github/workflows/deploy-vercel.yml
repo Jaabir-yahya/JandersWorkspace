@@ -5,9 +5,9 @@ on:
   push:
     branches: [main]
     paths:
-      - 'apps/web/**'
-      - 'packages/**'
-      - '.github/workflows/deploy-vercel.yml'
+      - "apps/web/**"
+      - "packages/**"
+      - ".github/workflows/deploy-vercel.yml"
   workflow_dispatch:
 
 jobs:
@@ -51,4 +51,4 @@ jobs:
         run: npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --yes
         env:
           VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ vars.VERCEL_WEB_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
