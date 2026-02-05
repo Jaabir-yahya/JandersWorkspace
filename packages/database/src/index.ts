@@ -1,15 +1,2 @@
-// Re-export Prisma client for shared usage across the monorepo
-export { PrismaClient } from "@prisma/client";
-
-// Export a singleton PrismaClient instance for use in applications
-import { PrismaClient } from "@prisma/client";
-
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
-
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-
-export default prisma;
+// Re-export Prisma Client from Prisma 7 generated output (consumers pass adapter when instantiating)
+export { PrismaClient } from "../generated/prisma/client.js";

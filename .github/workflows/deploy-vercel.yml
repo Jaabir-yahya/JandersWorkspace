@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
@@ -33,8 +33,7 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
 
-      # Vercel project must have Root Directory = "apps/web" (or be linked from apps/web).
-      # If you still use a project created for bridge-admin, set its Root Directory to apps/web in Vercel dashboard.
+      # Vercel project: set Root Directory to "apps/web" in Project Settings → General.
       - name: Deploy to Vercel
         working-directory: apps/web
         run: npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --yes

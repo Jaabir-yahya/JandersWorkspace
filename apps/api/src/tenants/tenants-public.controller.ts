@@ -16,7 +16,7 @@ const DEFAULT_TENANT_FEATURES = {
 
 /**
  * Public tenant lookup for manual-only flow (no JWT).
- * Used by bridge-manual to resolve tenant from slug (subdomain or path).
+ * Used by apps/web (frontend) to resolve tenant from slug (subdomain or path).
  */
 @Controller('tenants')
 export class TenantsPublicController {

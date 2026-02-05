@@ -22,23 +22,23 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        run: railway up --service=${{ vars.RAILWAY_SERVICE_NAME || 'JandersWorkspace' }}
+        run: railway up --service=${{ vars.RAILWAY_SERVICE_NAME }}
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_APITOKEN }}
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
       - name: Wait for deployment to be ready
         run: |
           sleep 30
           railway status
-          timeout 300 bash -c 'until curl -f https://${{ vars.RAILWAY_SERVICE_NAME || 'jandersworkspace' }}-production.up.railway.app/api/v1/health; do sleep 10; done'
+          timeout 300 bash -c 'until curl -f ${{ vars.RAILWAY_PUBLIC_URL }}/api/v1/health; do sleep 10; done'
 
       - name: Test Production Endpoints
         run: |
           # Test health endpoint
-          curl -f https://${{ vars.RAILWAY_SERVICE_NAME || 'jandersworkspace' }}-production.up.railway.app/api/v1/health
+          curl -f ${{ vars.RAILWAY_PUBLIC_URL }}/api/v1/health
 
           # Test quick-capture endpoint
-          curl -X POST "https://${{ vars.RAILWAY_SERVICE_NAME || 'jandersworkspace' }}-production.up.railway.app/api/v1/transactions/quick-capture" \
+          curl -X POST "${{ vars.RAILWAY_PUBLIC_URL }}/api/v1/transactions/quick-capture" \
             -H "Content-Type: application/json" \
             -H "X-Tenant-ID: test-tenant" \
             -d '{"totalAmount": 2500, "businessPurpose": "SALES", "customerSegment": "WALK_IN"}' || true
@@ -47,9 +47,9 @@ jobs:
         if: always()
         run: |
           if [ ${{ job.status }} == "success" ]; then
-            echo "🚀 Nairobi SME API deployed successfully!"
-            echo "📍 Production URL: https://${{ vars.RAILWAY_SERVICE_NAME || 'jandersworkspace' }}-production.up.railway.app"
-            echo "🔗 Health Check: https://${{ vars.RAILWAY_SERVICE_NAME || 'jandersworkspace' }}-production.up.railway.app/api/v1/health"
+            echo "🚀 API deployed successfully!"
+            echo "📍 Production URL: ${{ vars.RAILWAY_PUBLIC_URL }}"
+            echo "🔗 Health Check: ${{ vars.RAILWAY_PUBLIC_URL }}/api/v1/health"
           else
             echo "❌ Deployment failed - check Railway logs"
           fi

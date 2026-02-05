@@ -30,6 +30,7 @@
       "cache": false,
       "outputs": [
         "dist/**",
+        "generated/**",
         "node_modules/.prisma/**"
       ]
     },

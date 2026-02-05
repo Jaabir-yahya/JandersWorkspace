@@ -24,7 +24,7 @@ This guide covers the complete deployment setup for the Project Bridge monorepo,
 2. Click "New Project"
 3. Select "Deploy from GitHub repo"
 4. Choose your repository
-5. **Important**: Set the root directory to `apps/api`
+5. **Important**: Deploy from repo root; build uses `railway.json` at root with Dockerfile at `apps/api/Dockerfile`.
 
 ### 1.2 Configure Environment Variables
 
@@ -49,42 +49,24 @@ ALLOWED_ORIGINS=https://yourdomain.com,https://app.yourdomain.com
 
 ### 1.3 Railway Configuration
 
-The [`railway.json`](apps/api/railway.json) is already configured:
-
-```json
-{
-  "$schema": "https://railway.app/railway.schema.json",
-  "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "npm install && npx prisma generate && npm run build"
-  },
-  "deploy": {
-    "startCommand": "npx prisma migrate deploy && node dist/src/main",
-    "healthcheckPath": "/api/v1/health",
-    "healthcheckTimeout": 100,
-    "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
-  }
-}
-```
+The root [`railway.json`](railway.json) is configured to build with Docker (`apps/api/Dockerfile`) and run the API from `/app/apps/api`.
 
 ### 1.4 GitHub Actions for Railway
 
-The workflow is at [`.github/workflows/deploy-api.yml`](.github/workflows/deploy-api.yml).
+The workflow is [`.github/workflows/deploy-api-railway.yml`](.github/workflows/deploy-api-railway.yml).
 
 **Required GitHub Secrets:**
-- `RAILWAY_API_TOKEN`: Get from Railway Dashboard → Account Settings → Tokens
+- `RAILWAY_TOKEN`: Get from Railway Dashboard → Account Settings → Tokens
 
 **Required GitHub Variables:**
-- `RAILWAY_SERVICE_NAME`: Your Railway service name (default: "api")
+- `RAILWAY_SERVICE_NAME`: Your Railway service name
+- `RAILWAY_PUBLIC_URL`: Your app URL (e.g. `https://your-service.up.railway.app`)
 
 ## 2. Vercel Frontend Deployment
 
-### 2.1 Create Vercel Projects
+### 2.1 Create Vercel Project
 
-Create two projects:
-1. **bridge-admin**: Admin dashboard
-2. **bridge-manual**: Manual entry app
+Create one project for the Next.js frontend (**apps/web**, package name `ledger-system-frontend`). In Vercel → Project Settings → General, set **Root Directory** to `apps/web`.
 
 ### 2.2 Configure Environment Variables
 
@@ -115,7 +97,7 @@ npm i -g vercel
 vercel login
 
 # Link project (run in app directory)
-cd apps/bridge-admin
+cd apps/web
 vercel link
 
 # Get IDs from .vercel/project.json
@@ -157,17 +139,16 @@ Two MCP servers are configured for deployment monitoring:
 ```
 project-bridge/
 ├── apps/
-│   ├── api/                 # Railway backend
-│   ├── bridge-admin/        # Vercel frontend
-│   └── bridge-manual/       # Vercel frontend
+│   ├── api/                      # Railway backend (@project-bridge/api)
+│   └── web/                      # Vercel frontend (ledger-system-frontend)
 ├── packages/
-│   ├── database/            # Shared Prisma client
-│   └── types/               # Shared TypeScript types
+│   ├── database/                 # Shared Prisma client
+│   └── types/                    # Shared TypeScript types
 ├── .github/workflows/
-│   ├── deploy-api.yml       # Railway deployment
-│   ├── deploy-vercel.yml    # Vercel deployment
-│   └── ci.yml               # CI checks
-└── turbo.json               # Turborepo config
+│   ├── deploy-api-railway.yml    # Railway deployment
+│   ├── deploy-vercel.yml         # Vercel deployment (apps/web)
+│   └── ci.yml                    # CI checks
+└── turbo.json                    # Turborepo config
 ```
 
 ## 5. Deployment Workflow

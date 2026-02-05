@@ -55,7 +55,6 @@
     --font-inter: "Inter", system-ui, sans-serif;
     --font-mono: "Consolas", "Monaco", monospace;
 
-    /* High contrast for bright sunlight readability */
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
 
@@ -131,12 +130,10 @@
     font-feature-settings:
       "rlig" 1,
       "calt" 1;
-    /* Prevent text size adjustment on mobile */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
 
-  /* Touch-friendly tap targets (minimum 44x44px) */
   button,
   [role="button"],
   input[type="submit"],
@@ -145,7 +142,6 @@
     min-width: 44px;
   }
 
-  /* Improve number input for mobile */
   input[type="number"] {
     -moz-appearance: textfield;
   }
@@ -156,7 +152,6 @@
     margin: 0;
   }
 
-  /* High contrast focus for accessibility */
   *:focus-visible {
     outline: none;
     --tw-ring-color: hsl(var(--primary));
@@ -166,21 +161,17 @@
     box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow);
   }
 
-  /* Print styles for receipts and invoices */
   @media print {
     body {
       color: #000;
       background-color: #fff;
     }
-
     .no-print {
       display: none !important;
     }
-
     .print-break-before {
       page-break-before: always;
     }
-
     .print-break-after {
       page-break-after: always;
     }
@@ -188,7 +179,6 @@
 }
 
 @layer components {
-  /* Keyboard shortcut indicator */
   .kbd {
     display: inline-flex;
     align-items: center;
@@ -202,21 +192,18 @@
     border-radius: 0.25rem;
   }
 
-  /* Currency input styling */
   .currency-input {
     font-family: var(--font-mono);
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
 
-  /* Loading skeleton */
   .skeleton {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     background-color: #e5e5e5;
     border-radius: 0.25rem;
   }
 
-  /* Status badges */
   .badge-success {
     display: inline-flex;
     align-items: center;
@@ -263,12 +250,10 @@
 }
 
 @layer utilities {
-  /* Text utilities */
   .text-balance {
     text-wrap: balance;
   }
 
-  /* Animation utilities */
   .animate-fade-in {
     animation: fadeIn 0.3s ease-out;
   }
@@ -281,50 +266,25 @@
     animation: scaleIn 0.3s ease-out;
   }
 
-  /* Animation delay utilities */
-  .delay-100 {
-    animation-delay: 100ms;
-  }
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-500 { animation-delay: 500ms; }
+  .delay-600 { animation-delay: 600ms; }
+  .delay-700 { animation-delay: 700ms; }
 
-  .delay-200 {
-    animation-delay: 200ms;
-  }
-
-  .delay-300 {
-    animation-delay: 300ms;
-  }
-
-  .delay-400 {
-    animation-delay: 400ms;
-  }
-
-  .delay-500 {
-    animation-delay: 500ms;
-  }
-
-  .delay-600 {
-    animation-delay: 600ms;
-  }
-
-  .delay-700 {
-    animation-delay: 700ms;
-  }
-
-  /* Scrollbar styling */
   .scrollbar-thin::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
-
   .scrollbar-thin::-webkit-scrollbar-track {
     background-color: #f5f5f5;
   }
-
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background-color: #d4d4d4;
     border-radius: 9999px;
   }
-
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background-color: #a3a3a3;
   }

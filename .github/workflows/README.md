@@ -1,136 +1,43 @@
 # GitHub Actions Workflows
 
-This directory contains GitHub Actions workflows for CI/CD automation.
+CI/CD for the Project Bridge turborepo: **apps/api** (NestJS), **apps/web** (Next.js, package name `ledger-system-frontend`).
 
 ## Workflows
 
-### 1. CI Workflow (`ci.yml`)
-**Purpose**: Continuous Integration - build and test on every push/PR
+| File | Purpose | Triggers |
+|------|---------|----------|
+| **ci.yml** | Build and test on every push/PR | Push/PR to `main` or `develop` |
+| **test-and-build.yml** | API-focused: test, migrate, build, Docker | Push/PR to `main` or `develop` when `apps/api/**`, `packages/**`, or `tests/**` change |
+| **deploy-api-railway.yml** | Deploy API to Railway | Push to `main` when `apps/api/**`, `packages/**`, or Railway config change |
+| **deploy-vercel.yml** | Deploy frontend (apps/web) to Vercel | Push to `main` when `apps/web/**` or `packages/**` change |
 
-**Triggers**:
-- Push to `main` or `develop` branches
-- Pull requests to `main` or `develop` branches
+## Required secrets and variables
 
-**Jobs**:
-- Install dependencies
-- Generate Prisma client
-- Build the application
-- Run linting
-- Type checking
-- Unit tests
+### Railway (deploy-api-railway.yml)
 
-### 2. Deploy API to Railway (`deploy-api.yml`)
-**Purpose**: Deploy the NestJS API to Railway
+- **Secrets:** `RAILWAY_TOKEN` (Railway API token; Account → Tokens).
+- **Variables:** `RAILWAY_SERVICE_NAME` (Railway service name), `RAILWAY_PUBLIC_URL` (e.g. `https://your-service.up.railway.app`).
 
-**Triggers**:
-- Push to `main` branch with changes in:
-  - `apps/api/**`
-  - `packages/database/**`
-  - `packages/types/**`
-  - `.github/workflows/deploy-api.yml`
-- Manual trigger (`workflow_dispatch`)
+### Vercel (deploy-vercel.yml)
 
-**Required Secrets**:
-- `RAILWAY_API_TOKEN`: Railway API token for deployment
+- **Secrets:** `VERCEL_TOKEN` (Vercel API token).
+- **Variables:** `VERCEL_ORG_ID`, `VERCEL_WEB_PROJECT_ID`, `NEXT_PUBLIC_API_URL` (API URL for the frontend).
 
-**Jobs**:
-- Install dependencies
-- Generate Prisma client
-- Build application
-- Deploy to Railway using Railway CLI
-- Run database migrations
+## Local usage (match CI)
 
-### 3. Deploy Frontend to Vercel (`deploy-frontend.yml`)
-**Purpose**: Deploy the Next.js frontend to Vercel
+- **Node:** 24.x (see root `package.json` engines).
+- **Install:** From repo root run `npm ci` (or `npm install` after changing workspaces).
+- **Build API:** `npm run build:api` or `turbo run build --filter=@project-bridge/api`.
+- **Build web:** `npm run dev:web` / `turbo run build --filter=ledger-system-frontend`.
+- **Test API:** `npm run test:api`.
+- **Prisma:** `npm run db:migrate` (from root) or `cd packages/database && npx prisma migrate deploy`.
 
-**Triggers**:
-- Push to `main` branch with changes in:
-  - `apps/bridge-manual/**`
-  - `packages/**`
-  - `.github/workflows/deploy-frontend.yml`
-- Manual trigger (`workflow_dispatch`)
+## Naming reference
 
-**Required Secrets**:
-- `VERCEL_TOKEN`: Vercel API token for deployment
+- **API app:** `apps/api`, package name `@project-bridge/api`.
+- **Web app:** `apps/web`, package name `ledger-system-frontend` (use this in turbo filters).
+- **Database package:** `@project-bridge/database` (Prisma client and schema in `packages/database`).
 
-**Jobs**:
-- Install Vercel CLI
-- Pull environment information
-- Build project artifacts
-- Deploy to Vercel
+Obsolete apps `bridge-admin` and `bridge-perfect` have been removed; only **apps/api** and **apps/web** are used.
 
-## Required GitHub Secrets
-
-To use these workflows, you need to configure the following secrets in your GitHub repository:
-
-### Railway Deployment
-1. Go to Railway Dashboard → Account Settings → Tokens
-2. Generate a new token
-3. Add to GitHub: Settings → Secrets and variables → Actions → New repository secret
-4. Name: `RAILWAY_API_TOKEN`
-
-### Vercel Deployment
-1. Go to Vercel Dashboard → Settings → Tokens
-2. Generate a new token
-3. Add to GitHub: Settings → Secrets and variables → Actions → New repository secret
-4. Name: `VERCEL_TOKEN`
-
-## Environment Variables
-
-### API Environment Variables (Railway)
-The following environment variables should be configured in Railway:
-
-- `DATABASE_URL`: PostgreSQL connection string
-- `SUPABASE_URL`: Supabase project URL
-- `SUPABASE_SERVICE_ROLE_KEY`: Supabase service role key
-- `JWT_SECRET`: Secret for JWT token signing
-- `API_PORT`: Port for the API server (default: 3000)
-- `NODE_ENV`: Environment (production)
-
-### Frontend Environment Variables (Vercel)
-The following environment variables should be configured in Vercel:
-
-- `NEXT_PUBLIC_API_URL`: URL of the deployed API
-- `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase anonymous key
-
-## Manual Deployment
-
-You can trigger manual deployments from the GitHub Actions tab:
-
-1. Go to your repository on GitHub
-2. Click on "Actions" tab
-3. Select the workflow you want to run
-4. Click "Run workflow"
-5. Select the branch and click "Run workflow"
-
-## Troubleshooting
-
-### Build Failures
-
-If builds are failing:
-
-1. **Check local build first**:
-   ```bash
-   # API
-   cd apps/api && npm run build
-
-   # Frontend
-   cd apps/bridge-manual && npm run build
-   ```
-
-2. **Verify secrets are set correctly**
-
-3. **Check workflow logs** in GitHub Actions for specific error messages
-
-### Railway Deployment Issues
-
-- Ensure `RAILWAY_API_TOKEN` has the correct permissions
-- Verify the service name matches (`api` in the workflow)
-- Check Railway dashboard for deployment logs
-
-### Vercel Deployment Issues
-
-- Ensure `VERCEL_TOKEN` is valid and not expired
-- Verify Vercel project is linked correctly
-- Check Vercel dashboard for deployment logs
+**Lockfile:** If `package-lock.json` still references removed workspaces, run `npm install` at repo root once so the lockfile matches current workspaces; then CI (`npm ci`) will succeed.

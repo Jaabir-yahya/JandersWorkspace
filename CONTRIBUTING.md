@@ -137,7 +137,7 @@ npm run test:cov
 cd apps/api && npm test
 
 # Run frontend tests only (when added)
-cd apps/bridge-manual && npm test
+cd apps/web && npm test
 
 # Run E2E tests
 npm run test:e2e
@@ -332,7 +332,7 @@ npm run lint:fix
 
 # Check specific package
 cd apps/api && npm run lint
-cd apps/bridge-manual && npm run lint
+cd apps/web && npm run lint
 ```
 
 ### Formatting

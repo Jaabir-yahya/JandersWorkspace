@@ -15,7 +15,7 @@ JandersWorkspace/
 │   │   ├── 📁 src/                  # auth, dashboard, health, integrations, etc.
 │   │   ├── 📁 prisma/
 │   │   └── package.json
-│   └── 📁 bridge-manual/            # Next.js frontend (manual-first tier)
+│   └── 📁 web/                       # Next.js frontend (ledger-system-frontend)
 │       ├── 📁 app/
 │       ├── 📁 components/
 │       └── package.json

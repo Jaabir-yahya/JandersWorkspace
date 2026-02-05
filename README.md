@@ -45,14 +45,15 @@ A monorepo platform that gives **80% of Kenyan business owners** (manual users: 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js ≥18
-- npm ≥9
+- Node.js **24.x** (see `engines` in root `package.json`)
+- npm ≥10
 - Docker (for local database)
 
 ### 1. Install Dependencies
 ```bash
 npm install
 ```
+After changing workspaces or pulling, run `npm install` at root so `package-lock.json` stays in sync. CI uses `npm ci` for reproducible installs.
 
 ### 2. Environment Setup
 ```bash
