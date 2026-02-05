@@ -62,8 +62,13 @@ The **tests** workspace is included in root `package.json` workspaces so `npm ru
 ## Sanity (local)
 
 - **API:** `npm run lint --workspace=@project-bridge/api` (exit 0), `npm run test:api` (44 tests), `npm run build` (nest build).
-- **Web:** `NEXT_PUBLIC_API_URL=... npm run build` from repo root or `cd apps/web && npm run build`.
+- **Web:** `NEXT_PUBLIC_API_URL=... npm run build` from repo root or `cd apps/web && npm run build`. `npm run lint --workspace=ledger-system-frontend` passes (ESLint config in `apps/web/.eslintrc.json` + `eslint-config-next`).
 - **Lockfile:** `npm ci` at root works after adding `tests` to workspaces and running `npm install` once.
+
+## Local deploy (verify before pushing)
+
+- **Railway (API):** From repo root with Railway project linked: `railway up --service=<SERVICE_NAME>`. Requires `RAILWAY_TOKEN` (or `railway login`). Use root `railway.json` so build context is repo root; or run from `apps/api` with `apps/api/railway.json` and context `..`.
+- **Vercel (frontend):** From repo: `cd apps/web && npx vercel --prod` (or `vercel --prod`). Set **Root Directory** to `apps/web` in Vercel project settings. `apps/web/package.json` has `"engines":{"node":"20.x"}` so Vercel uses Node 20; set Node.js Version to 20.x in Vercel → Settings → General if needed.
 
 ## Summary
 
