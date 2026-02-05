@@ -1,5 +1,29 @@
 # LedgerFlow Deployment Guide
 
+## 🔗 Connect frontend (Vercel) and backend (Railway)
+
+**Deployed (production):**
+
+1. **Vercel (frontend)**  
+   Project → Settings → Environment Variables → add:
+   - `NEXT_PUBLIC_API_URL` = your Railway API URL **including protocol**, e.g. `https://your-app.up.railway.app`  
+   (If you set only the hostname, the app will prepend `https://`. With or without `/api/v1` is fine; the app adds it.)  
+   Redeploy after changing env vars.
+
+2. **Railway (backend)**  
+   Project → Variables → add:
+   - `ALLOWED_ORIGINS` = your Vercel frontend URL(s), comma-separated, e.g. `https://your-app.vercel.app,https://your-app-*.vercel.app`  
+   (Use the exact origin the browser sends; preview deploys often use `*-username.vercel.app`.)
+
+**Local (innovation / testing):**
+
+- **Frontend:** From repo root: `npm run dev:web` (or in `apps/web`: `npm run dev`). Default API base is `http://localhost:3000`. If your API runs on another port (e.g. 3001), set in `apps/web/.env.local`: `NEXT_PUBLIC_API_URL=http://localhost:3001`.
+- **Backend:** From repo root: `npm run dev:api`. API uses `PORT` from env (e.g. 3000) or defaults to 3001. In development, CORS allows `localhost` and `127.0.0.1` if `ALLOWED_ORIGINS` is unset; for production-like CORS locally set `ALLOWED_ORIGINS=http://localhost:3000` (or whatever port your frontend uses).
+
+**Quick check:** From the frontend, sign in or hit any API-backed page; network tab should show requests to your Railway URL (deployed) or `http://localhost:3000` (local).
+
+---
+
 ## 🌍 Deployment Options for African Context
 
 This guide covers deployment strategies optimized for African infrastructure, considering factors like connectivity, CDN availability, and cost.

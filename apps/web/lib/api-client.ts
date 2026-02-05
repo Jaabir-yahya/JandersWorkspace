@@ -55,7 +55,11 @@ export function setCurrentTenantName(name: string | null): void {
 }
 
 // Create axios instance – backend uses global prefix /api/v1
-const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+// Local: API runs on 3000. Production: set NEXT_PUBLIC_API_URL to full backend URL (e.g. https://your-app.up.railway.app).
+let apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+if (apiBase && !/^https?:\/\//i.test(apiBase)) {
+  apiBase = "https://" + apiBase;
+}
 const baseURL = apiBase.replace(/\/api\/v1\/?$/, "") + "/api/v1";
 
 export const api: AxiosInstance = axios.create({
