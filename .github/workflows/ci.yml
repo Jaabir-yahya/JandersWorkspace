@@ -45,7 +45,7 @@ jobs:
         run: npm ci
 
       - name: Generate Prisma Client
-        run: cd packages/database && npx prisma generate --schema=./prisma/schema.prisma
+        run: npm run generate --workspace=@project-bridge/database
 
       - name: Build database package
         run: npm run build --workspace=@project-bridge/database

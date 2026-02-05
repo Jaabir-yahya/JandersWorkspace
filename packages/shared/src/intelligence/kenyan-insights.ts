@@ -3,15 +3,27 @@
  * Automated intelligence for the Nairobi frontline.
  */
 
+interface Transaction {
+  party?: string;
+  [key: string]: unknown;
+}
+
+interface Pattern {
+  type: string;
+  party: string;
+  frequency: string;
+  confidence: number;
+}
+
 export class KenyanBusinessInsights {
     /**
      * Detects patterns in transactions (e.g., recurring rent or supplier payments).
      */
-    static detectPatterns(transactions: any[]): any[] {
-        const patterns: any[] = [];
+    static detectPatterns(transactions: Transaction[]): Pattern[] {
+        const patterns: Pattern[] = [];
 
         // Group by party to find recurring flows
-        const partyGroups = transactions.reduce((acc, t) => {
+        const partyGroups = transactions.reduce<Record<string, Transaction[]>>((acc, t) => {
             if (!t.party) return acc;
             acc[t.party] = acc[t.party] || [];
             acc[t.party].push(t);
@@ -19,8 +31,7 @@ export class KenyanBusinessInsights {
         }, {});
 
         Object.entries(partyGroups).forEach(([party, txns]) => {
-            const typedTxns = txns as any[];
-            if (typedTxns.length >= 3) {
+            if (txns.length >= 3) {
                 patterns.push({
                     type: 'RECURRING_PARTY',
                     party,

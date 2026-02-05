@@ -54,13 +54,13 @@ jobs:
         run: npm ci
 
       - name: Generate Prisma Client
-        run: cd packages/database && npx prisma generate --schema=./prisma/schema.prisma
+        run: npm run generate --workspace=@project-bridge/database
 
       - name: Build database package
         run: npm run build --workspace=@project-bridge/database
 
       - name: Run migrations (test DB)
-        run: cd packages/database && npx prisma migrate deploy --schema=./prisma/schema.prisma
+        run: npm run deploy --workspace=@project-bridge/database
 
       - name: Integration tests
         run: npm run test:integration:core

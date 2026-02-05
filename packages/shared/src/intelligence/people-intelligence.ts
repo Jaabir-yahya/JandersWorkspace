@@ -9,9 +9,17 @@ export interface Interaction {
     amount?: number;
 }
 
+export interface Transaction {
+    date: Date | string;
+    amount?: number;
+    type: string;
+    isCredit?: boolean;
+    [key: string]: unknown;
+}
+
 export interface PersonData {
     id: string;
-    transactions: any[];
+    transactions: Transaction[];
     lastContact?: Date;
     creditLimit?: number;
 }
@@ -55,7 +63,7 @@ export class PeopleIntelligence {
     /**
      * Calculates a "Trust Score" (0-1) based on credit behavior.
      */
-    static calculateTrustScore(person: { balance: number; transactions: any[] }): number {
+    static calculateTrustScore(person: { balance: number; transactions: Transaction[] }): number {
         let trust = 1.0;
 
         // Penalize for negative balance (debt)
