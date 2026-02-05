@@ -34,10 +34,12 @@ RUN adduser --system --uid 1001 nodejs
 RUN apk add --no-cache dumb-init curl
 
 WORKDIR /app
+# Workspace deps are hoisted to root — packages/database/node_modules does not exist in builder
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
-COPY --from=builder /app/packages/database/node_modules ./packages/database/node_modules
 COPY --from=builder /app/packages/database/dist ./packages/database/dist
 COPY --from=builder /app/packages/database/package.json ./packages/database/package.json
 
