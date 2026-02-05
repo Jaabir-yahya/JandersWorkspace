@@ -198,6 +198,9 @@ describe('Ledger Module Integration', () => {
             transaction: {
               create: jest.Mock;
             };
+            note: {
+              create: jest.Mock;
+            };
           }) => Promise<any>,
         ) => {
           return callback({
@@ -209,6 +212,9 @@ describe('Ledger Module Integration', () => {
             },
             transaction: {
               create: jest.fn().mockResolvedValue(mockTransaction),
+            },
+            note: {
+              create: jest.fn().mockResolvedValue({ id: 'note-123' }),
             },
           });
         },
@@ -252,6 +258,10 @@ describe('Ledger Module Integration', () => {
             transaction: {
               create: jest.Mock;
             };
+            note: {
+              create: jest.Mock;
+              update: jest.Mock;
+            };
           }) => Promise<any>,
         ) => {
           return callback({
@@ -263,6 +273,33 @@ describe('Ledger Module Integration', () => {
             },
             transaction: {
               create: jest.fn().mockResolvedValue(mockTransaction),
+            },
+            note: {
+              create: jest.fn().mockResolvedValue({
+                id: 'note-123',
+                tenantId: mockTenantId,
+                context: {
+                  supplierName: 'Test Supplier',
+                  itemType: 'Test Product',
+                  quantity: 10,
+                  unitPrice: 50,
+                  total: 500,
+                  unit: 'PCS',
+                },
+              }),
+              update: jest.fn().mockResolvedValue({
+                id: 'note-123',
+                tenantId: mockTenantId,
+                context: {
+                  supplierName: 'Test Supplier',
+                  itemType: 'Test Product',
+                  quantity: 10,
+                  unitPrice: 50,
+                  total: 500,
+                  unit: 'PCS',
+                  transactionPairId: 'PAIR_123_abc',
+                },
+              }),
             },
           });
         },
