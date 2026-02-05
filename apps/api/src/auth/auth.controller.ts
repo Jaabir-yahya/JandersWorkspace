@@ -9,7 +9,7 @@ import {
   UnauthorizedException,
   BadRequestException,
 } from '@nestjs/common';
-import { AuthService, AuthenticatedUser } from './auth.service';
+import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 
 import { IsString, IsEmail } from 'class-validator';
@@ -118,20 +118,16 @@ export class AuthController {
    * Refresh JWT token
    */
   @Post('refresh-token')
-  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
-    try {
-      // For now, return a basic implementation
-      // In production, you'd validate the refresh token with Supabase
-      return {
-        success: true,
-        data: {
-          accessToken: 'new_access_token_placeholder',
-          expiresAt: new Date().getTime() + 3600 * 1000, // 1 hour
-        },
-      };
-    } catch (error) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
+  refreshToken() {
+    // For now, return a basic implementation
+    // In production, you'd validate the refresh token with Supabase
+    return {
+      success: true,
+      data: {
+        accessToken: 'new_access_token_placeholder',
+        expiresAt: new Date().getTime() + 3600 * 1000, // 1 hour
+      },
+    };
   }
 
   /**
@@ -139,7 +135,7 @@ export class AuthController {
    */
   @Get('me')
   @UseGuards(AuthGuard)
-  async getCurrentUser(@Request() req: any) {
+  getCurrentUser(@Request() req: any) {
     return {
       success: true,
       data: {
@@ -156,10 +152,7 @@ export class AuthController {
    */
   @Put('profile')
   @UseGuards(AuthGuard)
-  async updateProfile(
-    @Body() updateDto: UpdateProfileDto,
-    @Request() req: any,
-  ) {
+  updateProfile(@Body() updateDto: UpdateProfileDto, @Request() req: any) {
     // This would update the user in Supabase
     // For now, return a placeholder response
     return {
@@ -186,7 +179,7 @@ export class AuthController {
         success: true,
         message: 'Signed out successfully',
       };
-    } catch (error) {
+    } catch {
       // Continue even if sign out fails
       return {
         success: true,

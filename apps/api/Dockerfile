@@ -1,36 +1,36 @@
 FROM node:24-alpine AS deps
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
 COPY package.json package-lock.json* ./
 COPY apps/api/package.json ./apps/api/
-WORKDIR /app/apps/api
-RUN npm install --only=production
+COPY packages/database/package.json ./packages/database/
+
+# Install production dependencies
+RUN npm ci --only=production
 
 # Rebuild the source code only when needed
 FROM node:24-alpine AS builder
 WORKDIR /app
-COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
-COPY packages ./packages
-COPY apps/api ./apps/api
+
+# Copy source files
 COPY package.json package-lock.json* turbo.json ./
-WORKDIR /app/apps/api
+COPY apps/api ./apps/api
+COPY packages/database ./packages/database
+
+# Install all dependencies (including dev)
+RUN npm ci
 
 # Install NestJS CLI for building
 RUN npm install -g @nestjs/cli
 
-# Install dev dependencies needed for build
-RUN npm install --only=dev @types/passport-jwt @types/express
-
-# Copy the database package to make it available
-COPY packages/database ./packages/database
-
-# Copy Prisma files from packages/database
-COPY packages/database/prisma ./prisma
-
 # Generate Prisma client
-RUN npx prisma generate --schema=./prisma/schema.prisma
+WORKDIR /app/packages/database
+RUN npx prisma generate
 
 # Build the application
+WORKDIR /app/apps/api
 RUN npm run build
 
 # Production image, copy all the files and run next
@@ -47,12 +47,14 @@ RUN apk add --no-cache dumb-init
 RUN apk add --no-cache curl
 
 WORKDIR /app
+
+# Copy production files
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
-
-# Copy Prisma files for database operations
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/packages/database/node_modules ./packages/database/node_modules
+COPY --from=builder /app/packages/database/dist ./packages/database/dist
+COPY --from=builder /app/packages/database/package.json ./packages/database/package.json
 
 USER nodejs
 

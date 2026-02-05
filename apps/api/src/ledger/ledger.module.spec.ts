@@ -14,8 +14,8 @@ describe('Ledger Module Integration', () => {
   let rpcService: RpcService;
   let prismaService: PrismaService;
 
-  let mockTenantId = 'test-tenant-123';
-  let mockUserId = 'test-user-123';
+  const mockTenantId = 'test-tenant-123';
+  const mockUserId = 'test-user-123';
   let mockAccount: any;
   let mockTransaction: any;
   let mockAccounts: any[];
