@@ -106,12 +106,11 @@ describe('PaymentRecordsService', () => {
       const mockTransaction = {
         id: createDto.transaction_id,
         status: 'DRAFT',
-        totalAmount: 1000,
       };
 
       mockPrisma.transaction.findUnique
         .mockResolvedValueOnce(mockTransaction)
-        .mockResolvedValueOnce({ ...mockTransaction, totalAmount: 1000 });
+        .mockResolvedValueOnce({ amount: 1000, status: 'DRAFT' });
       mockPrisma.payment.create.mockResolvedValue({
         id: 'payment-id',
         amount: 1000,

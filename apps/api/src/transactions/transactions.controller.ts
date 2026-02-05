@@ -41,7 +41,11 @@ export class TransactionsController {
     return this.transactionsService.create(dto);
   }
 
-  private async resolveTenant(req: any, queryTenantId: string, headerTenantId?: string): Promise<string> {
+  private async resolveTenant(
+    req: any,
+    queryTenantId: string,
+    headerTenantId?: string,
+  ): Promise<string> {
     const requested = (headerTenantId || queryTenantId)?.trim();
     if (!requested) throw new BadRequestException('tenant_id is required');
     const effective = await this.tenantsService.resolveEffectiveTenantId(
@@ -49,7 +53,8 @@ export class TransactionsController {
       requested,
       req.user?.email || '',
     );
-    if (!effective) throw new ForbiddenException('Access denied: no access to this tenant');
+    if (!effective)
+      throw new ForbiddenException('Access denied: no access to this tenant');
     return effective;
   }
 

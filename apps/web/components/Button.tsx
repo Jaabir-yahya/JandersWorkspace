@@ -24,15 +24,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const variants = {
+      /* High contrast on light green/savanna backgrounds – dark bg + white text */
       primary:
-        'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 focus:ring-primary-500',
+        'bg-savanna-700 text-white hover:bg-savanna-800 active:bg-savanna-900 focus:ring-savanna-500 shadow-sm',
       secondary:
         'bg-neutral-200 text-neutral-900 hover:bg-neutral-300 active:bg-neutral-400 focus:ring-neutral-500',
       danger:
         'bg-danger-500 text-white hover:bg-danger-600 active:bg-danger-700 focus:ring-danger-500',
       ghost:
         'bg-transparent text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 focus:ring-neutral-500',
-      link: 'bg-transparent text-primary-600 hover:text-primary-700 underline-offset-4 hover:underline focus:ring-primary-500',
+      link: 'bg-transparent text-savanna-700 hover:text-savanna-800 underline-offset-4 hover:underline focus:ring-savanna-500',
     };
 
     const sizes = {

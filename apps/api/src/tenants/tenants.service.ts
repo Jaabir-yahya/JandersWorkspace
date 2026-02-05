@@ -55,7 +55,9 @@ export class TenantsService {
       where: { email: userEmail },
       select: { tenantId: true },
     });
-    return [...new Set(users.map((u) => u.tenantId).filter(Boolean))] as string[];
+    return [
+      ...new Set(users.map((u) => u.tenantId).filter(Boolean)),
+    ] as string[];
   }
 
   /**

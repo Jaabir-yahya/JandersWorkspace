@@ -140,8 +140,14 @@ export class BusinessController {
 
   // Inventory containers
   @Get('containers')
-  @ApiOperation({ summary: 'List inventory containers (optional: filter by assigned entity)' })
-  @ApiResponse({ status: 200, description: 'List of containers', type: [InventoryContainerDto] })
+  @ApiOperation({
+    summary: 'List inventory containers (optional: filter by assigned entity)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of containers',
+    type: [InventoryContainerDto],
+  })
   async getContainers(
     @Request() req,
     @Query('entityId') entityId?: string,
@@ -151,7 +157,11 @@ export class BusinessController {
 
   @Get('containers/:id')
   @ApiOperation({ summary: 'Get container by ID' })
-  @ApiResponse({ status: 200, description: 'Container details', type: InventoryContainerDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Container details',
+    type: InventoryContainerDto,
+  })
   async getContainer(
     @Request() req,
     @Param('id') id: string,
@@ -161,7 +171,11 @@ export class BusinessController {
 
   @Post('containers')
   @ApiOperation({ summary: 'Create container' })
-  @ApiResponse({ status: 201, description: 'Container created', type: InventoryContainerDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Container created',
+    type: InventoryContainerDto,
+  })
   async createContainer(
     @Request() req,
     @Body() dto: CreateInventoryContainerDto,
@@ -171,7 +185,11 @@ export class BusinessController {
 
   @Patch('containers/:id')
   @ApiOperation({ summary: 'Update container' })
-  @ApiResponse({ status: 200, description: 'Container updated', type: InventoryContainerDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Container updated',
+    type: InventoryContainerDto,
+  })
   async updateContainer(
     @Request() req,
     @Param('id') id: string,
@@ -192,7 +210,11 @@ export class BusinessController {
 
   @Get('containers/:id/items')
   @ApiOperation({ summary: 'List items in container (batches)' })
-  @ApiResponse({ status: 200, description: 'Container items/batches', type: [InventoryContainerItemDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'Container items/batches',
+    type: [InventoryContainerItemDto],
+  })
   async getContainerItems(
     @Request() req,
     @Param('id') id: string,
@@ -202,7 +224,11 @@ export class BusinessController {
 
   @Post('containers/:id/items')
   @ApiOperation({ summary: 'Add item/batch to container' })
-  @ApiResponse({ status: 201, description: 'Item added to container', type: InventoryContainerItemDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Item added to container',
+    type: InventoryContainerItemDto,
+  })
   async addContainerItem(
     @Request() req,
     @Param('id') id: string,

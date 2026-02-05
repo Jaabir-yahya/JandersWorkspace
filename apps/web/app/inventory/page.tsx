@@ -19,6 +19,7 @@ import { Input } from '@/components/Input';
 import { Select } from '@/components/Select';
 import { Badge } from '@/components/Badge';
 import { inventoryApi } from '@/lib/api/inventory';
+import { getApiErrorMessage } from '@/lib/api-client';
 import { formatCurrency, formatNumber, downloadAsCSV } from '@/lib/utils';
 import type { Currency, InventoryItem } from '@/lib/types';
 import { toast } from 'sonner';
@@ -74,8 +75,8 @@ export default function InventoryPage() {
         category: categoryFilter || undefined,
       });
       setItems(response.data || []);
-    } catch {
-      toast.error('Failed to load inventory items. You can still add new items below.');
+    } catch (error) {
+      toast.error(getApiErrorMessage(error));
       setItems([]);
     } finally {
       setIsLoading(false);
@@ -92,8 +93,7 @@ export default function InventoryPage() {
       resetForm();
       fetchItems();
     } catch (error) {
-      console.error('Failed to create item:', error);
-      toast.error('Failed to add item');
+      toast.error(getApiErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -116,8 +116,7 @@ export default function InventoryPage() {
       resetForm();
       fetchItems();
     } catch (error) {
-      console.error('Failed to update item:', error);
-      toast.error('Failed to update item');
+      toast.error(getApiErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }

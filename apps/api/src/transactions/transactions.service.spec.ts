@@ -74,7 +74,7 @@ describe('TransactionsService', () => {
       const mockTransaction = {
         id: '550e8400-e29b-41d4-a716-446655440003',
         tenantId: createDto.tenant_id,
-        totalAmount: expectedTotal,
+        amount: expectedTotal,
         status: TxnStatus.DRAFT,
         lines: [],
       };
@@ -113,7 +113,7 @@ describe('TransactionsService', () => {
       const mockTransaction = {
         id: '550e8400-e29b-41d4-a716-446655440003',
         tenantId: emptyLinesDto.tenant_id,
-        totalAmount: 0,
+        amount: 0,
         status: TxnStatus.DRAFT,
         lines: [],
       };

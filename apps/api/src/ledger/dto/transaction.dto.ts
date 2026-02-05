@@ -104,7 +104,11 @@ export class CreateDoubleEntryTransactionDto {
   @IsUUID()
   linkedEntityId?: string;
 
-  @ApiProperty({ required: false, description: 'Inventory container this movement relates to (e.g. received into)' })
+  @ApiProperty({
+    required: false,
+    description:
+      'Inventory container this movement relates to (e.g. received into)',
+  })
   @IsOptional()
   @IsUUID()
   containerId?: string;

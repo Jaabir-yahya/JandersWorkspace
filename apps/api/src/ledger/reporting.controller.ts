@@ -32,7 +32,10 @@ export class ReportingController {
   }
 
   @Get('transaction-history')
-  @ApiOperation({ summary: 'Get transaction history (optional: filter by entity or container)' })
+  @ApiOperation({
+    summary:
+      'Get transaction history (optional: filter by entity or container)',
+  })
   @ApiResponse({ status: 200, description: 'Transaction history report' })
   async getTransactionHistory(
     @Request() req,

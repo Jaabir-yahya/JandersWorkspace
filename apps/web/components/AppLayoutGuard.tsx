@@ -40,7 +40,7 @@ export function AppLayoutGuard({ children }: { children: React.ReactNode }) {
 
   if (!checked) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-grid-pattern">
+        <div className="flex items-center justify-center min-h-screen bg-savanna-50">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-acacia-600 border-t-transparent" />
       </div>
     );
@@ -51,7 +51,7 @@ export function AppLayoutGuard({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <div className="flex-1 flex flex-col md:ml-64 overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto bg-savanna-50/60 min-h-full">
           <div className="container mx-auto px-4 md:px-6 py-6 md:py-8 max-w-7xl">
             {children}
           </div>

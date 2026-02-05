@@ -10,6 +10,6 @@
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
     "port": 3000,
-    "startCommand": "cd /app && node dist/main"
+    "startCommand": "cd /app/apps/api && node dist/main"
   }
 }

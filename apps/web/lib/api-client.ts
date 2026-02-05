@@ -4,6 +4,7 @@ import axios, {
   InternalAxiosRequestConfig,
   AxiosResponse,
 } from "axios";
+import { toast } from "sonner";
 
 // API response wrapper type
 export interface ApiResponse<T> {
@@ -12,12 +13,20 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-// API error type
+// API error type (matches rejected interceptor payload)
 export interface ApiError {
   message: string;
   statusCode?: number;
   code?: string;
   details?: unknown;
+}
+
+/** Use in catch blocks: toast.error(getApiErrorMessage(error)) */
+export function getApiErrorMessage(error: unknown): string {
+  if (error && typeof error === "object" && "message" in error && typeof (error as ApiError).message === "string") {
+    return (error as ApiError).message;
+  }
+  return "Something went wrong. Please try again.";
 }
 
 /** Current tenant ID (set after login from user.tenantId). Backend requires tenant_id for dashboard/transactions. */
@@ -139,8 +148,9 @@ api.interceptors.response.use(
             data?.message || `Request failed with status ${status}`;
       }
     } else if (error.request) {
-      // Request was made but no response received
+      // Request was made but no response received – always surface to user
       apiError.message = "Network error. Please check your connection.";
+      if (typeof window !== "undefined") toast.error(apiError.message);
     }
 
     // Log error in development

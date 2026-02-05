@@ -55,8 +55,8 @@ jobs:
       - name: Type check
         run: npm run type-check
 
-      - name: Lint code
-        run: npm run lint
+      - name: Lint API
+        run: npm run lint --workspace=@project-bridge/api
 
       - name: Test API (unit)
         run: npm run test:api

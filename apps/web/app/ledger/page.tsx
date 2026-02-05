@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { BookOpen, Search, Filter, Download, Calendar, Plus } from "lucide-react";
+import {
+  BookOpen,
+  Search,
+  Filter,
+  Download,
+  Calendar,
+  Plus,
+} from "lucide-react";
 import { Card, CardBody, CardHeader } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
@@ -305,53 +312,6 @@ export default function LedgerPage() {
                             {transaction.reference}
                           </p>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 text-right font-mono">
-                        <span className="text-clay-700 font-semibold">
-                          {formatCurrency(transaction.amount, "KES")}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right font-mono">
-                        <span className="text-acacia-700 font-semibold">
-                          {formatCurrency(transaction.amount, "KES")}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right font-mono">
-                        <span className="text-clay-700 font-semibold">
-                          {formatCurrency(transaction.amount, "KES")}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Badge variant="success">ACTIVE</Badge>
-                      </td>
-                      <td className="px-6 py-4 text-right font-mono">
-                        <span className="text-clay-700 font-semibold">
-                          {formatCurrency(transaction.amount, "KES")}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right font-mono">
-                        <span className="text-acacia-700 font-semibold">
-                          {formatCurrency(transaction.amount, "KES")}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right font-mono">
-                        <span className="text-clay-700 font-semibold">
-                          {formatCurrency(transaction.amount, "KES")}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Badge variant="success">ACTIVE</Badge>
-                      </td>
-                      <td className="px-6 py-4 text-right font-mono">
-                        <span className="text-acacia-700 font-semibold">
-                          {formatCurrency(transaction.amount, "KES")}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right font-mono font-bold">
-                        {formatCurrency(transaction.amount, "KES")}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <Badge variant="success">ACTIVE</Badge>
                       </td>
                     </tr>
                   ))

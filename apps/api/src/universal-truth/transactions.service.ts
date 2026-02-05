@@ -85,7 +85,7 @@ export class UniversalTransactionsService {
     tenantId: string,
     options: TransactionStreamOptions = {},
   ): Promise<TransactionStreamDto[]> {
-    const result = (await this.prisma.$queryRaw`
+    const result = await this.prisma.$queryRaw`
       SELECT * FROM get_transaction_stream(
         ${tenantId}::uuid,
         ${options.fromDate || null}::date,
@@ -94,19 +94,26 @@ export class UniversalTransactionsService {
         ${options.entityId || null}::uuid,
         ${options.limit || 100}::int
       )
-    `) as Record<string, unknown>[];
+    `;
 
-    return result.map((row: Record<string, unknown>): TransactionStreamDto => ({
-      id: String(row.id ?? ''),
-      date: row.date instanceof Date ? row.date : new Date(String(row.date ?? '')),
-      amount: Number(row.amount),
-      fromAccountName: String(row.from_account_name ?? ''),
-      toAccountName: String(row.to_account_name ?? ''),
-      reasonName: String(row.reason_name ?? ''),
-      entityName: row.entity_name != null ? String(row.entity_name) : undefined,
-      notes: row.notes != null ? String(row.notes) : undefined,
-      reference: row.reference != null ? String(row.reference) : undefined,
-    }));
+    const rows = result as Record<string, unknown>[];
+    return rows.map(
+      (row: Record<string, unknown>): TransactionStreamDto => ({
+        id: String(row.id ?? ''),
+        date:
+          row.date instanceof Date
+            ? row.date
+            : new Date(String(row.date ?? '')),
+        amount: Number(row.amount),
+        fromAccountName: String(row.from_account_name ?? ''),
+        toAccountName: String(row.to_account_name ?? ''),
+        reasonName: String(row.reason_name ?? ''),
+        entityName:
+          row.entity_name != null ? String(row.entity_name) : undefined,
+        notes: row.notes != null ? String(row.notes) : undefined,
+        reference: row.reference != null ? String(row.reference) : undefined,
+      }),
+    );
   }
 
   /**
@@ -116,14 +123,15 @@ export class UniversalTransactionsService {
     transactionId: string,
     reason: string,
   ): Promise<string> {
-    const result = (await this.prisma.$queryRaw`
+    const result = await this.prisma.$queryRaw`
       SELECT * FROM reverse_transaction(
         ${transactionId}::uuid,
         ${reason}::text
       )
-    `) as Record<string, unknown>[];
+    `;
 
-    const reversalData = result[0];
+    const reversalRows = result as Record<string, unknown>[];
+    const reversalData = reversalRows[0];
     if (reversalData?.p_error_message) {
       throw new BadRequestException(String(reversalData.p_error_message));
     }
@@ -135,9 +143,10 @@ export class UniversalTransactionsService {
    * Get transaction by ID
    */
   async getTransaction(transactionId: string): Promise<any> {
-    const transaction = (await this.prisma.$queryRaw`
+    const raw = await this.prisma.$queryRaw`
       SELECT * FROM get_transaction_details(${transactionId}::uuid)
-    `) as Record<string, unknown>[];
+    `;
+    const transaction = raw as unknown[];
 
     if (!transaction || transaction.length === 0) {
       throw new BadRequestException('Transaction not found');

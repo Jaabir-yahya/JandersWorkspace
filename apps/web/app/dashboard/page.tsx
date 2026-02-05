@@ -4,31 +4,35 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  TrendingUp,
-  TrendingDown,
   DollarSign,
   CreditCard,
   Package,
-  Users,
   Plus,
   ArrowUpRight,
   Calendar,
   AlertTriangle,
   FileText,
   Settings,
+  BookOpen,
+  Scale,
+  RefreshCw,
 } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { Badge } from '@/components/Badge';
-import { formatCurrency, formatDate, formatPercentage, downloadAsCSV } from '@/lib/utils';
+import { formatCurrency, formatDate, downloadAsCSV } from '@/lib/utils';
 import { dashboardApi } from '@/lib/api/dashboard';
+import { reportingApi } from '@/lib/api/reporting';
+import { getApiErrorMessage } from '@/lib/api-client';
 import type { DashboardStats, RecentActivity } from '@/lib/types';
+import type { TrialBalanceResponse } from '@/lib/api/reporting';
 import { toast } from 'sonner';
 
 export default function DashboardPage() {
   const router = useRouter();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [trialBalance, setTrialBalance] = useState<TrialBalanceResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -38,14 +42,16 @@ export default function DashboardPage() {
   const fetchDashboardData = async () => {
     setIsLoading(true);
     try {
-      const [statsData, activityData] = await Promise.all([
+      const [statsData, activityData, trialData] = await Promise.all([
         dashboardApi.stats(),
         dashboardApi.recentActivity(10),
+        reportingApi.trialBalance().catch(() => null),
       ]);
       setStats(statsData);
       setRecentActivity(activityData);
+      setTrialBalance(trialData ?? null);
     } catch (error) {
-      toast.error('Failed to load dashboard data');
+      toast.error(getApiErrorMessage(error));
       setStats({
         totalRevenue: 0,
         totalExpenses: 0,
@@ -58,6 +64,7 @@ export default function DashboardPage() {
         currency: 'KES',
       });
       setRecentActivity([]);
+      setTrialBalance(null);
     } finally {
       setIsLoading(false);
     }
@@ -148,262 +155,173 @@ export default function DashboardPage() {
     );
   }
 
+  // Active variables: anything with a balance or count for quick view (ledger + dashboard mains)
+  type ActiveRow = { id: string; label: string; value: number; unit: 'currency' | 'count'; type?: 'DEBIT' | 'CREDIT' };
+  const activeRows: ActiveRow[] = [];
+  if (trialBalance?.accounts?.length) {
+    trialBalance.accounts.forEach((acc) => {
+      activeRows.push({ id: acc.id, label: acc.name, value: acc.balance, unit: 'currency', type: acc.type as 'DEBIT' | 'CREDIT' });
+    });
+  }
+  activeRows.push(
+    { id: 'rev', label: 'Total revenue (month)', value: stats.totalRevenue, unit: 'currency' },
+    { id: 'exp', label: 'Total expenses', value: stats.totalExpenses, unit: 'currency' },
+    { id: 'net', label: 'Net income', value: stats.netIncome, unit: 'currency' },
+    { id: 'cash', label: 'Cash & payments', value: stats.cashBalance, unit: 'currency' },
+    { id: 'ar', label: 'Accounts receivable', value: stats.accountsReceivable, unit: 'currency' },
+    { id: 'ap', label: 'Accounts payable', value: stats.accountsPayable, unit: 'currency' },
+    { id: 'inv', label: 'Inventory value', value: stats.inventoryValue, unit: 'currency' },
+    { id: 'overdue', label: 'Overdue invoices', value: stats.overdueInvoices, unit: 'count' },
+  );
+  const showTypeCol = Boolean(trialBalance?.accounts?.length);
+
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-display font-bold text-baobab-900">Dashboard</h1>
-          <p className="text-baobab-600 mt-1 flex items-center">
-            <Calendar className="h-4 w-4 mr-2" />
+          <p className="text-baobab-600 mt-1 flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
             {formatDate(new Date())}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={fetchDashboardData}><RefreshCw className="h-4 w-4 mr-1" />Refresh</Button>
           <Link href="/supplies"><Button variant="secondary" size="sm">Record purchase</Button></Link>
-          <Link href="/invoices"><Button variant="secondary" size="sm">Create invoice</Button></Link>
-          <Link href="/people"><Button variant="ghost" size="sm">People</Button></Link>
+          <Link href="/invoices"><Button variant="primary" size="sm"><Plus className="h-4 w-4 mr-1" />Quick entry</Button></Link>
           <Link href="/reports"><Button variant="ghost" size="sm">Reports</Button></Link>
-          <Button variant="secondary" onClick={handleExport}>Export Report</Button>
-          <Button variant="primary" onClick={() => handleQuickAction('invoice')}>
-            <Plus className="h-5 w-5 mr-2" />
-            Quick Entry
-          </Button>
+          <Button variant="ghost" size="sm" onClick={handleExport}>Export</Button>
         </div>
       </div>
 
-      {/* Lighter use: prompt when no data — sign in or select tenant */}
+      {/* Empty state */}
       {stats.totalRevenue === 0 && stats.cashBalance === 0 && stats.accountsReceivable === 0 && recentActivity.length === 0 && (
         <div className="bg-savanna-50 border border-baobab-200 rounded-lg p-4 flex items-center justify-between flex-wrap gap-3">
-          <p className="text-baobab-700 text-sm">
-            No data yet. Sign in or select a tenant to see your state and logs. Lighter use: you can still use Supplies, Invoices, and Reports once connected.
-          </p>
-          <div className="flex gap-2">
-            <Button variant="ghost" size="sm" onClick={() => router.push('/login')}>Sign in</Button>
-            <Button variant="ghost" size="sm" onClick={() => router.push('/tenant-select')}>Select tenant</Button>
-          </div>
+          <p className="text-baobab-700 text-sm">No data yet. Select a tenant to see active state and recent activity.</p>
+          <Button variant="ghost" size="sm" onClick={() => router.push('/tenant-select')}>Select tenant</Button>
         </div>
       )}
 
-      {/* Alerts Section */}
-      {(stats.overdueInvoices > 0) && (
-        <div className="bg-clay-50 border border-clay-200 rounded-lg p-4 animate-slide-down">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-clay-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="font-medium text-clay-900">
-                {stats.overdueInvoices} overdue invoice{stats.overdueInvoices > 1 ? 's' : ''}
-              </p>
-              <p className="text-sm text-clay-700 mt-1">
-                Follow up with customers to collect payments
-              </p>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => router.push('/invoices')}>
-              View Invoices
-            </Button>
+      {/* Overdue alert */}
+      {stats.overdueInvoices > 0 && (
+        <div className="bg-clay-50 border border-clay-200 rounded-lg px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-clay-600 shrink-0" />
+            <span className="text-sm font-medium text-clay-900">
+              {stats.overdueInvoices} overdue invoice{stats.overdueInvoices > 1 ? 's' : ''} – follow up on payments
+            </span>
           </div>
+          <Button variant="ghost" size="sm" onClick={() => router.push('/invoices')}>View Invoices</Button>
         </div>
       )}
 
-      {/* KPI Cards - 8 Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Total Revenue */}
-        <Card className="stat-card animate-slide-up">
-          <CardBody className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-baobab-600">Total Revenue</span>
-              <div className="p-2 bg-acacia-100 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-acacia-700" />
-              </div>
+      {/* Active – variables with a balance or count for quick view (ledger + dashboard mains) */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-display font-semibold text-baobab-900 flex items-center gap-2">
+                <Scale className="h-5 w-5 text-savanna-600" />
+                Active
+              </h2>
+              <p className="text-sm text-baobab-600 mt-1">
+                Variables with a balance or count for quick view – ledger accounts and dashboard mains. Verify in Ledger or Reports.
+              </p>
             </div>
-            <div className="currency text-2xl font-bold text-baobab-900 mb-2">
-              {formatCurrency(stats.totalRevenue, stats.currency)}
+            <div className="flex items-center gap-2 shrink-0">
+              <Link href="/ledger"><Button variant="secondary" size="sm"><BookOpen className="h-4 w-4 mr-1" />Ledger</Button></Link>
+              <Link href="/reports"><Button variant="ghost" size="sm">Reports <ArrowUpRight className="h-4 w-4 ml-0.5 inline" /></Button></Link>
             </div>
-            <div className="flex items-center text-sm text-baobab-600">
-              <span className="text-acacia-700 font-medium">This month</span>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Total Expenses */}
-        <Card className="stat-card animate-slide-up delay-100">
-          <CardBody className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-baobab-600">Total Expenses</span>
-              <div className="p-2 bg-clay-100 rounded-lg">
-                <TrendingDown className="h-5 w-5 text-clay-700" />
-              </div>
-            </div>
-            <div className="currency text-2xl font-bold text-baobab-900 mb-2">
-              {formatCurrency(stats.totalExpenses, stats.currency)}
-            </div>
-            <div className="flex items-center text-sm text-baobab-600">
-              <span className="text-clay-700 font-medium">This month</span>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Net Income */}
-        <Card className="stat-card animate-slide-up delay-200">
-          <CardBody className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-baobab-600">Net Income</span>
-              <div className="p-2 bg-savanna-200 rounded-lg">
-                <DollarSign className="h-5 w-5 text-savanna-700" />
-              </div>
-            </div>
-            <div className="currency text-2xl font-bold text-baobab-900 mb-2">
-              {formatCurrency(stats.netIncome, stats.currency)}
-            </div>
-            <div className="flex items-center text-sm">
-              <span className={`flex items-center font-medium ${stats.netIncome >= 0 ? 'text-acacia-700' : 'text-clay-700'}`}>
-                {stats.netIncome >= 0 ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
-                {formatPercentage((stats.netIncome / stats.totalRevenue) * 100)}
+          </div>
+        </CardHeader>
+        <CardBody className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-baobab-200 bg-savanna-50/60">
+                  <th className="text-left px-6 py-3 font-medium text-baobab-700">Variable</th>
+                  {showTypeCol && <th className="text-left px-6 py-3 font-medium text-baobab-700 w-24">Type</th>}
+                  <th className="text-right px-6 py-3 font-medium text-baobab-700">Value</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-baobab-100">
+                {activeRows.map((row) => (
+                  <tr key={row.id} className="hover:bg-savanna-50/40">
+                    <td className="px-6 py-2.5 font-medium text-baobab-900">{row.label}</td>
+                    {showTypeCol && (
+                      <td className="px-6 py-2.5">
+                        {row.type ? <span className={row.type === 'DEBIT' ? 'text-savanna-700' : 'text-clay-700'}>{row.type}</span> : <span className="text-baobab-400">—</span>}
+                      </td>
+                    )}
+                    <td className="px-6 py-2.5 text-right font-semibold text-baobab-900">
+                      {row.unit === 'currency' ? formatCurrency(row.value, stats.currency) : row.value}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {showTypeCol && trialBalance && (
+            <div className="px-6 py-3 border-t border-baobab-200 bg-savanna-50/40 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <span className="text-baobab-600">
+                Debits: <strong>{formatCurrency(trialBalance.summary.totalDebits, stats.currency)}</strong>
+                {' · '}
+                Credits: <strong>{formatCurrency(trialBalance.summary.totalCredits, stats.currency)}</strong>
               </span>
-              <span className="text-baobab-500 ml-2">margin</span>
+              {trialBalance.summary.isBalanced ? <Badge variant="success">Balanced</Badge> : <Badge variant="warning">Unbalanced</Badge>}
             </div>
-          </CardBody>
-        </Card>
+          )}
+        </CardBody>
+      </Card>
 
-        {/* Cash Balance */}
-        <Card className="stat-card animate-slide-up delay-300">
-          <CardBody className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-baobab-600">Cash Balance</span>
-              <div className="p-2 bg-acacia-100 rounded-lg">
-                <CreditCard className="h-5 w-5 text-acacia-700" />
-              </div>
-            </div>
-            <div className="currency text-2xl font-bold text-baobab-900 mb-2">
-              {formatCurrency(stats.cashBalance, stats.currency)}
-            </div>
-            <div className="flex items-center text-sm text-baobab-600">
-              Available funds
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Accounts Receivable */}
-        <Card className="stat-card animate-slide-up delay-400">
-          <CardBody className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-baobab-600">Accounts Receivable</span>
-              <div className="p-2 bg-savanna-100 rounded-lg">
-                <Users className="h-5 w-5 text-savanna-700" />
-              </div>
-            </div>
-            <div className="currency text-2xl font-bold text-baobab-900 mb-2">
-              {formatCurrency(stats.accountsReceivable, stats.currency)}
-            </div>
-            <div className="flex items-center text-sm text-baobab-600">
-              Outstanding payments
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Accounts Payable */}
-        <Card className="stat-card animate-slide-up delay-500">
-          <CardBody className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-baobab-600">Accounts Payable</span>
-              <div className="p-2 bg-clay-100 rounded-lg">
-                <CreditCard className="h-5 w-5 text-clay-700" />
-              </div>
-            </div>
-            <div className="currency text-2xl font-bold text-baobab-900 mb-2">
-              {formatCurrency(stats.accountsPayable, stats.currency)}
-            </div>
-            <div className="flex items-center text-sm text-baobab-600">
-              Outstanding bills
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Inventory Value */}
-        <Card className="stat-card animate-slide-up delay-600">
-          <CardBody className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-baobab-600">Inventory Value</span>
-              <div className="p-2 bg-acacia-100 rounded-lg">
-                <Package className="h-5 w-5 text-acacia-700" />
-              </div>
-            </div>
-            <div className="currency text-2xl font-bold text-baobab-900 mb-2">
-              {formatCurrency(stats.inventoryValue, stats.currency)}
-            </div>
-            <div className="flex items-center text-sm text-baobab-600">
-              Total stock value
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Overdue Invoices */}
-        <Card className="stat-card animate-slide-up delay-700">
-          <CardBody className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-baobab-600">Overdue Invoices</span>
-              <div className="p-2 bg-clay-100 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-clay-700" />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-baobab-900 mb-2">
-              {stats.overdueInvoices}
-            </div>
-            <div className="flex items-center text-sm">
-              {stats.overdueInvoices > 0 ? (
-                <span className="text-clay-700 font-medium">Needs attention</span>
-              ) : (
-                <span className="text-acacia-700 font-medium">All paid</span>
-              )}
-            </div>
-          </CardBody>
-        </Card>
-      </div>
-
-      {/* Recent Activity */}
+      {/* Recent – activity only */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-display font-semibold text-baobab-900">
-              Recent Transactions
+              Recent
             </h2>
-            <Button variant="ghost" size="sm" onClick={() => router.push('/ledger')}>
-              View All
-              <ArrowUpRight className="h-4 w-4 ml-2" />
-            </Button>
+            <Link href="/ledger">
+              <Button variant="ghost" size="sm">View all <ArrowUpRight className="h-4 w-4 ml-1 inline" /></Button>
+            </Link>
           </div>
         </CardHeader>
         <CardBody className="p-0">
           <div className="divide-y divide-baobab-200">
-            {recentActivity.map((activity) => (
-              <div key={activity.id} className="px-6 py-4 hover:bg-savanna-50 transition-colors cursor-pointer">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className={`p-2 rounded-lg ${
-                      activity.type === 'invoice' ? 'bg-acacia-100' :
-                      activity.type === 'payment' ? 'bg-savanna-200' :
-                      activity.type === 'expense' ? 'bg-clay-100' : 'bg-baobab-100'
-                    }`}>
-                      {activity.type === 'invoice' && <FileText className="h-5 w-5 text-acacia-700" />}
-                      {activity.type === 'payment' && <DollarSign className="h-5 w-5 text-savanna-700" />}
-                      {activity.type === 'expense' && <Package className="h-5 w-5 text-clay-700" />}
+            {recentActivity.length === 0 ? (
+              <div className="px-6 py-8 text-center text-baobab-500 text-sm">No recent activity. Record a purchase or create an invoice to see it here.</div>
+            ) : (
+              recentActivity.map((activity) => (
+                <div key={activity.id} className="px-6 py-4 hover:bg-savanna-50 transition-colors cursor-pointer">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className={`p-2 rounded-lg ${
+                        activity.type === 'invoice' ? 'bg-acacia-100' :
+                        activity.type === 'payment' ? 'bg-savanna-200' :
+                        activity.type === 'expense' ? 'bg-clay-100' : 'bg-baobab-100'
+                      }`}>
+                        {activity.type === 'invoice' && <FileText className="h-5 w-5 text-acacia-700" />}
+                        {activity.type === 'payment' && <DollarSign className="h-5 w-5 text-savanna-700" />}
+                        {activity.type === 'expense' && <Package className="h-5 w-5 text-clay-700" />}
+                      </div>
+                      <div>
+                        <p className="font-medium text-baobab-900">{activity.description}</p>
+                        <p className="text-sm text-baobab-500">{formatDate(activity.date)}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-baobab-900">{activity.description}</p>
-                      <p className="text-sm text-baobab-500">{formatDate(activity.date)}</p>
+                    <div className="text-right">
+                      <p className="currency font-bold text-baobab-900">
+                        {formatCurrency(activity.amount, stats.currency)}
+                      </p>
+                      <Badge variant={activity.type === 'payment' ? 'success' : 'info'}>
+                        {activity.type}
+                      </Badge>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="currency font-bold text-baobab-900">
-                      {formatCurrency(activity.amount, stats.currency)}
-                    </p>
-                    <Badge variant={activity.type === 'payment' ? 'success' : 'info'}>
-                      {activity.type}
-                    </Badge>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </CardBody>
       </Card>

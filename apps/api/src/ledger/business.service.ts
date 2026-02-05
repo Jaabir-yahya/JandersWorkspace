@@ -454,7 +454,10 @@ export class BusinessService {
   }
 
   // Inventory containers
-  async getContainers(tenantId: string, entityId?: string): Promise<InventoryContainerDto[]> {
+  async getContainers(
+    tenantId: string,
+    entityId?: string,
+  ): Promise<InventoryContainerDto[]> {
     if (!tenantId?.trim()) return [];
     const where: any = { tenantId: tenantId.trim(), isActive: true };
     if (entityId?.trim()) where.assignedEntityId = entityId.trim();
@@ -466,7 +469,10 @@ export class BusinessService {
     return list.map((c: any) => this.mapContainerToDto(c));
   }
 
-  async getContainer(tenantId: string, id: string): Promise<InventoryContainerDto> {
+  async getContainer(
+    tenantId: string,
+    id: string,
+  ): Promise<InventoryContainerDto> {
     const c = await (this.prisma as any).inventoryContainer.findFirst({
       where: { id, tenantId },
     });
@@ -505,7 +511,9 @@ export class BusinessService {
         ...(dto.type != null && { type: dto.type }),
         ...(dto.location !== undefined && { location: dto.location }),
         ...(dto.capacity !== undefined && { capacity: dto.capacity }),
-        ...(dto.assignedEntityId !== undefined && { assignedEntityId: dto.assignedEntityId ?? null }),
+        ...(dto.assignedEntityId !== undefined && {
+          assignedEntityId: dto.assignedEntityId ?? null,
+        }),
         ...(dto.metadata !== undefined && { metadata: dto.metadata as any }),
         ...(dto.isActive !== undefined && { isActive: dto.isActive }),
       },
@@ -541,7 +549,9 @@ export class BusinessService {
     });
     if (!item) throw new NotFoundException(`Item ${dto.itemId} not found`);
     const batchRef = dto.batchRef?.trim() ?? '';
-    const existing = await (this.prisma as any).inventoryContainerItem.findFirst({
+    const existing = await (
+      this.prisma as any
+    ).inventoryContainerItem.findFirst({
       where: { containerId, itemId: dto.itemId, batchRef },
     });
     let row: any;
@@ -579,7 +589,10 @@ export class BusinessService {
       location: c.location ?? undefined,
       capacity: c.capacity ?? undefined,
       assignedEntityId: c.assignedEntityId ?? undefined,
-      metadata: typeof c.metadata === 'object' && c.metadata !== null ? { ...c.metadata } : {},
+      metadata:
+        typeof c.metadata === 'object' && c.metadata !== null
+          ? { ...c.metadata }
+          : {},
       isActive: c.isActive ?? true,
       createdAt: c.createdAt,
       updatedAt: c.updatedAt,
@@ -595,7 +608,10 @@ export class BusinessService {
       quantity: Number(row.quantity),
       batchRef: row.batchRef ?? '',
       expiryAt: row.expiryAt ?? undefined,
-      metadata: typeof row.metadata === 'object' && row.metadata !== null ? { ...row.metadata } : {},
+      metadata:
+        typeof row.metadata === 'object' && row.metadata !== null
+          ? { ...row.metadata }
+          : {},
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       itemName: item?.name,

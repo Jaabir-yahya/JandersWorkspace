@@ -24,16 +24,32 @@ interface NavItem {
   badge?: string;
 }
 
-const navigation: NavItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'People', href: '/people', icon: Users },
-  { name: 'Inventory', href: '/inventory', icon: Package },
-  { name: 'Containers', href: '/inventory/containers', icon: Box },
-  { name: 'Supplies', href: '/supplies', icon: Package },
-  { name: 'Invoices', href: '/invoices', icon: FileText },
-  { name: 'Reports', href: '/reports', icon: TrendingUp },
-  { name: 'Ledger', href: '/ledger', icon: BookOpen },
-  { name: 'Settings', href: '/settings', icon: Settings },
+/** Nav grouped by use case: Truth (ledger/bookkeeping), Capture (transactions), Manage (data) */
+const navSections: { label: string; items: NavItem[] }[] = [
+  {
+    label: 'Truth & bookkeeping',
+    items: [
+      { name: 'Ledger', href: '/ledger', icon: BookOpen },
+      { name: 'Reports', href: '/reports', icon: TrendingUp },
+    ],
+  },
+  {
+    label: 'Capture',
+    items: [
+      { name: 'Supplies', href: '/supplies', icon: Package },
+      { name: 'Invoices', href: '/invoices', icon: FileText },
+    ],
+  },
+  {
+    label: 'Manage',
+    items: [
+      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+      { name: 'People', href: '/people', icon: Users },
+      { name: 'Inventory', href: '/inventory', icon: Package },
+      { name: 'Containers', href: '/inventory/containers', icon: Box },
+      { name: 'Settings', href: '/settings', icon: Settings },
+    ],
+  },
 ];
 
 export function Sidebar() {
@@ -78,35 +94,43 @@ export function Sidebar() {
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-          {navigation.map((item) => {
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                className={`
-                  flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200
-                  ${isActive
-                    ? 'bg-acacia-600 text-white shadow-lg scale-105'
-                    : 'text-baobab-200 hover:bg-baobab-700 hover:text-white hover:scale-102'
-                  }
-                `}
-              >
-                <Icon className={`mr-3 h-5 w-5 ${isActive ? 'text-white' : 'text-baobab-300'}`} />
-                {item.name}
-                {item.badge && (
-                  <span className="ml-auto bg-clay-500 text-white text-xs px-2 py-0.5 rounded-full">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+        {/* Navigation – grouped by use case */}
+        <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
+          {navSections.map((section) => (
+            <div key={section.label}>
+              <p className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-baobab-400">
+                {section.label}
+              </p>
+              <div className="space-y-1">
+                {section.items.map((item) => {
+                  const isActive = pathname === item.href;
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className={`
+                        flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200
+                        ${isActive
+                          ? 'bg-savanna-600 text-white shadow-md'
+                          : 'text-baobab-200 hover:bg-baobab-700 hover:text-white'
+                        }
+                      `}
+                    >
+                      <Icon className={`mr-3 h-5 w-5 shrink-0 ${isActive ? 'text-white' : 'text-baobab-300'}`} />
+                      {item.name}
+                      {item.badge && (
+                        <span className="ml-auto bg-clay-500 text-white text-xs px-2 py-0.5 rounded-full">
+                          {item.badge}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         {/* Quick Actions - clickable + shortcuts */}

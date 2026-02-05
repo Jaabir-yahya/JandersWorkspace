@@ -40,7 +40,11 @@ export class CreateSupplyDto {
   @IsUUID()
   entityId?: string;
 
-  @ApiProperty({ required: false, description: 'Receive into this inventory container (links supply to truth)' })
+  @ApiProperty({
+    required: false,
+    description:
+      'Receive into this inventory container (links supply to truth)',
+  })
   @IsOptional()
   @IsUUID()
   containerId?: string;
@@ -383,7 +387,10 @@ export class InventoryContainerDto {
   location?: string;
   @ApiProperty({ required: false })
   capacity?: string;
-  @ApiProperty({ required: false, description: 'Entity (person) assigned to this container' })
+  @ApiProperty({
+    required: false,
+    description: 'Entity (person) assigned to this container',
+  })
   assignedEntityId?: string;
   @ApiProperty()
   metadata: Record<string, any>;
@@ -399,7 +406,10 @@ export class CreateInventoryContainerDto {
   @ApiProperty()
   @IsString()
   name: string;
-  @ApiProperty({ example: 'WAREHOUSE', description: 'WAREHOUSE | BIN | SHELF | SHIPMENT | VEHICLE' })
+  @ApiProperty({
+    example: 'WAREHOUSE',
+    description: 'WAREHOUSE | BIN | SHELF | SHIPMENT | VEHICLE',
+  })
   @IsString()
   type: string;
   @ApiProperty({ required: false })
@@ -410,7 +420,11 @@ export class CreateInventoryContainerDto {
   @IsOptional()
   @IsString()
   capacity?: string;
-  @ApiProperty({ required: false, description: 'Link container to a person/entity (e.g. driver, warehouse manager)' })
+  @ApiProperty({
+    required: false,
+    description:
+      'Link container to a person/entity (e.g. driver, warehouse manager)',
+  })
   @IsOptional()
   @IsUUID()
   assignedEntityId?: string;

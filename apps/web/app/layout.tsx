@@ -14,7 +14,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className="grid-pattern">
+      <body className="min-h-screen bg-savanna-50/80">
         <AppLayoutGuard>{children}</AppLayoutGuard>
 
         {/* Toast Notifications */}

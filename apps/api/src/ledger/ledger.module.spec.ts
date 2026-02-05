@@ -152,11 +152,15 @@ describe('Ledger Module Integration', () => {
           return callback({
             item: {
               findFirst: jest.fn().mockResolvedValue(mockAccount),
+              findMany: jest.fn().mockResolvedValue([mockAccount]),
               create: jest.fn().mockResolvedValue(mockAccount),
               update: jest.fn().mockResolvedValue(mockAccount),
             },
             transaction: {
               create: jest.fn().mockResolvedValue(mockTransaction),
+            },
+            note: {
+              create: jest.fn().mockResolvedValue({}),
             },
           } as any);
         });
@@ -241,14 +245,18 @@ describe('Ledger Module Integration', () => {
         {
           id: 'acc1',
           name: 'Cash Account',
+          itemType: 'ACCOUNT',
+          isActive: true,
           metadata: { accountType: 'CASH', balance: 1000, currency: 'KES' },
         },
         {
           id: 'acc2',
           name: 'Supplier Payable',
+          itemType: 'ACCOUNT',
+          isActive: true,
           metadata: {
             accountType: 'SUPPLIER_PAYABLE',
-            balance: -500,
+            balance: 500,
             currency: 'KES',
           },
         },
@@ -360,11 +368,17 @@ describe('Ledger Module Integration', () => {
       const mockAccounts = [
         {
           id: 'inventory-acc',
+          name: 'Inventory',
+          itemType: 'ACCOUNT',
+          isActive: true,
           metadata: { accountType: 'INVENTORY', balance: 1000 },
         },
         {
           id: 'supplier-acc',
-          metadata: { accountType: 'SUPPLIER_PAYABLE', balance: -1000 },
+          name: 'Supplier Payable',
+          itemType: 'ACCOUNT',
+          isActive: true,
+          metadata: { accountType: 'SUPPLIER_PAYABLE', balance: 1000 },
         },
       ];
 

@@ -75,9 +75,9 @@ describe('DashboardService', () => {
 
       mockPrisma.transaction.findMany
         .mockResolvedValueOnce([
-          { totalAmount: 100 },
-          { totalAmount: 200 },
-          { totalAmount: 300 },
+          { amount: 100 },
+          { amount: 200 },
+          { amount: 300 },
         ])
         .mockResolvedValueOnce([])
         .mockResolvedValueOnce([])
@@ -139,47 +139,47 @@ describe('DashboardService', () => {
           {
             id: 'txn-1',
             type: 'RETAIL',
-            totalAmount: 1000,
+            amount: 1000,
             createdAt: new Date(),
             reference: 'REF1',
             entityId: 'entity-1',
-            entity: { id: 'entity-1', displayName: 'Customer A' },
+            entity: { id: 'entity-1', name: 'Customer A' },
           },
           {
             id: 'txn-2',
             type: 'RETAIL',
-            totalAmount: 500,
+            amount: 500,
             createdAt: new Date(),
             reference: 'REF2',
             entityId: 'entity-2',
-            entity: { id: 'entity-2', displayName: 'Customer B' },
+            entity: { id: 'entity-2', name: 'Customer B' },
           },
           {
             id: 'txn-3',
             type: 'RETAIL',
-            totalAmount: 200,
+            amount: 200,
             createdAt: new Date(),
             reference: 'REF3',
             entityId: 'entity-1',
-            entity: { id: 'entity-1', displayName: 'Customer A' },
+            entity: { id: 'entity-1', name: 'Customer A' },
           },
           {
             id: 'txn-4',
             type: 'RETAIL',
-            totalAmount: 300,
+            amount: 300,
             createdAt: new Date(),
             reference: 'REF4',
             entityId: 'entity-2',
-            entity: { id: 'entity-2', displayName: 'Customer B' },
+            entity: { id: 'entity-2', name: 'Customer B' },
           },
           {
             id: 'txn-5',
             type: 'RETAIL',
-            totalAmount: 150,
+            amount: 150,
             createdAt: new Date(),
             reference: 'REF5',
             entityId: 'entity-1',
-            entity: { id: 'entity-1', displayName: 'Customer A' },
+            entity: { id: 'entity-1', name: 'Customer A' },
           },
         ]);
       mockPrisma.transaction.count.mockResolvedValue(0);
