@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionsService } from './transactions.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { TxnStatus, PaymentStatus } from '@prisma/client';
+import { TxnStatus, PaymentStatus } from '@project-bridge/database';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 

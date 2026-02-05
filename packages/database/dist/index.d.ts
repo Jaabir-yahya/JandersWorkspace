@@ -1,1 +1,1 @@
-export { PrismaClient } from "./generated/prisma/client.js";
+export { PrismaClient, Prisma, TxnStatus, TxnType, PaymentStatus, EntityType, } from "./generated/prisma/client.js";

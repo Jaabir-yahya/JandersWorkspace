@@ -4,7 +4,10 @@ import {
   OnModuleDestroy,
   Logger,
 } from '@nestjs/common';
-import { PrismaClient } from '@project-bridge/database';
+import { PrismaClient } from '@project-bridge/database/client';
+
+/** Instance type of the generated Prisma client (for declaration merge so PrismaService is typed as full client). */
+type PrismaClientInstance = InstanceType<typeof PrismaClient>;
 
 @Injectable()
 export class PrismaService
@@ -69,3 +72,6 @@ export class PrismaService
     }
   }
 }
+
+// Declaration merge: PrismaService is typed as the full Prisma client so injected usage (this.prisma.user, etc.) is correctly typed
+export interface PrismaService extends PrismaClientInstance {}

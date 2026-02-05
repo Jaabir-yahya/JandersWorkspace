@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { TxnType, TxnStatus, PaymentStatus } from '@prisma/client';
+import { TxnType, TxnStatus, PaymentStatus } from '@project-bridge/database';
 
 @Injectable()
 export class RpcService {

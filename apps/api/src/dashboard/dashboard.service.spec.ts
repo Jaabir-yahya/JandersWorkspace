@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DashboardService } from './dashboard.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { TxnStatus, TxnType, PaymentStatus } from '@prisma/client';
+import { TxnStatus, TxnType, PaymentStatus } from '@project-bridge/database';
 
 describe('DashboardService', () => {
   let service: DashboardService;

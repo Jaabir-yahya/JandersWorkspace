@@ -2,7 +2,7 @@
  * Seed script to create initial tenant and dev user
  * Run with: npx ts-node scripts/seed-dev-user.ts
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@project-bridge/database';
 
 const prisma = new PrismaClient();
 

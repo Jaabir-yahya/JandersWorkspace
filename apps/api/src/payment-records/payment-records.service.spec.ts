@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PaymentRecordsService } from './payment-records.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { PaymentStatus } from '@prisma/client';
+import { PaymentStatus } from '@project-bridge/database';
 
 describe('PaymentRecordsService', () => {
   let service: PaymentRecordsService;

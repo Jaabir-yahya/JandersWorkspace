@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { TxnStatus, TxnType, PaymentStatus } from '@prisma/client';
+import { TxnStatus, TxnType, PaymentStatus } from '@project-bridge/database';
 
 export interface DashboardStats {
   total_revenue_today: number;

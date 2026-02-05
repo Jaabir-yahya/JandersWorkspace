@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePaymentRecordDto } from './dto/create-payment-record.dto';
-import { PaymentStatus, Prisma } from '@prisma/client';
+import { PaymentStatus, Prisma } from '@project-bridge/database';
 
 export interface PaymentRecord {
   id: string;

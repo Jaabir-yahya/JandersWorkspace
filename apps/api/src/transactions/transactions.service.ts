@@ -12,7 +12,7 @@ import {
   UniversalInvoice,
   getAccountCode,
 } from './interfaces/universal-invoice.interface';
-import { TxnStatus, PaymentStatus, Prisma } from '@prisma/client';
+import { TxnStatus, PaymentStatus, Prisma } from '@project-bridge/database';
 
 export interface TransactionFilters {
   status?: string;

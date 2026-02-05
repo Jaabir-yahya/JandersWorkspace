@@ -4,7 +4,7 @@ import {
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
-import { TxnType, TxnStatus, PaymentStatus } from '@prisma/client';
+import { TxnType, TxnStatus, PaymentStatus } from '@project-bridge/database';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   CreateTransactionDto,
