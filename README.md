@@ -1,282 +1,295 @@
-# Project Bridge
+# Project Bridge 🇰🇪
 
-**Multi-tenant business management platform for African SMEs**
+**The Truth Ledger for Nairobi's Business Owners**
 
-Built for the 80% of African businesses that operate informally - from kiosks and dukas to salons and market traders. Project Bridge provides a modern, mobile-first dashboard with optional integrations (M-Pesa, WhatsApp, QuickBooks) for businesses ready to digitize.
-
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/Jaabir-yahya/JandersWorkspace)
-[![API Tests](https://img.shields.io/badge/api%20tests-23%20passing-brightgreen)](https://github.com/Jaabir-yahya/JandersWorkspace)
-[![TypeScript](https://img.shields.io/badge/typescript-5.9-blue)](https://www.typescriptlang.org/)
-[![NestJS](https://img.shields.io/badge/nestjs-11.0-red)](https://nestjs.com/)
-[![Prisma](https://img.shields.io/badge/prisma-6.0-2D3748)](https://prisma.io/)
+A monorepo platform that gives **80% of Kenyan business owners** (manual users: mama mbogas, dukas) complete control over their financial data, while preparing infrastructure for **20%** who need integrations and automation.
 
 ---
 
-## Quick Start (Solo Developer)
+## 🎯 Current State: Production-Ready MVP
 
+**Status**: ✅ Core MVP Complete - Ready for Production Deployment
+
+### What's Working ✅
+- **Turborepo Monorepo**: Efficient workspace with apps and packages
+- **NestJS Backend**: Complete API with authentication, transactions, entities, inventory
+- **Next.js Frontend**: Modern dashboard with African-inspired design
+- **Supabase Database**: PostgreSQL with comprehensive schema
+- **Multi-tenant Architecture**: Tenant isolation with tier-based access control
+- **Core Features**: Transactions, entities, items, payments, notes, dashboard
+
+### Known Issues ⚠️
+- **Workspace Linking**: Some packages using `file:` instead of `workspace:*` (optional cleanup)
+- **Integration Code**: TODOs in integration code (deferred for post-MVP)
+- **Turbo Remote Cache**: In some environments `turbo run build` may fail with TLS/keychain; use `turbo run build --no-daemon` or run build per package
+
+---
+
+## 📁 Monorepo Structure (Turborepo)
+
+| Path | Purpose |
+|------|---------|
+| **apps/api** | NestJS backend (`@project-bridge/api`) – auth, transactions, ledger, business, reporting |
+| **apps/web** | Next.js frontend (`ledger-system-frontend`) – dashboard, inventory, supplies, invoices, reports, ledger |
+| **packages/database** | Prisma schema, migrations, `prisma generate` (used by API) |
+| **packages/types** | Shared TypeScript types |
+| **packages/shared** | Kenya utilities, formatters, truth-engine |
+| **packages/config** | Shared ESLint/TypeScript configs |
+| **packages/integrations** | Mpesa, QuickBooks, WhatsApp, Xero (shared code) |
+
+**Root scripts:** `build`, `dev`, `dev:api`, `dev:web`, `dev:app` (api + web), `lint`, `test`, `db:local`, `db:migrate`, `db:studio`.
+**Turbo pipeline:** `build` (depends on `^build` and `^generate`), `dev` (persistent), `generate`, `lint`, `test`, `type-check`, `clean`, `migrate`, `studio`.
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js ≥18
+- npm ≥9
+- Docker (for local database)
+
+### 1. Install Dependencies
 ```bash
-# 1. Clone and install
-git clone https://github.com/Jaabir-yahya/JandersWorkspace.git
-cd JandersWorkspace
 npm install
+```
 
-# 2. Set up environment
+### 2. Environment Setup
+```bash
+# Copy example configs
+cp .env.example .env
 cp apps/api/.env.example apps/api/.env
-# Edit apps/api/.env with your Supabase credentials
 
-# 3. Run database migrations
-cd apps/api && npx prisma migrate deploy
-
-# 4. Start development
-npm run dev          # Starts API (3000), bridge-admin (3003), bridge-perfect (3002)
+# Update with your Supabase credentials
 ```
 
-**Test the setup:**
+### 3. Database
 ```bash
-curl http://localhost:3000/api/v1/health
-# Visit: http://localhost:3003/janders-dogfood
+# Start local Supabase (Docker)
+npm run db:local
+
+# Run migrations
+npm run db:migrate
+
+# (Optional) Seed with Kenya sample data
+npm run db:seed
 ```
 
----
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Vercel                               │
-│  ┌──────────────────┐  ┌──────────────────┐                │
-│  │ bridge-admin     │  │ bridge-perfect   │                │
-│  │ (Desktop)        │  │ (Mobile)         │                │
-│  │ localhost:3003   │  │ localhost:3002   │                │
-│  └──────────────────┘  └──────────────────┘                │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                       Railway                               │
-│                    NestJS API                               │
-│              localhost:3000                                 │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│  │   Tenants    │  │   Feature    │  │  Integrations    │  │
-│  │   (Multi)    │  │   Flags      │  │  (M-Pesa, etc)   │  │
-│  └──────────────┘  └──────────────┘  └──────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      Supabase                               │
-│              PostgreSQL + Auth                              │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| **Frontend** | React 19 + Vite + Tailwind CSS + Zustand |
-| **Backend** | NestJS 11 + Prisma 6 + Swagger |
-| **Database** | PostgreSQL (Supabase) |
-| **Auth** | Supabase Auth (optional for MVP) |
-| **Integrations** | M-Pesa, WhatsApp Business API, QuickBooks, Xero |
-| **Deployment** | Railway (API) + Vercel (Frontend) |
-| **CI/CD** | GitHub Actions |
-
----
-
-## Project Structure
-
-```
-JandersWorkspace/
-├── apps/
-│   ├── api/                    # NestJS API (Railway)
-│   │   ├── src/
-│   │   │   ├── auth/          # JWT + Supabase Auth
-│   │   │   ├── integrations/  # M-Pesa, WhatsApp, QuickBooks, Xero
-│   │   │   ├── tenants/       # Multi-tenant logic
-│   │   │   └── health/        # Health checks
-│   │   └── prisma/            # Database schema + migrations
-│   ├── bridge-admin/          # Desktop dashboard (Vercel)
-│   └── bridge-perfect/        # Mobile dashboard (Vercel)
-├── packages/
-│   ├── types/                 # Shared TypeScript types
-│   └── database/              # Shared Prisma client
-├── docs/
-│   ├── guides/                # Developer guides
-│   ├── reference/             # API reference
-│   └── archive/               # Old documentation
-└── .github/workflows/         # CI/CD automation
-```
-
----
-
-## Solo Developer Workflow
-
-### Daily Development
-
+### 4. Development
 ```bash
-# Start all services
+# Run everything (API + Web)
 npm run dev
 
-# Work on API
-cd apps/api && npm run dev
-
-# Work on bridge-admin
-cd apps/bridge-admin && npm run dev
-
-# Work on bridge-perfect
-cd apps/bridge-perfect && npm run dev
-```
-
-### Testing
-
-```bash
-# Run API tests
-npm test --workspace=@project-bridge/api
-
-# Type checking
-npm run type-check
-
-# Build check (catches deployment issues)
-npm run build
-```
-
-### Deployment
-
-```bash
-# 1. Commit and push
-git add .
-git commit -m "feat: your changes"
-git push origin main
-
-# 2. GitHub Actions auto-deploys:
-#    - API → Railway
-#    - Frontends → Vercel
-
-# 3. Monitor deployments
-#    - Railway Dashboard: https://railway.app
-#    - Vercel Dashboard: https://vercel.com
+# Or run individually:
+npm run dev:api      # Backend only (http://localhost:3001)
+npm run dev:web      # Frontend only (http://localhost:3000)
 ```
 
 ---
 
-## Environment Variables
+## 📦 Available Commands
 
-### Required (Supabase)
-
-```env
-# apps/api/.env
-DATABASE_URL=postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres
-DIRECT_URL=postgresql://postgres:[password]@db.[ref].supabase.co:6543/postgres?pgbouncer=true
-SUPABASE_URL=https://[ref].supabase.co
-SUPABASE_SECRET_KEY=eyJhbG...
-JWT_SECRET=your-random-secret
-ENCRYPTION_KEY=your-32-char-key
-```
-
-### Optional (Integrations)
-
-```env
-# M-Pesa (Safaricom)
-MPESA_ENVIRONMENT=sandbox
-MPESA_CONSUMER_KEY=...
-MPESA_CONSUMER_SECRET=...
-MPESA_SHORTCODE=174379
-MPESA_PASSKEY=...
-
-# WhatsApp (Meta)
-WHATSAPP_PHONE_NUMBER_ID=...
-WHATSAPP_ACCESS_TOKEN=...
-```
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start all apps in dev mode |
+| `npm run build` | Build all apps for production |  
+| `npm run lint` | Lint all code |
+| `npm run test` | Run all tests |
+| `npm run type-check` | TypeScript validation |
+| `npm run clean` | Remove all build artifacts + node_modules |
+| `npm run db:migrate` | Run Prisma migrations |
+| `npm run db:studio` | Open Prisma Studio (DB GUI) |
 
 ---
 
-## Integration Development
+## 🧪 Testing MVP
 
-### Adding a New Integration
+1. **Sign in** at `/login` with your Supabase Auth user (e.g. the email/password you set up in Supabase Dashboard → Authentication → Users). For dashboard and transactions to load, set `user_metadata.tenant_id` in Supabase to a valid tenant UUID (create a tenant via API or DB, then in Supabase Auth → User → Edit user_metadata add `tenant_id: "<uuid>"`).
+2. **Add an Item**: Navigate to `/inventory` → "Add Item" → Create "Sugar 1kg" (Cost: 80, Price: 100)
+3. **Add a Person**: Navigate to `/dashboard` → People → Create "Jane" (Customer)
+4. **Record Transaction**: `/dashboard` → Transactions → Sell Sugar to Jane (Cash, 100 KES)
+5. **Verify Flows**:
+   - `/dashboard` → Cash balance should show +100 KES
+   - `/inventory` → Sugar stock should decrease
+   - `/dashboard` → Jane should show transaction history
+6. **Export Data**: Download CSVs from Inventory and Transactions pages
 
-1. **Create service** in `apps/api/src/integrations/[name]/`
-2. **Extend tenant config** in `apps/api/src/integrations/tenant-config.service.ts`
-3. **Add feature flag** in database seed
-4. **Update frontend** to show integration UI when flag enabled
+---
 
-### Integration Pattern
+## 📚 Documentation
 
+- **[Repository Standards](REPOSITORY_STANDARDS.md)**: Coding conventions
+- **[Contributing Guide](CONTRIBUTING.md)**: How to contribute
+- **[Deployment Setup](DEPLOYMENT_SETUP.md)**: Production deployment
+- **[Guides](docs/guides/)**: Detailed technical docs
+- **[Project Overview](docs/PROJECT_OVERVIEW.md)**: Comprehensive project documentation
+- **[Turborepo Finalization](docs/TURBOREPO_FINALIZATION.md)**: Monorepo goals, connections, verification, and known issues
+
+---
+
+## 🤖️ Agentic Building Guide
+
+### For AI Assistants (Kilo Code, Cursor, etc.)
+
+This guide is designed for AI agents helping build this project. Follow these principles:
+
+#### 1. Understand the Architecture
+- **Monorepo**: Use Turborepo for efficient builds
+- **Backend**: NestJS with modular architecture (auth, transactions, entities, etc.)
+- **Frontend**: Next.js 14 with App Router, TypeScript, Tailwind CSS
+- **Database**: Supabase PostgreSQL with Prisma ORM
+- **State Management**: Zustand for frontend state
+
+#### 2. Code Style & Standards
+- Follow [`REPOSITORY_STANDARDS.md`](REPOSITORY_STANDARDS.md)
+- Use TypeScript strict mode
+- Write descriptive variable names
+- Add JSDoc comments for complex functions
+- Keep functions small and focused
+
+#### 3. File Organization
+- **Backend**: Each feature in its own module (e.g., `transactions/`, `entities/`)
+- **Frontend**: Pages in `app/`, components in `components/`, utilities in `lib/`
+- **Shared**: Common code in `packages/shared/`
+- **Types**: Shared types in `packages/types/`
+
+#### 4. API Development
+- Use NestJS modules for each feature
+- Create DTOs for input validation
+- Use Prisma for database operations
+- Implement proper error handling
+- Add Swagger documentation
+
+#### 5. Frontend Development
+- Use Next.js App Router
+- Create reusable components in `components/ui/`
+- Use Zustand for state management
+- Implement proper loading states
+- Add error boundaries
+
+#### 6. Database Changes
+- Update Prisma schema in `packages/database/prisma/schema.prisma`
+- Generate migration: `npx prisma migrate dev <name>`
+- Test migration locally
+- Update types if needed
+
+#### 7. Testing
+- Write unit tests for services
+- Write integration tests for controllers
+- Test frontend components
+- Test API endpoints
+- Use Jest for backend, React Testing Library for frontend
+
+#### 8. Common Patterns
+
+##### Creating a New Backend Module
+```bash
+# Generate module
+nest g module <module-name>
+nest g controller <module-name>
+nest g service <module-name>
+```
+
+##### Creating a New Frontend Page
+```bash
+# Create page in app/
+mkdir -p apps/web/app/<page-name>
+touch apps/web/app/<page-name>/page.tsx
+```
+
+##### Adding API Integration
 ```typescript
-// apps/api/src/integrations/mpesa/mpesa.service.ts
-@Injectable()
-export class MpesaService {
-  async initiatePayment(tenantId: string, amount: number, phone: string) {
-    // 1. Check tenant has integration enabled
-    const config = await this.tenantConfig.getIntegration(tenantId, 'MPESA');
-    if (!config.enabled) throw new ForbiddenException();
-    
-    // 2. Make API call
-    // 3. Store transaction
-    // 4. Return result
-  }
+// In apps/web/lib/api/<feature>.ts
+import { apiClient } from './api-client';
+
+export async function get<Feature>() {
+  return apiClient.get('/api/<feature>');
 }
 ```
 
----
+#### 9. Known Issues to Fix
 
-## Key Features
+##### Workspace Linking
+**Issue**: Some packages use `file:` instead of `workspace:*`
+**Fix**: Update `package.json` dependencies to use `workspace:*` for consistency
 
-### For Tenants (Businesses)
+##### Turbo Remote Cache
+**Issue**: `turbo run build` or `type-check` may fail with "Unable to set up TLS" in some environments
+**Fix**: Run `turbo run build --no-daemon` or run scripts per package (e.g. `npm run build --workspace=@project-bridge/api`)
 
-- **Dashboard** - Business overview with charts
-- **Transactions** - Record sales, purchases, expenses
-- **People** - Customer/supplier management with credit tracking
-- **Quick Add** - Fast transaction entry (mobile-optimized)
-- **Integrations** - M-Pesa payments, WhatsApp notifications (optional)
-
-### For You (Developer)
-
-- **Multi-tenancy** - Slug-based isolation (`/janders-dogfood`)
-- **Feature flags** - Enable features per tenant/tier
-- **Public API** - Headless design, works from any frontend
-- **Health checks** - `/api/v1/health` for monitoring
-- **MCP Servers** - Monitor Vercel/Railway deployments
+#### 10. Deployment Checklist
+- [ ] All tests pass
+- [ ] TypeScript errors resolved
+- [ ] Environment variables configured
+- [ ] Database migrations tested
+- [ ] Build succeeds
+- [ ] Manual testing complete
 
 ---
 
-## Deployment Checklist
+## 🛠️ Tech Decisions
 
-- [ ] Supabase project created
-- [ ] Railway project linked to GitHub
-- [ ] Vercel projects for bridge-admin and bridge-perfect
-- [ ] GitHub secrets: `RAILWAY_API_TOKEN`, `VERCEL_TOKEN`
-- [ ] Environment variables set in Railway
-- [ ] Database migrations run
-- [ ] Seed data loaded (includes `janders-dogfood` tenant)
+### Why Turborepo?
+- **Shared code**: Types, DB schema, utilities across apps
+- **Fast builds**: Only rebuild what changed
+- **Future-proof**: Easy to add mobile app, webhooks server, etc.
 
-See [DEPLOYMENT_SETUP.md](DEPLOYMENT_SETUP.md) for detailed instructions.
+### Why Supabase?
+- **Postgres + Auth + Realtime** in one
+- **Edge functions** for future integrations
+- **Free tier** perfect for solo dev + small tenants
 
----
-
-## Documentation
-
-| Document | Purpose |
-|----------|---------|
-| [DEPLOYMENT_SETUP.md](DEPLOYMENT_SETUP.md) | Production deployment guide |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Development standards |
-| [docs/guides/](docs/guides/) | Developer guides |
-| [docs/reference/](docs/reference/) | API reference |
-| [docs/archive/](docs/archive/) | Historical docs |
+### Why Manual-First?
+- **80% of users** don't need automation (yet)
+- **Build right core** that won't break when adding integrations
+- **Dogfood** platform ourselves before selling premium features
 
 ---
 
-## Support
+## 🚢 Deployment
 
-- **Issues**: GitHub Issues
-- **API Docs**: `/api/docs` when running locally
-- **Health Check**: `/api/v1/health`
+- **Backend (API)**: Railway (auto-deploys from `main`)
+- **Frontend (Web)**: Vercel (auto-deploys from `main`)
+- **Database**: Supabase Cloud (managed Postgres)
+
+```bash
+# Production build (verifies everything works)
+npm run build
+
+# Deploy to production
+npm run deploy:prod
+```
 
 ---
 
-## License
+## 🔮 Roadmap
 
-MIT License - see [LICENSE](LICENSE) file.
+### Completed: Nairobi Core MVP ✅
+- [x] **Truth Engine**: Robust backend ledger with state transitions
+- [x] **Intelligence Layer**: Auto-categorization & relationship heatmaps
+- [x] **Nairobi Command Center**: Unified modern dashboard
+- [x] **Modern History**: Story-driven transaction narratives
+- [x] **Smart Inventory**: Demand prediction & reorder logic
+- [x] **Multi-tenant Architecture**: Tenant isolation with tier-based access
+
+### Next: Scale-Out
+- [ ] Fix TypeScript errors in universal-truth module
+- [ ] Fix workspace linking issues
+- [ ] M-Pesa STK Push Integration
+- [ ] WhatsApp Automated Receipting
+- [ ] Multi-store / Multi-tenant isolation
+- [ ] Offline PWA for frontline users
 
 ---
 
-**Built for African SMEs. Made in Nairobi.** 🇰🇪
+## 💬 Philosophy
+
+> "Build the ledger right for manual users. Everything else is abstraction on top of truth."
+
+The core transaction/entity model works whether you're a solo shopkeeper or a chain with 100 locations. Integrations are just *ways to get data in/out* faster—but the ledger stays clean.
+
+---
+
+## 📄 License
+
+Proprietary - © 2026 Project Bridge

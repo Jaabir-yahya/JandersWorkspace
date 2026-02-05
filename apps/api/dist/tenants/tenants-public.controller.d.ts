@@ -5,9 +5,9 @@ export declare class TenantsPublicController {
     getTenantBySlug(slug: string): Promise<{
         id: string;
         name: string;
-        slug: string | null;
-        tier: string | null;
-        country: string | null;
+        slug: string;
+        tier: string;
+        country: string;
         settings: {
             businessType: any;
             location: any;

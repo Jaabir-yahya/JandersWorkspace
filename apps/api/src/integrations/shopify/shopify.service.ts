@@ -49,7 +49,9 @@ export class ShopifyService extends BaseIntegrationService {
 
   async syncData(request: SyncRequest): Promise<SyncResult> {
     try {
-      this.logger.debug(`Starting Shopify sync for tenant: ${request.tenantId}`);
+      this.logger.debug(
+        `Starting Shopify sync for tenant: ${request.tenantId}`,
+      );
 
       // TODO: Implement Shopify data synchronization
       // This would sync:
@@ -126,7 +128,14 @@ export class ShopifyService extends BaseIntegrationService {
     config: ShopifyConfig,
     options?: {
       status?: 'open' | 'closed' | 'cancelled' | 'any';
-      financialStatus?: 'pending' | 'authorized' | 'partially_paid' | 'paid' | 'partially_refunded' | 'refunded' | 'voided';
+      financialStatus?:
+        | 'pending'
+        | 'authorized'
+        | 'partially_paid'
+        | 'paid'
+        | 'partially_refunded'
+        | 'refunded'
+        | 'voided';
       fulfillmentStatus?: 'shipped' | 'partial' | 'unshipped' | 'any';
       createdAtMin?: string;
       createdAtMax?: string;
@@ -251,10 +260,7 @@ export class ShopifyService extends BaseIntegrationService {
     }
   }
 
-  async createCustomer(
-    config: ShopifyConfig,
-    customer: any,
-  ): Promise<any> {
+  async createCustomer(config: ShopifyConfig, customer: any): Promise<any> {
     try {
       this.logger.debug('Creating Shopify customer');
 

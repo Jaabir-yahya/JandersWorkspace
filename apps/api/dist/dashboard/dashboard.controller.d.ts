@@ -1,9 +1,12 @@
+import { TenantsService } from '../tenants/tenants.service';
 import { DashboardService } from './dashboard.service';
 export declare class DashboardController {
     private readonly dashboardService;
-    constructor(dashboardService: DashboardService);
-    getStats(tenantId: string, req: any): Promise<import("./dashboard.service").DashboardStats>;
-    getMetrics(tenantId: string, req: any, startDate?: string, endDate?: string): Promise<{
+    private readonly tenantsService;
+    constructor(dashboardService: DashboardService, tenantsService: TenantsService);
+    private resolveTenant;
+    getStats(tenantId: string, req: any, xTenantId?: string): Promise<import("./dashboard.service").DashboardStats>;
+    getMetrics(tenantId: string, req: any, xTenantId?: string, startDate?: string, endDate?: string): Promise<{
         total_transactions: number;
         total_amount: number;
         by_type: Record<string, number>;
@@ -19,7 +22,7 @@ export declare class DashboardController {
             date: string;
         }[];
     }>;
-    getReconciliation(tenantId: string, req: any): Promise<{
+    getReconciliation(tenantId: string, req: any, xTenantId?: string): Promise<{
         total_expected: number;
         total_received: number;
         variance: number;

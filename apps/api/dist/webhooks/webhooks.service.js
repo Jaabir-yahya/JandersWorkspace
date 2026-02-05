@@ -112,10 +112,7 @@ let WebhooksService = WebhooksService_1 = class WebhooksService {
         return crypto.timingSafeEqual(Buffer.from(signature.replace('sha256=', '')), Buffer.from(expectedSignature));
     }
     generateSignature(payload, secret, algorithm = 'sha256') {
-        return crypto
-            .createHmac(algorithm, secret)
-            .update(payload)
-            .digest('hex');
+        return crypto.createHmac(algorithm, secret).update(payload).digest('hex');
     }
     async getWebhookEventById(id) {
         const event = await this.prisma.webhookEvent.findUnique({

@@ -9,27 +9,27 @@ export const swaggerConfig = new DocumentBuilder()
   .setTitle('Project Bridge API')
   .setDescription(
     'African Informal Economy Ledger - Headless Truth Ledger API\n\n' +
-    '## Authentication\n\n' +
-    'This API uses JWT Bearer tokens for authentication. ' +
-    'Include the token in the Authorization header as: `Bearer <token>`\n\n' +
-    '## Modules\n\n' +
-    '- **Transactions**: Core transaction management and posting\n' +
-    '- **Entities**: Customer and vendor management\n' +
-    '- **Payment Records**: Payment tracking and reconciliation\n' +
-    '- **Integrations**: Third-party service integrations (M-Pesa, WhatsApp, QuickBooks, Xero, Shopify)\n' +
-    '- **Webhooks**: Webhook configuration and event handling\n' +
-    '- **Attachments**: File attachments and document management\n' +
-    '- **Dashboard**: Analytics and reporting\n' +
-    '- **Health**: System health checks'
+      '## Authentication\n\n' +
+      'This API uses JWT Bearer tokens for authentication. ' +
+      'Include the token in the Authorization header as: `Bearer <token>`\n\n' +
+      '## Modules\n\n' +
+      '- **Transactions**: Core transaction management and posting\n' +
+      '- **Entities**: Customer and vendor management\n' +
+      '- **Payment Records**: Payment tracking and reconciliation\n' +
+      '- **Integrations**: Third-party service integrations (M-Pesa, WhatsApp, QuickBooks, Xero, Shopify)\n' +
+      '- **Webhooks**: Webhook configuration and event handling\n' +
+      '- **Attachments**: File attachments and document management\n' +
+      '- **Dashboard**: Analytics and reporting\n' +
+      '- **Health**: System health checks',
   )
   .setVersion('1.0.0')
   .setContact(
     'Project Bridge Team',
     'https://project-bridge.app',
-    'support@project-bridge.app'
+    'support@project-bridge.app',
   )
   .setLicense('MIT', 'https://opensource.org/licenses/MIT')
-  .addServer('http://localhost:3000/api/v1', 'Local Development')
+  .addServer('http://localhost:3001/api/v1', 'Local Development')
   .addServer('https://api.project-bridge.app/api/v1', 'Production')
   .addServer('https://api-staging.project-bridge.app/api/v1', 'Staging')
   // Bearer authentication
@@ -41,7 +41,7 @@ export const swaggerConfig = new DocumentBuilder()
       description: 'Enter JWT token',
       in: 'header',
     },
-    'JWT-auth' // This is the key name for the security scheme
+    'JWT-auth', // This is the key name for the security scheme
   )
   // API Key authentication for webhooks
   .addApiKey(
@@ -51,7 +51,7 @@ export const swaggerConfig = new DocumentBuilder()
       name: 'X-Webhook-Secret',
       description: 'Webhook secret for verifying webhook requests',
     },
-    'Webhook-Secret'
+    'Webhook-Secret',
   )
   // Add tags for grouping
   .addTag('Authentication', 'User authentication and authorization')

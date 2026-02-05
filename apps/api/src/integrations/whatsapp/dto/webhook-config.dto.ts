@@ -1,4 +1,11 @@
-import { IsString, IsUrl, IsBoolean, IsOptional, IsArray, IsObject } from 'class-validator';
+import {
+  IsString,
+  IsUrl,
+  IsBoolean,
+  IsOptional,
+  IsArray,
+  IsObject,
+} from 'class-validator';
 
 export class WebhookConfigDto {
   @IsString()

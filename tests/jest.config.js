@@ -8,7 +8,7 @@ module.exports = {
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: './coverage',
   testEnvironment: 'node',
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@project-bridge/(.*)$': '<rootDir>/../packages/$1/src',
   },
 };

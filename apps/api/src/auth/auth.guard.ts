@@ -1,50 +1,46 @@
 import {
   Injectable,
-  CanActivate,
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthService, AuthenticatedUser } from './auth.service';
+import { AuthService } from './auth.service';
 
 /**
  * Authentication guard that validates JWT tokens from the Authorization header
- * and attaches the authenticated user to the request.
+ * using Supabase Auth directly (not Passport strategy which has issues).
  */
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class AuthGuard {
   constructor(private readonly authService: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
+    const authHeader = request.headers.authorization;
 
-    if (!token) {
-      throw new UnauthorizedException('Authorization token is required');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedException('No token provided');
     }
+
+    const token = authHeader.substring(7);
 
     try {
       const user = await this.authService.verifyToken(token);
-      // Attach user to request for use in controllers
       request.user = user;
       return true;
     } catch (error) {
       throw new UnauthorizedException('Invalid or expired token');
     }
   }
+}
 
-  private extractTokenFromHeader(request: any): string | undefined {
-    const authHeader = request.headers.authorization;
-    if (!authHeader) {
-      return undefined;
-    }
-
-    const [type, token] = authHeader.split(' ');
-    if (type !== 'Bearer' || !token) {
-      return undefined;
-    }
-
-    return token;
-  }
+/**
+ * Interface for authenticated user
+ */
+export interface AuthenticatedUser {
+  id: string;
+  email: string;
+  tenantId: string;
+  role: string;
 }
 
 /**

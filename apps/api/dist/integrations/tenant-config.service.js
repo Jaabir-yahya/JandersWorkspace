@@ -404,7 +404,12 @@ let TenantConfigService = class TenantConfigService {
         const tenantSettings = config.settings?.features || {};
         const features = {};
         for (const flag of availableFeatures) {
-            const isBasicFeature = ['manual_transactions', 'entity_management', 'payment_records', 'dashboard'].includes(flag.name);
+            const isBasicFeature = [
+                'manual_transactions',
+                'entity_management',
+                'payment_records',
+                'dashboard',
+            ].includes(flag.name);
             features[flag.name] = tenantSettings[flag.name] ?? isBasicFeature;
         }
         return features;

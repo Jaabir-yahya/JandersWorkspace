@@ -85,11 +85,11 @@ let PaymentRecordsService = class PaymentRecordsService {
                 id: app.paymentId,
                 transaction_id: transactionId,
                 method: metadata?.method || 'unknown',
-                amount: Number(app.amount),
+                amount: Number(app.appliedAmount || app.amount || 0),
                 reference: app.payment?.reference || undefined,
                 paid_at: metadata?.paid_at || app.payment?.paidAt?.toISOString(),
                 metadata: app.payment?.metadata,
-                created_at: app.appliedAt.toISOString(),
+                created_at: app.appliedAt?.toISOString() || new Date().toISOString(),
             };
         });
     }
@@ -128,7 +128,7 @@ let PaymentRecordsService = class PaymentRecordsService {
     async updateTransactionPaymentStatus(transactionId) {
         const transaction = await this.prisma.transaction.findUnique({
             where: { id: transactionId },
-            select: { totalAmount: true, status: true },
+            select: { amount: true, status: true },
         });
         if (!transaction) {
             return;
@@ -138,7 +138,7 @@ let PaymentRecordsService = class PaymentRecordsService {
             select: { appliedAmount: true },
         });
         const totalPaid = paymentApps.reduce((sum, p) => sum + Number(p.appliedAmount), 0);
-        const totalAmount = Number(transaction.totalAmount);
+        const totalAmount = Number(transaction.amount);
         let newStatus;
         if (totalPaid === 0) {
             newStatus = client_1.PaymentStatus.PENDING;

@@ -1,0 +1,8 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/inventory/page": "app/inventory/page.js",
+  "/settings/page": "app/settings/page.js",
+  "/inventory/new/page": "app/inventory/new/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/inventory/containers/page": "app/inventory/containers/page.js"
+}

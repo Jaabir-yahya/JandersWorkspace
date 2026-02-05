@@ -57,7 +57,7 @@ export class DashboardService {
         type: { in: [TxnType.RETAIL, TxnType.SERVICE, TxnType.RENTAL] },
         createdAt: { gte: startOfToday },
       },
-      select: { totalAmount: true },
+      select: { amount: true },
     });
 
     // Revenue this week
@@ -68,7 +68,7 @@ export class DashboardService {
         type: { in: [TxnType.RETAIL, TxnType.SERVICE, TxnType.RENTAL] },
         createdAt: { gte: startOfWeek },
       },
-      select: { totalAmount: true },
+      select: { amount: true },
     });
 
     // Revenue this month
@@ -79,7 +79,7 @@ export class DashboardService {
         type: { in: [TxnType.RETAIL, TxnType.SERVICE, TxnType.RENTAL] },
         createdAt: { gte: startOfMonth },
       },
-      select: { totalAmount: true },
+      select: { amount: true },
     });
 
     // Transaction counts
@@ -107,7 +107,7 @@ export class DashboardService {
         type: { in: [TxnType.RETAIL, TxnType.SERVICE, TxnType.RENTAL] },
         paymentStatus: { in: [PaymentStatus.PENDING, PaymentStatus.PARTIAL] },
       },
-      select: { totalAmount: true },
+      select: { amount: true },
     });
 
     // Outstanding debt (money we owe suppliers) - expense type with pending payment
@@ -118,7 +118,7 @@ export class DashboardService {
         type: TxnType.EXPENSE,
         paymentStatus: { in: [PaymentStatus.PENDING, PaymentStatus.PARTIAL] },
       },
-      select: { totalAmount: true },
+      select: { amount: true },
     });
 
     // Payment method breakdown (from payments)
@@ -141,7 +141,7 @@ export class DashboardService {
         entity: {
           select: {
             id: true,
-            displayName: true,
+            name: true,
           },
         },
       },
@@ -150,7 +150,12 @@ export class DashboardService {
     // Aggregate by entity
     const entityMap = new Map<
       string,
-      { entity_id: string; display_name: string; total_amount: number; transaction_count: number }
+      {
+        entity_id: string;
+        display_name: string;
+        total_amount: number;
+        transaction_count: number;
+      }
     >();
 
     for (const txn of topTransactions) {
@@ -158,13 +163,13 @@ export class DashboardService {
 
       const existing = entityMap.get(txn.entityId);
       if (existing) {
-        existing.total_amount += Number(txn.totalAmount);
+        existing.total_amount += Number(txn.amount);
         existing.transaction_count += 1;
       } else {
         entityMap.set(txn.entityId, {
           entity_id: txn.entityId,
-          display_name: txn.entity.displayName || 'Unknown',
-          total_amount: Number(txn.totalAmount),
+          display_name: txn.entity.name || 'Unknown',
+          total_amount: Number(txn.amount),
           transaction_count: 1,
         });
       }
@@ -181,7 +186,7 @@ export class DashboardService {
         entity: {
           select: {
             id: true,
-            displayName: true,
+            name: true,
           },
         },
       },
@@ -212,34 +217,31 @@ export class DashboardService {
         type: (txn.type === 'EXPENSE' ? 'transaction' : 'transaction') as
           | 'transaction'
           | 'reversal',
-        description: `${txn.type} - ${txn.entity?.displayName || 'Unknown'}${txn.reference ? ` (${txn.reference})` : ''}`,
-        amount: Number(txn.totalAmount),
+        description: `${txn.type} - ${txn.entity?.name || 'Unknown'}${txn.reference ? ` (${txn.reference})` : ''}`,
+        amount: Number(txn.amount),
         timestamp: txn.createdAt.toISOString(),
       }));
 
     return {
       total_revenue_today: todayRevenue.reduce(
-        (sum, t) => sum + Number(t.totalAmount),
+        (sum, t) => sum + Number(t.amount),
         0,
       ),
       total_revenue_week: weekRevenue.reduce(
-        (sum, t) => sum + Number(t.totalAmount),
+        (sum, t) => sum + Number(t.amount),
         0,
       ),
       total_revenue_month: monthRevenue.reduce(
-        (sum, t) => sum + Number(t.totalAmount),
+        (sum, t) => sum + Number(t.amount),
         0,
       ),
       transactions_today: todayCount,
       transactions_week: weekCount,
       outstanding_credit: creditData.reduce(
-        (sum, t) => sum + Number(t.totalAmount),
+        (sum, t) => sum + Number(t.amount),
         0,
       ),
-      outstanding_debt: debtData.reduce(
-        (sum, t) => sum + Number(t.totalAmount),
-        0,
-      ),
+      outstanding_debt: debtData.reduce((sum, t) => sum + Number(t.amount), 0),
       payment_method_breakdown: paymentBreakdown,
       top_customers: topCustomers,
       recent_activity: formattedActivity,
@@ -255,27 +257,27 @@ export class DashboardService {
       if (endDate) dateFilter.createdAt.lte = new Date(endDate);
     }
 
-    const [transactions, totalAmount] = await Promise.all([
+    const [transactions, amount] = await Promise.all([
       this.prisma.transaction.findMany({
         where: dateFilter,
         select: {
           id: true,
           type: true,
-          totalAmount: true,
+          amount: true,
           status: true,
           createdAt: true,
         },
       }),
       this.prisma.transaction.aggregate({
         where: dateFilter,
-        _sum: { totalAmount: true },
+        _sum: { amount: true },
         _count: { id: true },
       }),
     ]);
 
     const byType = transactions.reduce(
       (acc, txn) => {
-        acc[txn.type] = (acc[txn.type] || 0) + Number(txn.totalAmount);
+        acc[txn.type] = (acc[txn.type] || 0) + Number(txn.amount);
         return acc;
       },
       {} as Record<string, number>,
@@ -283,14 +285,14 @@ export class DashboardService {
 
     // For simplicity, return basic metrics
     return {
-      total_transactions: totalAmount._count.id || 0,
-      total_amount: Number(totalAmount._sum.totalAmount || 0),
+      total_transactions: amount._count.id || 0,
+      total_amount: Number(amount._sum.amount || 0),
       by_type: byType,
       by_payment_method: { cash: 0, mpesa: 0, bank: 0 }, // Simplified
       recent_transactions: transactions.slice(-5).map((txn) => ({
         id: txn.id,
         type: txn.type,
-        amount: Number(txn.totalAmount),
+        amount: Number(txn.amount),
         date: txn.createdAt.toISOString(),
       })),
     };
@@ -300,14 +302,14 @@ export class DashboardService {
     const transactions = await this.prisma.transaction.findMany({
       where: { tenantId },
       select: {
-        totalAmount: true,
+        amount: true,
         status: true,
       },
     });
 
     const totalExpected = transactions
       .filter((txn) => txn.status === TxnStatus.POSTED)
-      .reduce((sum, txn) => sum + Number(txn.totalAmount), 0);
+      .reduce((sum, txn) => sum + Number(txn.amount), 0);
 
     // Simplified reconciliation - in real scenario this would match with actual payments
     return {

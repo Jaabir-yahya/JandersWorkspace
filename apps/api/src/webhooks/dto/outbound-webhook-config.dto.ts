@@ -1,4 +1,14 @@
-import { IsString, IsObject, IsOptional, IsEnum, IsUUID, IsNumber, IsBoolean, IsArray, IsUrl } from 'class-validator';
+import {
+  IsString,
+  IsObject,
+  IsOptional,
+  IsEnum,
+  IsUUID,
+  IsNumber,
+  IsBoolean,
+  IsArray,
+  IsUrl,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { EventType } from '../../integrations/types/integration.types';
 

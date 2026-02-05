@@ -12,8 +12,6 @@ const tenants_module_1 = require("../tenants/tenants.module");
 const transactions_service_1 = require("./transactions.service");
 const transactions_controller_1 = require("./transactions.controller");
 const transactions_quick_controller_1 = require("./transactions-quick.controller");
-const transactions_public_controller_1 = require("./transactions-public.controller");
-const entities_public_controller_1 = require("./entities-public.controller");
 let TransactionsModule = class TransactionsModule {
 };
 exports.TransactionsModule = TransactionsModule;
@@ -22,8 +20,6 @@ exports.TransactionsModule = TransactionsModule = __decorate([
         imports: [tenants_module_1.TenantsModule],
         controllers: [
             transactions_quick_controller_1.TransactionsQuickController,
-            transactions_public_controller_1.TransactionsPublicController,
-            entities_public_controller_1.EntitiesPublicController,
             transactions_controller_1.TransactionsController,
             transactions_controller_1.EntitiesController,
         ],

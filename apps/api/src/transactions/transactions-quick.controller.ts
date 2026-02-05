@@ -43,7 +43,8 @@ export class TransactionsQuickController {
           | 'CREDIT')
       : 'CASH';
 
-    const manualUserId = await this.transactionsService.getOrCreateManualUserForTenant(tenantId);
+    const manualUserId =
+      await this.transactionsService.getOrCreateManualUserForTenant(tenantId);
 
     return this.transactionsService.create({
       tenant_id: tenantId,

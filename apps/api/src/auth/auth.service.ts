@@ -4,12 +4,9 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 export const SUPABASE_AUTH_CLIENT = 'SUPABASE_AUTH_CLIENT';
 
-export interface AuthenticatedUser {
-  id: string;
-  email: string;
-  tenantId: string;
-  role: string;
-}
+import { AuthenticatedUser } from './auth.guard';
+
+export type { AuthenticatedUser };
 
 @Injectable()
 export class AuthService {
@@ -37,29 +34,36 @@ export class AuthService {
    * Verify a JWT token and return the authenticated user
    */
   async verifyToken(token: string): Promise<AuthenticatedUser> {
-    const {
-      data: { user },
-      error,
-    } = await this.supabase.auth.getUser(token);
+    try {
+      const {
+        data: { user },
+        error,
+      } = await this.supabase.auth.getUser(token);
 
-    if (error || !user) {
+      if (error) {
+        console.error('Supabase getUser error:', error.message);
+        throw new UnauthorizedException('Invalid or expired token');
+      }
+
+      if (!user) {
+        throw new UnauthorizedException('Invalid or expired token');
+      }
+
+      // Extract tenant_id from user metadata (optional for now)
+      const tenantId = user.user_metadata?.['tenant_id'];
+      const role = user.user_metadata?.['role'] || 'user';
+
+      // Return user even without tenant_id - we'll handle tenant selection separately
+      return {
+        id: user.id,
+        email: user.email || '',
+        tenantId: tenantId || '',
+        role,
+      };
+    } catch (err) {
+      console.error('Token verification error:', err);
       throw new UnauthorizedException('Invalid or expired token');
     }
-
-    // Extract tenant_id from user metadata
-    const tenantId = user.user_metadata?.['tenant_id'];
-    const role = user.user_metadata?.['role'] || 'user';
-
-    if (!tenantId) {
-      throw new UnauthorizedException('User is not associated with a tenant');
-    }
-
-    return {
-      id: user.id,
-      email: user.email || '',
-      tenantId,
-      role,
-    };
   }
 
   /**

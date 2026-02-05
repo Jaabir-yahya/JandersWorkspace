@@ -51,7 +51,9 @@ export class QuickBooksService extends BaseIntegrationService {
 
   async syncData(request: SyncRequest): Promise<SyncResult> {
     try {
-      this.logger.debug(`Starting QuickBooks sync for tenant: ${request.tenantId}`);
+      this.logger.debug(
+        `Starting QuickBooks sync for tenant: ${request.tenantId}`,
+      );
 
       // TODO: Implement QuickBooks data synchronization
       // This would sync:
@@ -202,7 +204,9 @@ export class QuickBooksService extends BaseIntegrationService {
     }
   }
 
-  async refreshAccessToken(config: QuickBooksConfig): Promise<QuickBooksConfig> {
+  async refreshAccessToken(
+    config: QuickBooksConfig,
+  ): Promise<QuickBooksConfig> {
     try {
       this.logger.debug('Refreshing QuickBooks access token');
 

@@ -6,15 +6,11 @@ import {
   EntitiesController,
 } from './transactions.controller';
 import { TransactionsQuickController } from './transactions-quick.controller';
-import { TransactionsPublicController } from './transactions-public.controller';
-import { EntitiesPublicController } from './entities-public.controller';
 
 @Module({
   imports: [TenantsModule],
   controllers: [
     TransactionsQuickController,
-    TransactionsPublicController,
-    EntitiesPublicController,
     TransactionsController,
     EntitiesController,
   ],

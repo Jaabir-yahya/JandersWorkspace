@@ -51,10 +51,7 @@ export class XeroController {
 
   @Post('invoices')
   @HttpCode(HttpStatus.CREATED)
-  async createInvoice(
-    @Request() req: any,
-    @Body() invoice: XeroInvoice,
-  ) {
+  async createInvoice(@Request() req: any, @Body() invoice: XeroInvoice) {
     const tenantId = req.user?.tenantId || 'default';
 
     // TODO: Retrieve Xero config from tenant configuration
@@ -159,10 +156,7 @@ export class XeroController {
   }
 
   @Get('contacts')
-  async getContacts(
-    @Request() req: any,
-    @Query('page') page: number = 1,
-  ) {
+  async getContacts(@Request() req: any, @Query('page') page: number = 1) {
     const tenantId = req.user?.tenantId || 'default';
 
     // TODO: Retrieve Xero config from tenant configuration
@@ -187,10 +181,7 @@ export class XeroController {
 
   @Post('contacts')
   @HttpCode(HttpStatus.CREATED)
-  async createContact(
-    @Request() req: any,
-    @Body() contact: any,
-  ) {
+  async createContact(@Request() req: any, @Body() contact: any) {
     const tenantId = req.user?.tenantId || 'default';
 
     // TODO: Retrieve Xero config from tenant configuration

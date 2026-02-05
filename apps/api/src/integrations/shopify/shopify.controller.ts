@@ -57,7 +57,8 @@ export class ShopifyController {
   @Get('orders')
   async getOrders(
     @Request() req: any,
-    @Query() query: {
+    @Query()
+    query: {
       status?: 'open' | 'closed' | 'cancelled' | 'any';
       financial_status?: string;
       fulfillment_status?: string;
@@ -115,7 +116,10 @@ export class ShopifyController {
       apiVersion: '2024-01',
     };
 
-    const result = await this.shopifyService.getOrder(config, parseInt(orderId, 10));
+    const result = await this.shopifyService.getOrder(
+      config,
+      parseInt(orderId, 10),
+    );
 
     return {
       success: true,
@@ -126,10 +130,7 @@ export class ShopifyController {
 
   @Post('orders')
   @HttpCode(HttpStatus.CREATED)
-  async createOrder(
-    @Request() req: any,
-    @Body() order: Partial<ShopifyOrder>,
-  ) {
+  async createOrder(@Request() req: any, @Body() order: Partial<ShopifyOrder>) {
     const tenantId = req.user?.tenantId || 'default';
 
     // TODO: Retrieve Shopify config from tenant configuration
@@ -182,7 +183,8 @@ export class ShopifyController {
   async cancelOrder(
     @Request() req: any,
     @Param('id') orderId: string,
-    @Body() body: {
+    @Body()
+    body: {
       amount?: number;
       currency?: string;
       reason?: 'customer' | 'inventory' | 'fraud' | 'declined' | 'other';
@@ -215,7 +217,8 @@ export class ShopifyController {
   @Get('products')
   async getProducts(
     @Request() req: any,
-    @Query() query: {
+    @Query()
+    query: {
       limit?: number;
       collection_id?: number;
       product_type?: string;
@@ -256,7 +259,10 @@ export class ShopifyController {
       apiVersion: '2024-01',
     };
 
-    const result = await this.shopifyService.getCustomer(config, parseInt(customerId, 10));
+    const result = await this.shopifyService.getCustomer(
+      config,
+      parseInt(customerId, 10),
+    );
 
     return {
       success: true,
@@ -267,10 +273,7 @@ export class ShopifyController {
 
   @Post('customers')
   @HttpCode(HttpStatus.CREATED)
-  async createCustomer(
-    @Request() req: any,
-    @Body() customer: any,
-  ) {
+  async createCustomer(@Request() req: any, @Body() customer: any) {
     const tenantId = req.user?.tenantId || 'default';
 
     // TODO: Retrieve Shopify config from tenant configuration

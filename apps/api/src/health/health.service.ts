@@ -59,10 +59,10 @@ export class HealthService {
     private readonly prismaService: PrismaService,
   ) {
     this.startTime = Date.now();
-    
+
     const url = this.configService.get<string>('SUPABASE_URL');
     const secretKey = this.configService.get<string>('SUPABASE_SECRET_KEY');
-    
+
     if (url && secretKey) {
       this.supabaseClient = createClient(url, secretKey, {
         auth: {
@@ -196,7 +196,8 @@ export class HealthService {
       return {
         status: 'unhealthy',
         responseTime: Date.now() - startTime,
-        message: 'Supabase client not initialized - missing environment variables',
+        message:
+          'Supabase client not initialized - missing environment variables',
       };
     }
 
@@ -414,11 +415,7 @@ export class HealthService {
    * Check if required environment variables are set
    */
   private areRequiredEnvVarsSet(): boolean {
-    const required = [
-      'DATABASE_URL',
-      'SUPABASE_URL',
-      'SUPABASE_SECRET_KEY',
-    ];
+    const required = ['DATABASE_URL', 'SUPABASE_URL', 'SUPABASE_SECRET_KEY'];
 
     return required.every((key) => !!this.configService.get(key));
   }

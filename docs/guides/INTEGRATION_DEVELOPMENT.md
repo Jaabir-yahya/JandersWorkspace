@@ -4,7 +4,7 @@
 
 This guide covers the patterns and practices for developing new integrations in Project Bridge. Since you're the sole developer, consistency and maintainability are key.
 
----
+
 
 ## Integration Architecture
 
@@ -21,7 +21,7 @@ This guide covers the patterns and practices for developing new integrations in 
 │                Integration Service                          │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
 │  │ 1. Check     │  │ 2. Call      │  │ 3. Store         │  │
-│  │    Feature   │  │    External  │  │    Result        │  │
+│  │    Feature   │  │    External  │  │    Result --       │  │
 │  │    Flag      │  │    API       │  │                  │  │
 │  └──────────────┘  └──────────────┘  └──────────────────┘  │
 └─────────────────────────────────────────────────────────────┘

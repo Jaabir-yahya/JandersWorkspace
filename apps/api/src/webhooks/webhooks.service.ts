@@ -1,7 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
-import { IntegrationType, EventType, WebhookStatus, WebhookResult } from '../integrations/types/integration.types';
+import {
+  IntegrationType,
+  EventType,
+  WebhookStatus,
+  WebhookResult,
+} from '../integrations/types/integration.types';
 import { CreateWebhookEventDto } from './dto/webhook-event.dto';
 import * as crypto from 'crypto';
 
@@ -30,7 +35,9 @@ export class WebhooksService {
   /**
    * Store an incoming webhook event in the database
    */
-  async storeWebhookEvent(data: CreateWebhookEventDto): Promise<WebhookEventRecord> {
+  async storeWebhookEvent(
+    data: CreateWebhookEventDto,
+  ): Promise<WebhookEventRecord> {
     const event = await this.prisma.webhookEvent.create({
       data: {
         tenantId: data.tenantId,
@@ -43,7 +50,9 @@ export class WebhooksService {
       },
     });
 
-    this.logger.log(`Stored webhook event ${event.id} for ${data.integrationType}`);
+    this.logger.log(
+      `Stored webhook event ${event.id} for ${data.integrationType}`,
+    );
     return event as WebhookEventRecord;
   }
 
@@ -69,7 +78,10 @@ export class WebhooksService {
           return false;
       }
     } catch (error) {
-      this.logger.error(`Signature validation failed for ${integrationType}:`, error);
+      this.logger.error(
+        `Signature validation failed for ${integrationType}:`,
+        error,
+      );
       return false;
     }
   }
@@ -77,7 +89,11 @@ export class WebhooksService {
   /**
    * Validate M-Pesa webhook signature using HMAC
    */
-  private validateMpesaSignature(payload: string, signature: string, secret: string): boolean {
+  private validateMpesaSignature(
+    payload: string,
+    signature: string,
+    secret: string,
+  ): boolean {
     const expectedSignature = crypto
       .createHmac('sha256', secret)
       .update(payload)
@@ -91,7 +107,11 @@ export class WebhooksService {
   /**
    * Validate Shopify webhook signature using HMAC-SHA256
    */
-  private validateShopifySignature(payload: string, signature: string, secret: string): boolean {
+  private validateShopifySignature(
+    payload: string,
+    signature: string,
+    secret: string,
+  ): boolean {
     const expectedSignature = crypto
       .createHmac('sha256', secret)
       .update(payload, 'utf8')
@@ -105,7 +125,11 @@ export class WebhooksService {
   /**
    * Validate WhatsApp webhook signature
    */
-  private validateWhatsAppSignature(payload: string, signature: string, secret: string): boolean {
+  private validateWhatsAppSignature(
+    payload: string,
+    signature: string,
+    secret: string,
+  ): boolean {
     // WhatsApp uses SHA-256 signature in the X-Hub-Signature-256 header
     const expectedSignature = crypto
       .createHmac('sha256', secret)
@@ -120,11 +144,12 @@ export class WebhooksService {
   /**
    * Generate HMAC signature for outbound webhooks
    */
-  generateSignature(payload: string, secret: string, algorithm: string = 'sha256'): string {
-    return crypto
-      .createHmac(algorithm, secret)
-      .update(payload)
-      .digest('hex');
+  generateSignature(
+    payload: string,
+    secret: string,
+    algorithm: string = 'sha256',
+  ): string {
+    return crypto.createHmac(algorithm, secret).update(payload).digest('hex');
   }
 
   /**
@@ -204,7 +229,10 @@ export class WebhooksService {
   /**
    * Mark webhook event as processed
    */
-  async markAsProcessed(id: string, errorMessage?: string): Promise<WebhookEventRecord> {
+  async markAsProcessed(
+    id: string,
+    errorMessage?: string,
+  ): Promise<WebhookEventRecord> {
     const event = await this.prisma.webhookEvent.update({
       where: { id },
       data: {
@@ -220,7 +248,10 @@ export class WebhooksService {
   /**
    * Increment retry count for a webhook event
    */
-  async incrementRetryCount(id: string, errorMessage?: string): Promise<WebhookEventRecord> {
+  async incrementRetryCount(
+    id: string,
+    errorMessage?: string,
+  ): Promise<WebhookEventRecord> {
     const event = await this.prisma.webhookEvent.update({
       where: { id },
       data: {

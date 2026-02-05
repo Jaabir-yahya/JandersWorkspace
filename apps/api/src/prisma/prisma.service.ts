@@ -14,6 +14,12 @@ export class PrismaService
   private readonly logger = new Logger(PrismaService.name);
 
   constructor() {
+    // Fix prepared statement conflicts with Supabase by adding pgBouncer=true
+    const databaseUrl = process.env.DATABASE_URL;
+    const connectionUrl = databaseUrl?.includes('?')
+      ? `${databaseUrl}&pgbouncer=true`
+      : `${databaseUrl}?pgbouncer=true`;
+
     super({
       log: [
         { emit: 'event', level: 'query' },
@@ -21,6 +27,7 @@ export class PrismaService
         { emit: 'stdout', level: 'warn' },
         { emit: 'stdout', level: 'error' },
       ],
+      datasourceUrl: connectionUrl,
     });
 
     // Log queries in development

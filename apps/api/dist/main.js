@@ -57,9 +57,10 @@ async function bootstrap() {
     app.setGlobalPrefix('api/v1');
     const document = swagger_1.SwaggerModule.createDocument(app, swagger_config_1.swaggerConfig, swagger_config_1.swaggerDocumentOptions);
     swagger_1.SwaggerModule.setup('api/docs', app, document, swagger_config_1.swaggerUiOptions);
-    await app.listen(process.env.PORT ?? 3000);
-    console.log(`Application is running on: http://localhost:${process.env.PORT ?? 3000}/api/v1`);
-    console.log(`API Documentation available at: http://localhost:${process.env.PORT ?? 3000}/api/docs`);
+    const port = process.env.PORT ?? 3001;
+    await app.listen(port);
+    console.log(`Application is running on: http://localhost:${port}/api/v1`);
+    console.log(`API Documentation available at: http://localhost:${port}/api/docs`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

@@ -259,7 +259,7 @@ Brief description of changes
 DATABASE_URL=
 DIRECT_URL=
 SUPABASE_URL=
-SUPABASE_SERVICE_KEY=
+SUPABASE_SECRET_KEY=
 ```
 
 #### Web (.env.local)

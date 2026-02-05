@@ -290,11 +290,7 @@ let HealthService = HealthService_1 = class HealthService {
         }
     }
     areRequiredEnvVarsSet() {
-        const required = [
-            'DATABASE_URL',
-            'SUPABASE_URL',
-            'SUPABASE_SECRET_KEY',
-        ];
+        const required = ['DATABASE_URL', 'SUPABASE_URL', 'SUPABASE_SECRET_KEY'];
         return required.every((key) => !!this.configService.get(key));
     }
 };

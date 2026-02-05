@@ -32,21 +32,28 @@ let AuthService = class AuthService {
         });
     }
     async verifyToken(token) {
-        const { data: { user }, error, } = await this.supabase.auth.getUser(token);
-        if (error || !user) {
+        try {
+            const { data: { user }, error, } = await this.supabase.auth.getUser(token);
+            if (error) {
+                console.error('Supabase getUser error:', error.message);
+                throw new common_1.UnauthorizedException('Invalid or expired token');
+            }
+            if (!user) {
+                throw new common_1.UnauthorizedException('Invalid or expired token');
+            }
+            const tenantId = user.user_metadata?.['tenant_id'];
+            const role = user.user_metadata?.['role'] || 'user';
+            return {
+                id: user.id,
+                email: user.email || '',
+                tenantId: tenantId || '',
+                role,
+            };
+        }
+        catch (err) {
+            console.error('Token verification error:', err);
             throw new common_1.UnauthorizedException('Invalid or expired token');
         }
-        const tenantId = user.user_metadata?.['tenant_id'];
-        const role = user.user_metadata?.['role'] || 'user';
-        if (!tenantId) {
-            throw new common_1.UnauthorizedException('User is not associated with a tenant');
-        }
-        return {
-            id: user.id,
-            email: user.email || '',
-            tenantId,
-            role,
-        };
     }
     async getUserById(userId) {
         const { data: { user }, error, } = await this.supabase.auth.admin.getUserById(userId);

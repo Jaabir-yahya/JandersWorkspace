@@ -1,19 +1,16 @@
 import { Module, Global } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { PassportModule } from '@nestjs/passport';
 import { AuthGuard } from './auth.guard';
-import { AuthService, SUPABASE_AUTH_CLIENT } from './auth.service';
+import { AuthService } from './auth.service';
+
+import { AuthController } from './auth.controller';
 
 @Global()
 @Module({
-  imports: [ConfigModule],
-  providers: [
-    AuthService,
-    AuthGuard,
-    {
-      provide: SUPABASE_AUTH_CLIENT,
-      useValue: {},
-    },
-  ],
-  exports: [SUPABASE_AUTH_CLIENT, AuthService, AuthGuard],
+  imports: [ConfigModule, PassportModule],
+  controllers: [AuthController],
+  providers: [AuthService, AuthGuard],
+  exports: [AuthService, AuthGuard],
 })
 export class AuthModule {}

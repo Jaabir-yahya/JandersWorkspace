@@ -43,7 +43,7 @@ let TransactionsService = class TransactionsService {
     }
     async create(dto) {
         const transaction = await this.prisma.$transaction(async (tx) => {
-            const totalAmount = dto.lines.reduce((sum, line) => {
+            const amount = dto.lines.reduce((sum, line) => {
                 return sum + line.quantity * line.unit_price;
             }, 0);
             const txn = await tx.transaction.create({
@@ -52,7 +52,7 @@ let TransactionsService = class TransactionsService {
                     entityId: dto.entity_id || null,
                     createdByUserId: dto.created_by_user_id,
                     type: dto.type,
-                    totalAmount: totalAmount,
+                    amount: amount,
                     status: client_1.TxnStatus.DRAFT,
                     paymentStatus: client_1.PaymentStatus.PENDING,
                     reference: dto.reference || null,
@@ -60,10 +60,8 @@ let TransactionsService = class TransactionsService {
                         context: dto.context,
                         tags: dto.tags,
                     },
-                    systemTags: '',
-                    customTags: '',
                     lines: {
-                        create: dto.lines.map((line, index) => ({
+                        create: dto.lines.map((line) => ({
                             description: line.description,
                             sku: line.sku || null,
                             quantity: line.quantity,
@@ -116,7 +114,7 @@ let TransactionsService = class TransactionsService {
                 { reference: { contains: filters.search, mode: 'insensitive' } },
                 {
                     entity: {
-                        displayName: { contains: filters.search, mode: 'insensitive' },
+                        name: { contains: filters.search, mode: 'insensitive' },
                     },
                 },
             ];
@@ -127,8 +125,8 @@ let TransactionsService = class TransactionsService {
                 entity: {
                     select: {
                         id: true,
-                        displayName: true,
-                        phoneNumber: true,
+                        name: true,
+                        phone: true,
                     },
                 },
                 lines: true,
@@ -159,13 +157,17 @@ let TransactionsService = class TransactionsService {
         if (filters?.search) {
             where.OR = [
                 { reference: { contains: filters.search, mode: 'insensitive' } },
-                { entity: { displayName: { contains: filters.search, mode: 'insensitive' } } },
+                {
+                    entity: {
+                        name: { contains: filters.search, mode: 'insensitive' },
+                    },
+                },
             ];
         }
         const transactions = await this.prisma.transaction.findMany({
             where,
             include: {
-                entity: { select: { id: true, displayName: true, phoneNumber: true } },
+                entity: { select: { id: true, name: true, phone: true } },
                 lines: true,
             },
             orderBy: { createdAt: 'desc' },
@@ -176,7 +178,7 @@ let TransactionsService = class TransactionsService {
                 id: t.id,
                 tenantId: t.tenantId,
                 type: t.type,
-                totalAmount: Number(t.totalAmount),
+                amount: Number(t.amount),
                 currencyCode: t.currencyCode,
                 createdAt: t.createdAt.toISOString(),
                 status: t.status,
@@ -195,7 +197,7 @@ let TransactionsService = class TransactionsService {
         const rows = transactions.map((t) => {
             const desc = t.lines?.[0]?.description ?? '';
             const escaped = desc.replace(/"/g, '""');
-            return `${t.createdAt.toISOString().split('T')[0]},${t.type},${t.totalAmount},${t.currencyCode},"${escaped}",${(t.reference ?? '').replace(/"/g, '""')}`;
+            return `${t.createdAt.toISOString().split('T')[0]},${t.type},${Number(t.amount)},${t.currencyCode},"${escaped}",${(t.reference ?? '').replace(/"/g, '""')}`;
         });
         return [header, ...rows].join('\n');
     }
@@ -229,7 +231,7 @@ let TransactionsService = class TransactionsService {
         });
         return transactions;
     }
-    async postTransaction(id, dto) {
+    async postTransaction(id) {
         const transaction = await this.prisma.transaction.update({
             where: { id },
             data: {
@@ -261,13 +263,11 @@ let TransactionsService = class TransactionsService {
                     createdByUserId: dto.created_by_user_id,
                     type: original.type,
                     currencyCode: original.currencyCode,
-                    totalAmount: -original.totalAmount,
+                    amount: -original.amount,
                     status: client_1.TxnStatus.REVERSED,
                     paymentStatus: original.paymentStatus,
                     reference: `REV-${original.reference || id}`,
                     reversedTransactionId: original.id,
-                    systemTags: original.systemTags || '',
-                    customTags: original.customTags || '',
                     metadata: {
                         reversal_reason: dto.reason,
                         original_reference: original.reference,
@@ -328,7 +328,7 @@ let TransactionsService = class TransactionsService {
         });
         let runningBalance = 0;
         const history = transactions.map((txn) => {
-            const amount = Number(txn.totalAmount);
+            const amount = Number(txn.amount);
             runningBalance += amount;
             return {
                 transaction_id: txn.id,
@@ -353,7 +353,7 @@ let TransactionsService = class TransactionsService {
         if (!transaction) {
             throw new common_1.NotFoundException(`Transaction with ID ${id} not found`);
         }
-        const entityName = transaction.entity?.displayName || 'Unknown';
+        const entityName = transaction.entity?.name || 'Unknown';
         const defaultAccountCode = (0, universal_invoice_interface_1.getAccountCode)(transaction.type);
         const lineItems = transaction.lines?.map((line) => ({
             description: line.description,
@@ -369,7 +369,7 @@ let TransactionsService = class TransactionsService {
             customer_id: transaction.entityId,
             invoice_date: transaction.createdAt.toISOString(),
             currency: transaction.currencyCode,
-            total_amount: Number(transaction.totalAmount),
+            total_amount: Number(transaction.amount),
             line_items: lineItems,
             tax_amount: 0,
             status: transaction.status,
@@ -394,16 +394,14 @@ let TransactionsService = class TransactionsService {
                 transactionId: true,
             },
         });
-        const transactionIdsFromLines = [
-            ...new Set(lineMatches.map((l) => l.transactionId)),
-        ];
+        const transactionIdsFromLines = Array.from(new Set(lineMatches.map((l) => l.transactionId)));
         const where = {
             tenantId,
             OR: [
                 { reference: { contains: searchTerm, mode: 'insensitive' } },
                 {
                     entity: {
-                        displayName: { contains: searchTerm, mode: 'insensitive' },
+                        name: { contains: searchTerm, mode: 'insensitive' },
                     },
                 },
                 { id: { in: transactionIdsFromLines } },
@@ -435,8 +433,8 @@ let TransactionsService = class TransactionsService {
                 entity: {
                     select: {
                         id: true,
-                        displayName: true,
-                        phoneNumber: true,
+                        name: true,
+                        phone: true,
                     },
                 },
                 lines: true,
@@ -456,14 +454,14 @@ let TransactionsService = class TransactionsService {
         }
         if (filters?.search) {
             where.OR = [
-                { displayName: { contains: filters.search, mode: 'insensitive' } },
-                { phoneNumber: { contains: filters.search, mode: 'insensitive' } },
+                { name: { contains: filters.search, mode: 'insensitive' } },
+                { phone: { contains: filters.search, mode: 'insensitive' } },
             ];
         }
         const entities = await this.prisma.entity.findMany({
             where,
             orderBy: {
-                displayName: 'asc',
+                name: 'asc',
             },
         });
         return entities;
@@ -473,8 +471,8 @@ let TransactionsService = class TransactionsService {
             data: {
                 tenantId: dto.tenant_id,
                 entityType: dto.type,
-                displayName: dto.display_name,
-                phoneNumber: dto.phone_number || null,
+                name: dto.display_name,
+                phone: dto.phone_number || null,
                 systemTags: dto.system_tags || '',
                 customTags: dto.custom_tags || '',
                 metadata: (dto.metadata || {}),
@@ -503,15 +501,15 @@ let TransactionsService = class TransactionsService {
                 status: client_1.TxnStatus.POSTED,
             },
             select: {
-                totalAmount: true,
+                amount: true,
             },
         });
         const totalCredit = transactions
-            .filter((t) => Number(t.totalAmount) > 0)
-            .reduce((sum, t) => sum + Number(t.totalAmount), 0);
+            .filter((t) => Number(t.amount) > 0)
+            .reduce((sum, t) => sum + Number(t.amount), 0);
         const totalDebit = transactions
-            .filter((t) => Number(t.totalAmount) < 0)
-            .reduce((sum, t) => sum + Number(t.totalAmount), 0);
+            .filter((t) => Number(t.amount) < 0)
+            .reduce((sum, t) => sum + Number(t.amount), 0);
         const netBalance = totalCredit + totalDebit;
         const transactionCount = await this.prisma.transaction.count({
             where: {
@@ -550,7 +548,7 @@ let TransactionsService = class TransactionsService {
         SELECT * FROM attachments WHERE entity_id = ${entityId} ORDER BY uploaded_at DESC
       `;
         }
-        catch (e) {
+        catch {
             attachments = [];
         }
         return {
@@ -564,7 +562,7 @@ let TransactionsService = class TransactionsService {
         const entities = await this.prisma.entity.findMany({
             where: {
                 tenantId,
-                phoneNumber: {
+                phone: {
                     contains: phone,
                 },
             },
@@ -614,6 +612,48 @@ let TransactionsService = class TransactionsService {
             },
         });
         return updatedEntity;
+    }
+    async quickSearchEntities(tenantId, query, limit = 10) {
+        const entities = await this.prisma.entity.findMany({
+            where: {
+                tenantId,
+                OR: [
+                    {
+                        name: {
+                            contains: query,
+                            mode: 'insensitive',
+                        },
+                    },
+                    {
+                        phone: {
+                            contains: query,
+                            mode: 'insensitive',
+                        },
+                    },
+                ],
+            },
+            select: {
+                id: true,
+                name: true,
+                phone: true,
+                entityType: true,
+                trustScore: true,
+                createdAt: true,
+            },
+            orderBy: [
+                { trustScore: 'desc' },
+                { createdAt: 'desc' },
+            ],
+            take: limit,
+        });
+        return entities.map((entity) => ({
+            id: entity.id,
+            name: entity.name,
+            phone: entity.phone,
+            type: entity.entityType,
+            trustScore: entity.trustScore || 0,
+            createdAt: entity.createdAt,
+        }));
     }
 };
 exports.TransactionsService = TransactionsService;

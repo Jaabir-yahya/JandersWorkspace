@@ -97,7 +97,9 @@ describe('PaymentRecordsService', () => {
     it('should throw NotFoundException if transaction does not exist', async () => {
       mockPrisma.transaction.findUnique.mockResolvedValue(null);
 
-      await expect(service.create(createDto)).rejects.toThrow(NotFoundException);
+      await expect(service.create(createDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should update transaction payment status to SETTLED when fully paid', async () => {
@@ -182,7 +184,9 @@ describe('PaymentRecordsService', () => {
       mockPrisma.paymentApplication.delete.mockResolvedValue({});
       mockPrisma.payment.delete.mockResolvedValue({});
       mockPrisma.paymentApplication.findMany.mockResolvedValue([]);
-      mockPrisma.transaction.findUnique.mockResolvedValue({ totalAmount: 1000 });
+      mockPrisma.transaction.findUnique.mockResolvedValue({
+        totalAmount: 1000,
+      });
       mockPrisma.transaction.update.mockResolvedValue({});
 
       await service.delete(paymentId);
@@ -196,7 +200,9 @@ describe('PaymentRecordsService', () => {
 
       mockPrisma.paymentApplication.findFirst.mockResolvedValue(null);
 
-      await expect(service.delete(paymentId)).rejects.toThrow(NotFoundException);
+      await expect(service.delete(paymentId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw BadRequestException for non-DRAFT transactions', async () => {
@@ -208,7 +214,9 @@ describe('PaymentRecordsService', () => {
         transaction: { id: 'txn-id', status: 'POSTED' },
       });
 
-      await expect(service.delete(paymentId)).rejects.toThrow(BadRequestException);
+      await expect(service.delete(paymentId)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

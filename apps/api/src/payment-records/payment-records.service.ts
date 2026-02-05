@@ -106,11 +106,11 @@ export class PaymentRecordsService {
         id: app.paymentId,
         transaction_id: transactionId,
         method: metadata?.method || 'unknown',
-        amount: Number(app.amount),
+        amount: Number(app.appliedAmount || app.amount || 0),
         reference: app.payment?.reference || undefined,
         paid_at: metadata?.paid_at || app.payment?.paidAt?.toISOString(),
         metadata: app.payment?.metadata as Record<string, unknown>,
-        created_at: app.appliedAt.toISOString(),
+        created_at: app.appliedAt?.toISOString() || new Date().toISOString(),
       };
     });
   }
@@ -167,7 +167,7 @@ export class PaymentRecordsService {
     // Get transaction total amount
     const transaction = await this.prisma.transaction.findUnique({
       where: { id: transactionId },
-      select: { totalAmount: true, status: true },
+      select: { amount: true, status: true },
     });
 
     if (!transaction) {
@@ -184,7 +184,7 @@ export class PaymentRecordsService {
       (sum, p) => sum + Number(p.appliedAmount),
       0,
     );
-    const totalAmount = Number(transaction.totalAmount);
+    const totalAmount = Number(transaction.amount);
 
     let newStatus: PaymentStatus;
     if (totalPaid === 0) {

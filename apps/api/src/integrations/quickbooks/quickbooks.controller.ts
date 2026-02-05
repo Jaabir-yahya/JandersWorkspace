@@ -11,7 +11,10 @@ import {
 } from '@nestjs/common';
 import { QuickBooksService } from './quickbooks.service';
 import { SyncTransactionDto } from './dto/sync-transaction.dto';
-import type { QuickBooksConfig, QuickBooksInvoice } from '../types/integration.types';
+import type {
+  QuickBooksConfig,
+  QuickBooksInvoice,
+} from '../types/integration.types';
 
 @Controller('api/v1/integrations/quickbooks')
 export class QuickBooksController {
@@ -53,10 +56,7 @@ export class QuickBooksController {
 
   @Post('invoices')
   @HttpCode(HttpStatus.CREATED)
-  async createInvoice(
-    @Request() req: any,
-    @Body() invoice: QuickBooksInvoice,
-  ) {
+  async createInvoice(@Request() req: any, @Body() invoice: QuickBooksInvoice) {
     const tenantId = req.user?.tenantId || 'default';
 
     // TODO: Retrieve QuickBooks config from tenant configuration
@@ -152,7 +152,10 @@ export class QuickBooksController {
       refreshToken: '',
     };
 
-    const result = await this.quickbooksService.deleteInvoice(config, invoiceId);
+    const result = await this.quickbooksService.deleteInvoice(
+      config,
+      invoiceId,
+    );
 
     return {
       success: result,

@@ -6,8 +6,14 @@ export declare class TenantsController {
     private readonly prismaService;
     private readonly tenantsService;
     constructor(tenantConfigService: TenantConfigService, prismaService: PrismaService, tenantsService: TenantsService);
-    getMyFeatures(req: any): Promise<Record<string, boolean>>;
-    getMyConfig(req: any): Promise<import("../integrations/types/integration.types").TenantConfig>;
+    getMyFeatures(req: any): Promise<Record<string, boolean> | {
+        success: boolean;
+        data: {};
+    }>;
+    getMyConfig(req: any): Promise<import("../integrations/types/integration.types").TenantConfig | {
+        success: boolean;
+        data: null;
+    }>;
     createTenant(body: {
         name: string;
         slug: string;
@@ -18,9 +24,9 @@ export declare class TenantsController {
         tenant: {
             id: string;
             name: string;
-            slug: string | null;
-            tier: string | null;
-            country: string | null;
+            slug: string;
+            tier: string;
+            country: string;
         };
         user: {
             id: string;
@@ -59,13 +65,27 @@ export declare class TenantsController {
     listTenants(req: any): Promise<{
         features: any;
         id: string;
-        name: string;
         createdAt: Date;
-        slug: string | null;
-        tier: string | null;
-        country: string | null;
+        name: string;
+        slug: string;
+        tier: string;
+        country: string;
         settings: import("@prisma/client/runtime/library").JsonValue;
     }[]>;
+    getMyTenants(req: any): Promise<{
+        success: boolean;
+        data: {
+            features: any;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            slug: string;
+            tier: string;
+            country: string;
+            settings: import("@prisma/client/runtime/library").JsonValue;
+        }[];
+    }>;
     setTenantApiKey(tenantId: string, body: {
         apiKey: string;
     }, req: any): Promise<{

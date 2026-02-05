@@ -11,10 +11,7 @@ import {
 import { WhatsAppService } from './whatsapp.service';
 import { SendMessageDto } from './dto/send-message.dto';
 import { WebhookConfigDto } from './dto/webhook-config.dto';
-import {
-  WhatsAppConfig,
-  WhatsAppMessage,
-} from '../types/integration.types';
+import { WhatsAppConfig, WhatsAppMessage } from '../types/integration.types';
 
 @Controller('api/v1/integrations/whatsapp')
 export class WhatsAppController {
@@ -40,16 +37,22 @@ export class WhatsAppController {
     const message: WhatsAppMessage = {
       messagingProduct: 'whatsapp',
       to: sendMessageDto.to,
-      text: sendMessageDto.type === 'text' ? {
-        body: sendMessageDto.content.body || '',
-      } : undefined,
-      template: sendMessageDto.type === 'template' ? {
-        name: sendMessageDto.content.templateName || '',
-        language: {
-          code: sendMessageDto.content.templateData?.language || 'en',
-        },
-        components: sendMessageDto.content.templateData?.components,
-      } : undefined,
+      text:
+        sendMessageDto.type === 'text'
+          ? {
+              body: sendMessageDto.content.body || '',
+            }
+          : undefined,
+      template:
+        sendMessageDto.type === 'template'
+          ? {
+              name: sendMessageDto.content.templateName || '',
+              language: {
+                code: sendMessageDto.content.templateData?.language || 'en',
+              },
+              components: sendMessageDto.content.templateData?.components,
+            }
+          : undefined,
     };
 
     const result = await this.whatsappService.sendMessage(config, message);
@@ -64,7 +67,8 @@ export class WhatsAppController {
   @HttpCode(HttpStatus.OK)
   async sendTemplateMessage(
     @Request() req: any,
-    @Body() body: {
+    @Body()
+    body: {
       to: string;
       templateName: string;
       languageCode?: string;

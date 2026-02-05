@@ -21,6 +21,6 @@
     "typescript-eslint": "^8.20.0"
   },
   "dependencies": {
-    "@project-bridge/database": "file:../database"
+    "@project-bridge/database": "*"
   }
 }

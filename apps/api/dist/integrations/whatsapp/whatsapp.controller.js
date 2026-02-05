@@ -34,16 +34,20 @@ let WhatsAppController = class WhatsAppController {
         const message = {
             messagingProduct: 'whatsapp',
             to: sendMessageDto.to,
-            text: sendMessageDto.type === 'text' ? {
-                body: sendMessageDto.content.body || '',
-            } : undefined,
-            template: sendMessageDto.type === 'template' ? {
-                name: sendMessageDto.content.templateName || '',
-                language: {
-                    code: sendMessageDto.content.templateData?.language || 'en',
-                },
-                components: sendMessageDto.content.templateData?.components,
-            } : undefined,
+            text: sendMessageDto.type === 'text'
+                ? {
+                    body: sendMessageDto.content.body || '',
+                }
+                : undefined,
+            template: sendMessageDto.type === 'template'
+                ? {
+                    name: sendMessageDto.content.templateName || '',
+                    language: {
+                        code: sendMessageDto.content.templateData?.language || 'en',
+                    },
+                    components: sendMessageDto.content.templateData?.components,
+                }
+                : undefined,
         };
         const result = await this.whatsappService.sendMessage(config, message);
         return {

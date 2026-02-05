@@ -1,11 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 export declare const SUPABASE_AUTH_CLIENT = "SUPABASE_AUTH_CLIENT";
-export interface AuthenticatedUser {
-    id: string;
-    email: string;
-    tenantId: string;
-    role: string;
-}
+import { AuthenticatedUser } from './auth.guard';
+export type { AuthenticatedUser };
 export declare class AuthService {
     private readonly configService;
     private readonly supabase;

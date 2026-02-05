@@ -83,11 +83,11 @@ describe('TransactionsService', () => {
 
       const result = await service.create(createDto);
 
-      expect(result.totalAmount).toBe(expectedTotal);
+      expect(result.amount).toBe(expectedTotal);
       expect(mockPrisma.transaction.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            totalAmount: expectedTotal,
+            amount: expectedTotal,
           }),
         }),
       );
@@ -122,11 +122,11 @@ describe('TransactionsService', () => {
 
       const result = await service.create(emptyLinesDto);
 
-      expect(result.totalAmount).toBe(0);
+      expect(result.amount).toBe(0);
       expect(mockPrisma.transaction.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            totalAmount: 0,
+            amount: 0,
             lines: { create: [] },
           }),
         }),
@@ -212,10 +212,7 @@ describe('TransactionsService', () => {
         status: TxnStatus.POSTED,
       });
 
-      const result = await service.postTransaction(transactionId, {
-        user_id: '550e8400-e29b-41d4-a716-446655440002',
-      });
-
+      const result = await service.postTransaction(transactionId);
       expect(result.status).toBe(TxnStatus.POSTED);
     });
 
@@ -228,10 +225,7 @@ describe('TransactionsService', () => {
 
       mockPrisma.transaction.update.mockResolvedValue(mockTransaction);
 
-      const result = await service.postTransaction(transactionId, {
-        user_id: '550e8400-e29b-41d4-a716-446655440002',
-      });
-
+      const result = await service.postTransaction(transactionId);
       expect(result.status).toBe(TxnStatus.POSTED);
       expect(mockPrisma.transaction.update).toHaveBeenCalledWith(
         expect.objectContaining({

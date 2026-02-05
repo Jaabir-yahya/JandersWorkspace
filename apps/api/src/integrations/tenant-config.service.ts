@@ -510,7 +510,12 @@ export class TenantConfigService {
     for (const flag of availableFeatures) {
       // Feature is enabled if tenant settings explicitly enable it
       // or if it's a basic feature available to all
-      const isBasicFeature = ['manual_transactions', 'entity_management', 'payment_records', 'dashboard'].includes(flag.name);
+      const isBasicFeature = [
+        'manual_transactions',
+        'entity_management',
+        'payment_records',
+        'dashboard',
+      ].includes(flag.name);
       features[flag.name] = tenantSettings[flag.name] ?? isBasicFeature;
     }
 
@@ -529,11 +534,12 @@ export class TenantConfigService {
     const config = await this.getTenantConfig(tenantId);
 
     // Check if tenant has access to this integration
-    const featureName = integrationType.toLowerCase() === 'mpesa'
-      ? 'mpesa_integration'
-      : integrationType.toLowerCase() === 'whatsapp'
-      ? 'whatsapp_integration'
-      : `${integrationType.toLowerCase()}_sync`;
+    const featureName =
+      integrationType.toLowerCase() === 'mpesa'
+        ? 'mpesa_integration'
+        : integrationType.toLowerCase() === 'whatsapp'
+          ? 'whatsapp_integration'
+          : `${integrationType.toLowerCase()}_sync`;
 
     await this.requireFeatureAccess(tenantId, featureName);
 
@@ -549,11 +555,12 @@ export class TenantConfigService {
       const tenantConfig = await this.getTenantConfig(tenantId);
 
       // Check if tenant has access to this integration
-      const featureName = integrationType.toLowerCase() === 'mpesa'
-        ? 'mpesa_integration'
-        : integrationType.toLowerCase() === 'whatsapp'
-        ? 'whatsapp_integration'
-        : `${integrationType.toLowerCase()}_sync`;
+      const featureName =
+        integrationType.toLowerCase() === 'mpesa'
+          ? 'mpesa_integration'
+          : integrationType.toLowerCase() === 'whatsapp'
+            ? 'whatsapp_integration'
+            : `${integrationType.toLowerCase()}_sync`;
 
       await this.requireFeatureAccess(tenantId, featureName);
 

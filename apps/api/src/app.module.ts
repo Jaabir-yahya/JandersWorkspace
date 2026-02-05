@@ -14,6 +14,12 @@ import { IntegrationsModule } from './integrations/integrations.module';
 import { HealthModule } from './health/health.module';
 import { NairobiModule } from './nairobi/nairobi.module';
 import { TenantsModule } from './tenants/tenants.module';
+import { LedgerModule } from './ledger/ledger.module';
+import { UniversalTruthModule } from './universal-truth/universal-truth.module';
+import { SuppliesModule } from './supplies/supplies.module';
+import { InvoiceModule } from './invoices/invoice.module';
+import { PaymentModule } from './payments/payment.module';
+import { ReportingModule } from './reporting/reporting.module';
 
 @Module({
   imports: [
@@ -22,12 +28,12 @@ import { TenantsModule } from './tenants/tenants.module';
       {
         name: 'default',
         ttl: 60000, // 1 minute
-        limit: 100, // 100 requests per minute
+        limit: 1000, // 1000 requests per minute (increased for development)
       },
       {
         name: 'strict',
         ttl: 60000, // 1 minute
-        limit: 5, // 5 requests per minute (for auth endpoints)
+        limit: 50, // 50 requests per minute (for auth endpoints - increased for dev)
       },
     ]),
     AuthModule,
@@ -40,6 +46,12 @@ import { TenantsModule } from './tenants/tenants.module';
     IntegrationsModule,
     NairobiModule,
     HealthModule,
+    LedgerModule,
+    UniversalTruthModule,
+    SuppliesModule,
+    InvoiceModule,
+    PaymentModule,
+    ReportingModule,
   ],
   controllers: [AppController],
   providers: [

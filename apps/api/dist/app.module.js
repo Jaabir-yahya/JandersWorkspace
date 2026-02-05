@@ -23,6 +23,12 @@ const integrations_module_1 = require("./integrations/integrations.module");
 const health_module_1 = require("./health/health.module");
 const nairobi_module_1 = require("./nairobi/nairobi.module");
 const tenants_module_1 = require("./tenants/tenants.module");
+const ledger_module_1 = require("./ledger/ledger.module");
+const universal_truth_module_1 = require("./universal-truth/universal-truth.module");
+const supplies_module_1 = require("./supplies/supplies.module");
+const invoice_module_1 = require("./invoices/invoice.module");
+const payment_module_1 = require("./payments/payment.module");
+const reporting_module_1 = require("./reporting/reporting.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -34,12 +40,12 @@ exports.AppModule = AppModule = __decorate([
                 {
                     name: 'default',
                     ttl: 60000,
-                    limit: 100,
+                    limit: 1000,
                 },
                 {
                     name: 'strict',
                     ttl: 60000,
-                    limit: 5,
+                    limit: 50,
                 },
             ]),
             auth_module_1.AuthModule,
@@ -52,6 +58,12 @@ exports.AppModule = AppModule = __decorate([
             integrations_module_1.IntegrationsModule,
             nairobi_module_1.NairobiModule,
             health_module_1.HealthModule,
+            ledger_module_1.LedgerModule,
+            universal_truth_module_1.UniversalTruthModule,
+            supplies_module_1.SuppliesModule,
+            invoice_module_1.InvoiceModule,
+            payment_module_1.PaymentModule,
+            reporting_module_1.ReportingModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

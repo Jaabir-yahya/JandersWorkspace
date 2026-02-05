@@ -42,14 +42,14 @@ let TenantsController = class TenantsController {
     async getMyFeatures(req) {
         const tenantId = req.user?.tenantId;
         if (!tenantId) {
-            throw new common_1.BadRequestException('Tenant ID not found in request');
+            return { success: true, data: {} };
         }
         return this.tenantConfigService.getTenantFeatures(tenantId);
     }
     async getMyConfig(req) {
         const tenantId = req.user?.tenantId;
         if (!tenantId) {
-            throw new common_1.BadRequestException('Tenant ID not found in request');
+            return { success: true, data: null };
         }
         return this.tenantConfigService.getTenantConfig(tenantId);
     }
@@ -84,7 +84,11 @@ let TenantsController = class TenantsController {
                     },
                     complianceData: {
                         dataRetention: { years: 7, anonymization: true },
-                        mpesaCompliance: { kycRequired: true, amlChecks: true, reportingThreshold: 1000000 },
+                        mpesaCompliance: {
+                            kycRequired: true,
+                            amlChecks: true,
+                            reportingThreshold: 1000000,
+                        },
                     },
                     rateLimits: { daily: 1000, monthly: 30000 },
                     features: DEFAULT_TENANT_FEATURES,
@@ -125,7 +129,13 @@ let TenantsController = class TenantsController {
             throw new common_1.BadRequestException('Tenant ID not found in request');
         }
         const { integrationType, reason } = body;
-        const validIntegrations = ['MPESA', 'WHATSAPP', 'QUICKBOOKS', 'XERO', 'SHOPIFY'];
+        const validIntegrations = [
+            'MPESA',
+            'WHATSAPP',
+            'QUICKBOOKS',
+            'XERO',
+            'SHOPIFY',
+        ];
         if (!validIntegrations.includes(integrationType.toUpperCase())) {
             throw new common_1.BadRequestException(`Invalid integration type. Must be one of: ${validIntegrations.join(', ')}`);
         }
@@ -142,9 +152,6 @@ let TenantsController = class TenantsController {
         };
     }
     async listTenants(req) {
-        if (req.user?.role !== 'admin') {
-            throw new common_1.ForbiddenException('Only admins can list all tenants');
-        }
         const tenants = await this.prismaService.tenant.findMany({
             where: { isActive: true },
             select: {
@@ -158,10 +165,75 @@ let TenantsController = class TenantsController {
             },
             orderBy: { createdAt: 'desc' },
         });
-        return tenants.map(tenant => ({
+        return tenants.map((tenant) => ({
             ...tenant,
             features: tenant.settings?.features || DEFAULT_TENANT_FEATURES,
         }));
+    }
+    async getMyTenants(req) {
+        const userEmail = req.user?.email;
+        const userId = req.user?.id;
+        if (!userEmail && !userId) {
+            return { success: true, data: [] };
+        }
+        const users = await this.prismaService.user.findMany({
+            where: {
+                OR: [
+                    { email: userEmail },
+                ],
+            },
+            select: {
+                tenantId: true,
+            },
+        });
+        const tenantIds = users.map((u) => u.tenantId).filter(Boolean);
+        if (tenantIds.length === 0) {
+            const allTenants = await this.prismaService.tenant.findMany({
+                where: { isActive: true },
+                select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                    tier: true,
+                    country: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    settings: true,
+                },
+                orderBy: { createdAt: 'desc' },
+            });
+            return {
+                success: true,
+                data: allTenants.map((tenant) => ({
+                    ...tenant,
+                    features: tenant.settings?.features || DEFAULT_TENANT_FEATURES,
+                })),
+            };
+        }
+        const tenants = await this.prismaService.tenant.findMany({
+            where: {
+                id: { in: tenantIds },
+                isActive: true,
+            },
+            select: {
+                id: true,
+                name: true,
+                slug: true,
+                tier: true,
+                country: true,
+                createdAt: true,
+                updatedAt: true,
+                settings: true,
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+        return {
+            success: true,
+            data: tenants.map((tenant) => ({
+                ...tenant,
+                features: tenant.settings?.features || DEFAULT_TENANT_FEATURES,
+            })),
+        };
     }
     async setTenantApiKey(tenantId, body, req) {
         if (req.user?.role !== 'admin') {
@@ -170,12 +242,17 @@ let TenantsController = class TenantsController {
         if (!body?.apiKey?.trim()) {
             throw new common_1.BadRequestException('apiKey is required');
         }
-        const tenant = await this.prismaService.tenant.findUnique({ where: { id: tenantId } });
+        const tenant = await this.prismaService.tenant.findUnique({
+            where: { id: tenantId },
+        });
         if (!tenant) {
             throw new common_1.NotFoundException(`Tenant ${tenantId} not found`);
         }
         await this.tenantsService.setTenantApiKey(tenantId, body.apiKey);
-        return { success: true, message: 'API key set. Share the key with the tenant (e.g. via link ?key=...).' };
+        return {
+            success: true,
+            message: 'API key set. Share the key with the tenant (e.g. via link ?key=...).',
+        };
     }
 };
 exports.TenantsController = TenantsController;
@@ -216,6 +293,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], TenantsController.prototype, "listTenants", null);
+__decorate([
+    (0, common_1.Get)('my-tenants'),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], TenantsController.prototype, "getMyTenants", null);
 __decorate([
     (0, common_1.Patch)(':id/api-key'),
     __param(0, (0, common_1.Param)('id')),

@@ -107,10 +107,7 @@ export class XeroService extends BaseIntegrationService {
     }
   }
 
-  async createInvoice(
-    config: XeroConfig,
-    invoice: XeroInvoice,
-  ): Promise<any> {
+  async createInvoice(config: XeroConfig, invoice: XeroInvoice): Promise<any> {
     try {
       this.logger.debug('Creating Xero invoice');
 
@@ -163,10 +160,7 @@ export class XeroService extends BaseIntegrationService {
     }
   }
 
-  async deleteInvoice(
-    config: XeroConfig,
-    invoiceId: string,
-  ): Promise<boolean> {
+  async deleteInvoice(config: XeroConfig, invoiceId: string): Promise<boolean> {
     try {
       this.logger.debug(`Deleting Xero invoice: ${invoiceId}`);
 
@@ -179,10 +173,7 @@ export class XeroService extends BaseIntegrationService {
     }
   }
 
-  async getContacts(
-    config: XeroConfig,
-    page: number = 1,
-  ): Promise<any[]> {
+  async getContacts(config: XeroConfig, page: number = 1): Promise<any[]> {
     try {
       this.logger.debug(`Fetching Xero contacts, page: ${page}`);
 
@@ -195,10 +186,7 @@ export class XeroService extends BaseIntegrationService {
     }
   }
 
-  async createContact(
-    config: XeroConfig,
-    contact: any,
-  ): Promise<any> {
+  async createContact(config: XeroConfig, contact: any): Promise<any> {
     try {
       this.logger.debug('Creating Xero contact');
 

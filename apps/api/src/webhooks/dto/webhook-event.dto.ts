@@ -1,6 +1,19 @@
-import { IsString, IsObject, IsOptional, IsEnum, IsUUID, IsNumber, IsBoolean, IsDateString } from 'class-validator';
+import {
+  IsString,
+  IsObject,
+  IsOptional,
+  IsEnum,
+  IsUUID,
+  IsNumber,
+  IsBoolean,
+  IsDateString,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { IntegrationType, WebhookStatus, EventType } from '../../integrations/types/integration.types';
+import {
+  IntegrationType,
+  WebhookStatus,
+  EventType,
+} from '../../integrations/types/integration.types';
 
 export class CreateWebhookEventDto {
   @IsUUID()

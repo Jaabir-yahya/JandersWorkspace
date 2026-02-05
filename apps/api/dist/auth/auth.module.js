@@ -9,24 +9,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthModule = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
+const passport_1 = require("@nestjs/passport");
 const auth_guard_1 = require("./auth.guard");
 const auth_service_1 = require("./auth.service");
+const auth_controller_1 = require("./auth.controller");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
-        imports: [config_1.ConfigModule],
-        providers: [
-            auth_service_1.AuthService,
-            auth_guard_1.AuthGuard,
-            {
-                provide: auth_service_1.SUPABASE_AUTH_CLIENT,
-                useValue: {},
-            },
-        ],
-        exports: [auth_service_1.SUPABASE_AUTH_CLIENT, auth_service_1.AuthService, auth_guard_1.AuthGuard],
+        imports: [config_1.ConfigModule, passport_1.PassportModule],
+        controllers: [auth_controller_1.AuthController],
+        providers: [auth_service_1.AuthService, auth_guard_1.AuthGuard],
+        exports: [auth_service_1.AuthService, auth_guard_1.AuthGuard],
     })
 ], AuthModule);
 //# sourceMappingURL=auth.module.js.map

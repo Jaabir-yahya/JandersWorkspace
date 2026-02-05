@@ -9,16 +9,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DashboardModule = void 0;
 const common_1 = require("@nestjs/common");
 const tenants_module_1 = require("../tenants/tenants.module");
+const transactions_module_1 = require("../transactions/transactions.module");
+const prisma_module_1 = require("../prisma/prisma.module");
 const dashboard_service_1 = require("./dashboard.service");
 const dashboard_controller_1 = require("./dashboard.controller");
 const dashboard_public_controller_1 = require("./dashboard-public.controller");
+const dashboard_mobile_controller_1 = require("./dashboard-mobile.controller");
 let DashboardModule = class DashboardModule {
 };
 exports.DashboardModule = DashboardModule;
 exports.DashboardModule = DashboardModule = __decorate([
     (0, common_1.Module)({
-        imports: [tenants_module_1.TenantsModule],
-        controllers: [dashboard_public_controller_1.DashboardPublicController, dashboard_controller_1.DashboardController],
+        imports: [tenants_module_1.TenantsModule, transactions_module_1.TransactionsModule, prisma_module_1.PrismaModule],
+        controllers: [
+            dashboard_public_controller_1.DashboardPublicController,
+            dashboard_controller_1.DashboardController,
+            dashboard_mobile_controller_1.DashboardMobileController,
+        ],
         providers: [dashboard_service_1.DashboardService],
     })
 ], DashboardModule);

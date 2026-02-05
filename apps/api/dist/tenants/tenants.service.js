@@ -47,6 +47,22 @@ let TenantsService = TenantsService_1 = class TenantsService {
             data: { apiKeyHash: hash },
         });
     }
+    async getTenantIdsForUser(userEmail) {
+        const users = await this.prisma.user.findMany({
+            where: { email: userEmail },
+            select: { tenantId: true },
+        });
+        return [...new Set(users.map((u) => u.tenantId).filter(Boolean))];
+    }
+    async resolveEffectiveTenantId(jwtTenantId, headerTenantId, userEmail) {
+        const requested = headerTenantId?.trim();
+        if (requested) {
+            const allowed = await this.getTenantIdsForUser(userEmail);
+            if (allowed.includes(requested))
+                return requested;
+        }
+        return jwtTenantId?.trim() || null;
+    }
 };
 exports.TenantsService = TenantsService;
 exports.TenantsService = TenantsService = TenantsService_1 = __decorate([

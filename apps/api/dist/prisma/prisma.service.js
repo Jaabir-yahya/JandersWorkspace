@@ -16,6 +16,10 @@ const database_1 = require("@project-bridge/database");
 let PrismaService = PrismaService_1 = class PrismaService extends database_1.PrismaClient {
     logger = new common_1.Logger(PrismaService_1.name);
     constructor() {
+        const databaseUrl = process.env.DATABASE_URL;
+        const connectionUrl = databaseUrl?.includes('?')
+            ? `${databaseUrl}&pgbouncer=true`
+            : `${databaseUrl}?pgbouncer=true`;
         super({
             log: [
                 { emit: 'event', level: 'query' },
@@ -23,6 +27,7 @@ let PrismaService = PrismaService_1 = class PrismaService extends database_1.Pri
                 { emit: 'stdout', level: 'warn' },
                 { emit: 'stdout', level: 'error' },
             ],
+            datasourceUrl: connectionUrl,
         });
         this.$on('query', (e) => {
             this.logger.debug(`Query: ${e.query} - Duration: ${e.duration}ms`);

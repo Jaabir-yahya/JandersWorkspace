@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { PostTransactionDto } from './dto/post-transaction.dto';
+
 import { ReverseTransactionDto } from './dto/reverse-transaction.dto';
 import { UpdatePaymentStatusDto } from './dto/update-payment-status.dto';
 import {
@@ -49,7 +49,9 @@ export class TransactionsService {
       where: { tenantId },
       orderBy: { createdAt: 'asc' },
     });
-    const manual = users.find((u) => (u.metadata as Record<string, unknown>)?.manual_capture === true);
+    const manual = users.find(
+      (u) => (u.metadata as Record<string, unknown>)?.manual_capture === true,
+    );
     if (manual) return manual.id;
     if (users.length > 0) return users[0].id;
     const created = await this.prisma.user.create({
@@ -69,7 +71,7 @@ export class TransactionsService {
     // Create transaction with lines in a single transaction
     const transaction = await this.prisma.$transaction(async (tx) => {
       // Calculate total from lines
-      const totalAmount = dto.lines.reduce((sum, line) => {
+      const amount = dto.lines.reduce((sum, line) => {
         return sum + line.quantity * line.unit_price;
       }, 0);
 
@@ -80,7 +82,7 @@ export class TransactionsService {
           entityId: dto.entity_id || null,
           createdByUserId: dto.created_by_user_id,
           type: dto.type as any,
-          totalAmount: totalAmount,
+          amount: amount,
           status: TxnStatus.DRAFT,
           paymentStatus: PaymentStatus.PENDING,
           reference: dto.reference || null,
@@ -88,10 +90,8 @@ export class TransactionsService {
             context: dto.context,
             tags: dto.tags,
           } as Prisma.InputJsonValue,
-          systemTags: '',
-          customTags: '',
           lines: {
-            create: dto.lines.map((line, index) => ({
+            create: dto.lines.map((line) => ({
               description: line.description,
               sku: line.sku || null,
               quantity: line.quantity,
@@ -154,7 +154,7 @@ export class TransactionsService {
         { reference: { contains: filters.search, mode: 'insensitive' } },
         {
           entity: {
-            displayName: { contains: filters.search, mode: 'insensitive' },
+            name: { contains: filters.search, mode: 'insensitive' },
           },
         },
       ];
@@ -166,8 +166,8 @@ export class TransactionsService {
         entity: {
           select: {
             id: true,
-            displayName: true,
-            phoneNumber: true,
+            name: true,
+            phone: true,
           },
         },
         lines: true,
@@ -195,7 +195,8 @@ export class TransactionsService {
     if (filters?.status) where.status = filters.status as TxnStatus;
     if (filters?.type) where.type = filters.type as any;
     if (filters?.entity_id) where.entityId = filters.entity_id;
-    if (filters?.payment_status) where.paymentStatus = filters.payment_status as PaymentStatus;
+    if (filters?.payment_status)
+      where.paymentStatus = filters.payment_status as PaymentStatus;
     if (filters?.date_from || filters?.date_to) {
       where.createdAt = {};
       if (filters.date_from) where.createdAt.gte = new Date(filters.date_from);
@@ -204,14 +205,18 @@ export class TransactionsService {
     if (filters?.search) {
       where.OR = [
         { reference: { contains: filters.search, mode: 'insensitive' } },
-        { entity: { displayName: { contains: filters.search, mode: 'insensitive' } } },
+        {
+          entity: {
+            name: { contains: filters.search, mode: 'insensitive' },
+          },
+        },
       ];
     }
 
     const transactions = await this.prisma.transaction.findMany({
       where,
       include: {
-        entity: { select: { id: true, displayName: true, phoneNumber: true } },
+        entity: { select: { id: true, name: true, phone: true } },
         lines: true,
       },
       orderBy: { createdAt: 'desc' },
@@ -223,7 +228,7 @@ export class TransactionsService {
         id: t.id,
         tenantId: t.tenantId,
         type: t.type,
-        totalAmount: Number(t.totalAmount),
+        amount: Number(t.amount),
         currencyCode: t.currencyCode,
         createdAt: t.createdAt.toISOString(),
         status: t.status,
@@ -243,7 +248,7 @@ export class TransactionsService {
     const rows = transactions.map((t) => {
       const desc = t.lines?.[0]?.description ?? '';
       const escaped = desc.replace(/"/g, '""');
-      return `${t.createdAt.toISOString().split('T')[0]},${t.type},${t.totalAmount},${t.currencyCode},"${escaped}",${(t.reference ?? '').replace(/"/g, '""')}`;
+      return `${t.createdAt.toISOString().split('T')[0]},${t.type},${Number(t.amount)},${t.currencyCode},"${escaped}",${(t.reference ?? '').replace(/"/g, '""')}`;
     });
     return [header, ...rows].join('\n');
   }
@@ -287,7 +292,7 @@ export class TransactionsService {
    * Post a transaction (DRAFT -> POSTED)
    * LOCK 2: Once POSTED, transaction becomes immutable
    */
-  async postTransaction(id: string, dto: PostTransactionDto) {
+  async postTransaction(id: string) {
     const transaction = await this.prisma.transaction.update({
       where: { id },
       data: {
@@ -332,13 +337,11 @@ export class TransactionsService {
           createdByUserId: dto.created_by_user_id,
           type: original.type,
           currencyCode: original.currencyCode,
-          totalAmount: -original.totalAmount,
+          amount: -original.amount,
           status: TxnStatus.REVERSED,
           paymentStatus: original.paymentStatus,
           reference: `REV-${original.reference || id}`,
           reversedTransactionId: original.id,
-          systemTags: original.systemTags || '',
-          customTags: original.customTags || '',
           metadata: {
             reversal_reason: dto.reason,
             original_reference: original.reference,
@@ -425,7 +428,7 @@ export class TransactionsService {
     // Calculate running balance
     let runningBalance = 0;
     const history: EntityHistoryItem[] = transactions.map((txn) => {
-      const amount = Number(txn.totalAmount);
+      const amount = Number(txn.amount);
       runningBalance += amount;
 
       return {
@@ -459,7 +462,7 @@ export class TransactionsService {
       throw new NotFoundException(`Transaction with ID ${id} not found`);
     }
 
-    const entityName = transaction.entity?.displayName || 'Unknown';
+    const entityName = transaction.entity?.name || 'Unknown';
 
     // Map transaction type to account code
     const defaultAccountCode = getAccountCode(transaction.type);
@@ -482,7 +485,7 @@ export class TransactionsService {
       customer_id: transaction.entityId,
       invoice_date: transaction.createdAt.toISOString(),
       currency: transaction.currencyCode,
-      total_amount: Number(transaction.totalAmount),
+      total_amount: Number(transaction.amount),
       line_items: lineItems,
       tax_amount: 0, // Not implemented in Phase 2
       status: transaction.status,
@@ -520,9 +523,9 @@ export class TransactionsService {
       },
     });
 
-    const transactionIdsFromLines = [
-      ...new Set(lineMatches.map((l) => l.transactionId)),
-    ];
+    const transactionIdsFromLines = Array.from(
+      new Set(lineMatches.map((l) => l.transactionId)),
+    );
 
     // Build main query
     const where: Prisma.TransactionWhereInput = {
@@ -531,7 +534,7 @@ export class TransactionsService {
         { reference: { contains: searchTerm, mode: 'insensitive' } },
         {
           entity: {
-            displayName: { contains: searchTerm, mode: 'insensitive' },
+            name: { contains: searchTerm, mode: 'insensitive' },
           },
         },
         { id: { in: transactionIdsFromLines } },
@@ -569,8 +572,8 @@ export class TransactionsService {
         entity: {
           select: {
             id: true,
-            displayName: true,
-            phoneNumber: true,
+            name: true,
+            phone: true,
           },
         },
         lines: true,
@@ -601,15 +604,15 @@ export class TransactionsService {
 
     if (filters?.search) {
       where.OR = [
-        { displayName: { contains: filters.search, mode: 'insensitive' } },
-        { phoneNumber: { contains: filters.search, mode: 'insensitive' } },
+        { name: { contains: filters.search, mode: 'insensitive' } },
+        { phone: { contains: filters.search, mode: 'insensitive' } },
       ];
     }
 
     const entities = await this.prisma.entity.findMany({
       where,
       orderBy: {
-        displayName: 'asc',
+        name: 'asc',
       },
     });
 
@@ -620,9 +623,9 @@ export class TransactionsService {
     const entity = await this.prisma.entity.create({
       data: {
         tenantId: dto.tenant_id,
-        entityType: dto.type as any,
-        displayName: dto.display_name,
-        phoneNumber: dto.phone_number || null,
+        entityType: dto.type,
+        name: dto.display_name,
+        phone: dto.phone_number || null,
         systemTags: dto.system_tags || '',
         customTags: dto.custom_tags || '',
         metadata: (dto.metadata || {}) as Prisma.InputJsonValue,
@@ -661,17 +664,17 @@ export class TransactionsService {
         status: TxnStatus.POSTED,
       },
       select: {
-        totalAmount: true,
+        amount: true,
       },
     });
 
     const totalCredit = transactions
-      .filter((t) => Number(t.totalAmount) > 0)
-      .reduce((sum, t) => sum + Number(t.totalAmount), 0);
+      .filter((t) => Number(t.amount) > 0)
+      .reduce((sum, t) => sum + Number(t.amount), 0);
 
     const totalDebit = transactions
-      .filter((t) => Number(t.totalAmount) < 0)
-      .reduce((sum, t) => sum + Number(t.totalAmount), 0);
+      .filter((t) => Number(t.amount) < 0)
+      .reduce((sum, t) => sum + Number(t.amount), 0);
 
     const netBalance = totalCredit + totalDebit;
 
@@ -719,7 +722,7 @@ export class TransactionsService {
       attachments = await this.prisma.$queryRaw`
         SELECT * FROM attachments WHERE entity_id = ${entityId} ORDER BY uploaded_at DESC
       `;
-    } catch (e) {
+    } catch {
       // Attachments table might not exist yet
       attachments = [];
     }
@@ -736,7 +739,7 @@ export class TransactionsService {
     const entities = await this.prisma.entity.findMany({
       where: {
         tenantId,
-        phoneNumber: {
+        phone: {
           contains: phone,
         },
       },
@@ -808,5 +811,56 @@ export class TransactionsService {
     });
 
     return updatedEntity;
+  }
+
+  /**
+   * Quick search entities for mobile - optimized for speed
+   */
+  async quickSearchEntities(
+    tenantId: string,
+    query: string,
+    limit: number = 10,
+  ) {
+    const entities = await this.prisma.entity.findMany({
+      where: {
+        tenantId,
+        OR: [
+          {
+            name: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
+            phone: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        entityType: true,
+        trustScore: true,
+        createdAt: true,
+      },
+      orderBy: [
+        { trustScore: 'desc' }, // Prioritize trusted entities
+        { createdAt: 'desc' }, // Then recent entities
+      ],
+      take: limit,
+    });
+
+    return entities.map((entity) => ({
+      id: entity.id,
+      name: entity.name,
+      phone: entity.phone,
+      type: entity.entityType,
+      trustScore: entity.trustScore || 0,
+      createdAt: entity.createdAt,
+    }));
   }
 }

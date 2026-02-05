@@ -20,7 +20,7 @@ exports.swaggerConfig = new swagger_1.DocumentBuilder()
     .setVersion('1.0.0')
     .setContact('Project Bridge Team', 'https://project-bridge.app', 'support@project-bridge.app')
     .setLicense('MIT', 'https://opensource.org/licenses/MIT')
-    .addServer('http://localhost:3000/api/v1', 'Local Development')
+    .addServer('http://localhost:3001/api/v1', 'Local Development')
     .addServer('https://api.project-bridge.app/api/v1', 'Production')
     .addServer('https://api-staging.project-bridge.app/api/v1', 'Staging')
     .addBearerAuth({

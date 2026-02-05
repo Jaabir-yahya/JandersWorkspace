@@ -20,10 +20,11 @@ let AuthGuard = class AuthGuard {
     }
     async canActivate(context) {
         const request = context.switchToHttp().getRequest();
-        const token = this.extractTokenFromHeader(request);
-        if (!token) {
-            throw new common_1.UnauthorizedException('Authorization token is required');
+        const authHeader = request.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            throw new common_1.UnauthorizedException('No token provided');
         }
+        const token = authHeader.substring(7);
         try {
             const user = await this.authService.verifyToken(token);
             request.user = user;
@@ -32,17 +33,6 @@ let AuthGuard = class AuthGuard {
         catch (error) {
             throw new common_1.UnauthorizedException('Invalid or expired token');
         }
-    }
-    extractTokenFromHeader(request) {
-        const authHeader = request.headers.authorization;
-        if (!authHeader) {
-            return undefined;
-        }
-        const [type, token] = authHeader.split(' ');
-        if (type !== 'Bearer' || !token) {
-            return undefined;
-        }
-        return token;
     }
 };
 exports.AuthGuard = AuthGuard;

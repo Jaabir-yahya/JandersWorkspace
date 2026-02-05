@@ -1,4 +1,10 @@
-import { IsString, IsEnum, IsOptional, IsObject, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsOptional,
+  IsObject,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class MessageContentDto {

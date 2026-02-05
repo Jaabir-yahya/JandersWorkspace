@@ -1,10 +1,26 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local", "tsconfig.json"],
+  "globalDependencies": [
+    "apps/**/.env.*local",
+    "packages/**/.env.*local",
+    ".env",
+    "tsconfig.json"
+  ],
+  "globalDotEnv": [
+    ".env"
+  ],
   "pipeline": {
     "build": {
-      "dependsOn": ["^build", "^generate"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**", "!.turbo/**"]
+      "dependsOn": [
+        "^build",
+        "^generate"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**",
+        "!.turbo/**"
+      ]
     },
     "dev": {
       "cache": false,
@@ -12,17 +28,29 @@
     },
     "generate": {
       "cache": false,
-      "outputs": ["dist/**", "node_modules/.prisma/**"]
+      "outputs": [
+        "dist/**",
+        "node_modules/.prisma/**"
+      ]
     },
     "lint": {
       "outputs": []
     },
     "test": {
-      "dependsOn": ["build"],
-      "outputs": ["coverage/**"]
+      "dependsOn": [
+        "build"
+      ],
+      "outputs": [
+        "coverage/**"
+      ]
+    },
+    "format": {
+      "cache": false
     },
     "type-check": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "outputs": []
     },
     "clean": {

@@ -15,7 +15,10 @@ import { AuthGuard } from '../auth/auth.guard';
 import { TenantConfigService } from '../integrations/tenant-config.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantsService } from './tenants.service';
-import { TenantTier, TenantCountry } from '../integrations/types/integration.types';
+import {
+  TenantTier,
+  TenantCountry,
+} from '../integrations/types/integration.types';
 
 // Default features for new manual-only tenants (Nairobi focus)
 const DEFAULT_TENANT_FEATURES = {
@@ -43,12 +46,14 @@ export class TenantsController {
   /**
    * Get current tenant's features
    * Returns what features the tenant has access to
+   * If no tenantId in user, return empty features (user hasn't selected tenant yet)
    */
   @Get('features')
   async getMyFeatures(@Request() req: any) {
     const tenantId = req.user?.tenantId;
     if (!tenantId) {
-      throw new BadRequestException('Tenant ID not found in request');
+      // Return empty features if user hasn't selected a tenant yet
+      return { success: true, data: {} };
     }
 
     return this.tenantConfigService.getTenantFeatures(tenantId);
@@ -56,12 +61,14 @@ export class TenantsController {
 
   /**
    * Get current tenant's configuration
+   * If no tenantId in user, return null (user hasn't selected tenant yet)
    */
   @Get('config')
   async getMyConfig(@Request() req: any) {
     const tenantId = req.user?.tenantId;
     if (!tenantId) {
-      throw new BadRequestException('Tenant ID not found in request');
+      // Return null config if user hasn't selected a tenant yet
+      return { success: true, data: null };
     }
 
     return this.tenantConfigService.getTenantConfig(tenantId);
@@ -73,7 +80,8 @@ export class TenantsController {
    */
   @Post()
   async createTenant(
-    @Body() body: {
+    @Body()
+    body: {
       name: string;
       slug: string;
       phoneNumber: string;
@@ -92,7 +100,9 @@ export class TenantsController {
 
     // Validate required fields
     if (!name || !slug || !phoneNumber || !displayName) {
-      throw new BadRequestException('Missing required fields: name, slug, phoneNumber, displayName');
+      throw new BadRequestException(
+        'Missing required fields: name, slug, phoneNumber, displayName',
+      );
     }
 
     // Check if slug is already taken
@@ -122,7 +132,11 @@ export class TenantsController {
           },
           complianceData: {
             dataRetention: { years: 7, anonymization: true },
-            mpesaCompliance: { kycRequired: true, amlChecks: true, reportingThreshold: 1000000 },
+            mpesaCompliance: {
+              kycRequired: true,
+              amlChecks: true,
+              reportingThreshold: 1000000,
+            },
           },
           rateLimits: { daily: 1000, monthly: 30000 },
           features: DEFAULT_TENANT_FEATURES,
@@ -157,7 +171,8 @@ export class TenantsController {
         role: user.role,
       },
       features: DEFAULT_TENANT_FEATURES,
-      message: 'Tenant created successfully with manual-only features. Contact support to enable integrations.',
+      message:
+        'Tenant created successfully with manual-only features. Contact support to enable integrations.',
     };
   }
 
@@ -178,9 +193,17 @@ export class TenantsController {
     const { integrationType, reason } = body;
 
     // Validate integration type
-    const validIntegrations = ['MPESA', 'WHATSAPP', 'QUICKBOOKS', 'XERO', 'SHOPIFY'];
+    const validIntegrations = [
+      'MPESA',
+      'WHATSAPP',
+      'QUICKBOOKS',
+      'XERO',
+      'SHOPIFY',
+    ];
     if (!validIntegrations.includes(integrationType.toUpperCase())) {
-      throw new BadRequestException(`Invalid integration type. Must be one of: ${validIntegrations.join(', ')}`);
+      throw new BadRequestException(
+        `Invalid integration type. Must be one of: ${validIntegrations.join(', ')}`,
+      );
     }
 
     // In a real implementation, this would create a request record
@@ -199,14 +222,13 @@ export class TenantsController {
   }
 
   /**
-   * List all tenants (admin only)
+   * List all tenants (for now, return all active tenants for any authenticated user)
+   * This allows users to select a tenant after signing in
    */
   @Get()
   async listTenants(@Request() req: any) {
-    if (req.user?.role !== 'admin') {
-      throw new ForbiddenException('Only admins can list all tenants');
-    }
-
+    // For now, return all active tenants so users can select one
+    // In production, you might want to filter by user's tenant memberships
     const tenants = await this.prismaService.tenant.findMany({
       where: { isActive: true },
       select: {
@@ -221,10 +243,94 @@ export class TenantsController {
       orderBy: { createdAt: 'desc' },
     });
 
-    return tenants.map(tenant => ({
+    return tenants.map((tenant) => ({
       ...tenant,
       features: (tenant.settings as any)?.features || DEFAULT_TENANT_FEATURES,
     }));
+  }
+
+  /**
+   * Get tenants for the currently authenticated user
+   * Returns tenants where the user has a matching user record in the database
+   */
+  @Get('my-tenants')
+  async getMyTenants(@Request() req: any) {
+    const userEmail = req.user?.email;
+    const userId = req.user?.id;
+
+    if (!userEmail && !userId) {
+      return { success: true, data: [] };
+    }
+
+    // Find users in the database with matching email or supabase user id
+    const users = await this.prismaService.user.findMany({
+      where: {
+        OR: [
+          { email: userEmail },
+          // Also check if user metadata has supabase user id stored
+        ],
+      },
+      select: {
+        tenantId: true,
+      },
+    });
+
+    const tenantIds = users.map((u) => u.tenantId).filter(Boolean);
+
+    if (tenantIds.length === 0) {
+      // If no specific tenant link found, return all active tenants
+      // This is a fallback for development/testing
+      const allTenants = await this.prismaService.tenant.findMany({
+        where: { isActive: true },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          tier: true,
+          country: true,
+          createdAt: true,
+          updatedAt: true,
+          settings: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      return {
+        success: true,
+        data: allTenants.map((tenant) => ({
+          ...tenant,
+          features:
+            (tenant.settings as any)?.features || DEFAULT_TENANT_FEATURES,
+        })),
+      };
+    }
+
+    // Return tenants linked to this user
+    const tenants = await this.prismaService.tenant.findMany({
+      where: {
+        id: { in: tenantIds },
+        isActive: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        tier: true,
+        country: true,
+        createdAt: true,
+        updatedAt: true,
+        settings: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return {
+      success: true,
+      data: tenants.map((tenant) => ({
+        ...tenant,
+        features: (tenant.settings as any)?.features || DEFAULT_TENANT_FEATURES,
+      })),
+    };
   }
 
   /**
@@ -242,11 +348,17 @@ export class TenantsController {
     if (!body?.apiKey?.trim()) {
       throw new BadRequestException('apiKey is required');
     }
-    const tenant = await this.prismaService.tenant.findUnique({ where: { id: tenantId } });
+    const tenant = await this.prismaService.tenant.findUnique({
+      where: { id: tenantId },
+    });
     if (!tenant) {
       throw new NotFoundException(`Tenant ${tenantId} not found`);
     }
     await this.tenantsService.setTenantApiKey(tenantId, body.apiKey);
-    return { success: true, message: 'API key set. Share the key with the tenant (e.g. via link ?key=...).' };
+    return {
+      success: true,
+      message:
+        'API key set. Share the key with the tenant (e.g. via link ?key=...).',
+    };
   }
 }

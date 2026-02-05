@@ -85,11 +85,13 @@ export class WhatsAppService extends BaseIntegrationService {
 
   async syncData(request: SyncRequest): Promise<SyncResult> {
     try {
-      this.logger.debug(`Starting WhatsApp sync for tenant: ${request.tenantId}`);
-      
+      this.logger.debug(
+        `Starting WhatsApp sync for tenant: ${request.tenantId}`,
+      );
+
       // WhatsApp doesn't support traditional data sync
       // Messages are sent/received via API calls and webhooks
-      
+
       return {
         success: true,
         processed: 0,
