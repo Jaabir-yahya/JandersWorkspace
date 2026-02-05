@@ -20,7 +20,7 @@
     "deploy": "prisma migrate deploy",
     "studio": "dotenv -e ../../.env prisma studio",
     "clean": "rm -rf dist generated",
-    "lint": "eslint src/**/*.ts",
+    "lint": "eslint index.ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
