@@ -113,12 +113,9 @@ export class DashboardMobileController {
           transactionCount: stats._count.id || 0,
         },
         entities: {
-          total: entityCounts.reduce(
-            (sum, group) => sum + (group._count as any).id,
-            0,
-          ),
+          total: entityCounts.reduce((sum, group) => sum + group._count.id, 0),
           byType: entityCounts.reduce((acc, group) => {
-            acc[group.entityType] = (group._count as any).id;
+            acc[group.entityType] = group._count.id;
             return acc;
           }, {}),
         },

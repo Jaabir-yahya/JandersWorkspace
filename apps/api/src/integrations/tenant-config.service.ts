@@ -203,7 +203,7 @@ export class TenantConfigService {
       }
 
       // Merge settings
-      const currentSettings = (existingTenant.settings as any) || {};
+      const currentSettings = existingTenant.settings || {};
       const mergedSettings = { ...currentSettings };
 
       // Handle specific updates

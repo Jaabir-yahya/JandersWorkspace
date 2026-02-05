@@ -199,7 +199,7 @@ export class DashboardService {
     // Calculate payment method breakdown
     const paymentBreakdown = { cash: 0, mpesa: 0, bank: 0, credit: 0 };
     paymentData.forEach((payment) => {
-      const metadata = payment.metadata as any;
+      const metadata = payment.metadata;
       const method = metadata?.method?.toLowerCase() || 'unknown';
       const amount = Number(payment.amount);
       if (method === 'cash') paymentBreakdown.cash += amount;

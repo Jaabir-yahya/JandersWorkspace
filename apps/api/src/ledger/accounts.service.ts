@@ -150,13 +150,13 @@ export class AccountsService {
     if (updateAccountDto.balance !== undefined) {
       updateData.quantity = updateAccountDto.balance;
       updateData.metadata = {
-        ...(existing.metadata as any),
+        ...existing.metadata,
         balance: updateAccountDto.balance,
       };
     }
     if (updateAccountDto.metadata) {
       updateData.metadata = {
-        ...(existing.metadata as any),
+        ...existing.metadata,
         ...updateAccountDto.metadata,
       };
     }
@@ -217,7 +217,7 @@ export class AccountsService {
       throw new NotFoundException(`Account with ID ${id} not found`);
     }
 
-    const metadata = item.metadata as any;
+    const metadata = item.metadata;
     const balance = metadata?.balance || 0;
     return { balance: Number(balance) };
   }
@@ -241,7 +241,7 @@ export class AccountsService {
 
     // Group by account type and calculate debits/credits
     const trialBalance = items.reduce((acc, item) => {
-      const metadata = item.metadata as any;
+      const metadata = item.metadata;
       const accountType = metadata?.accountType || 'UNKNOWN';
       const balance = Number(metadata?.balance || 0);
 

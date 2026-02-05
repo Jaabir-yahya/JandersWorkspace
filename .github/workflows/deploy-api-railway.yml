@@ -29,7 +29,10 @@ jobs:
       - name: Deploy to Railway
         run: |
           if [ -n "${{ vars.RAILWAY_SERVICE_NAME }}" ]; then
-            railway up --service=${{ vars.RAILWAY_SERVICE_NAME }}
+            if ! railway up --service=${{ vars.RAILWAY_SERVICE_NAME }}; then
+              echo "::error::Service '${{ vars.RAILWAY_SERVICE_NAME }}' not found in Railway. Either create a service with that name in your Railway project, or remove the RAILWAY_SERVICE_NAME repo variable (Settings → Secrets and variables → Actions) to use the default service."
+              exit 1
+            fi
           else
             railway up
           fi

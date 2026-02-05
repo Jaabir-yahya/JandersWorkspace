@@ -73,7 +73,7 @@ export class UniversalAccountsService {
       )
     `;
 
-    const accountData = (result as any)[0];
+    const accountData = result[0];
     if (accountData?.p_error_message) {
       throw new BadRequestException(accountData.p_error_message);
     }

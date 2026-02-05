@@ -70,7 +70,7 @@ export class UniversalTransactionsService {
       )
     `;
 
-    const transactionData = (result as any)[0];
+    const transactionData = result[0];
     if (transactionData?.p_error_message) {
       throw new BadRequestException(transactionData.p_error_message);
     }

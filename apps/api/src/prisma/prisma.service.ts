@@ -10,6 +10,7 @@ import { PrismaClient } from '@project-bridge/database/client';
 type PrismaClientInstance = InstanceType<typeof PrismaClient>;
 
 @Injectable()
+/* eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging -- class is merged with interface below so injected PrismaService has full client types */
 export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
@@ -74,4 +75,5 @@ export class PrismaService
 }
 
 // Declaration merge: PrismaService is typed as the full Prisma client so injected usage (this.prisma.user, etc.) is correctly typed
+/* eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging -- intentional empty interface merge for Prisma client typing */
 export interface PrismaService extends PrismaClientInstance {}

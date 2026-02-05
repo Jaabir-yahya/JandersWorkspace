@@ -344,17 +344,15 @@ export class TransactionsService {
       });
 
       // Update account balances (reverse the original amounts)
-      const newDebitBalance =
-        ((debitAccount.metadata as any)?.balance || 0) - amount;
-      const newCreditBalance =
-        ((creditAccount.metadata as any)?.balance || 0) + amount;
+      const newDebitBalance = (debitAccount.metadata?.balance || 0) - amount;
+      const newCreditBalance = (creditAccount.metadata?.balance || 0) + amount;
 
       await tx.item.update({
         where: { id: debitAccount.id },
         data: {
           quantity: newDebitBalance,
           metadata: {
-            ...(debitAccount.metadata as any),
+            ...debitAccount.metadata,
             balance: newDebitBalance,
           },
         },
@@ -365,7 +363,7 @@ export class TransactionsService {
         data: {
           quantity: newCreditBalance,
           metadata: {
-            ...(creditAccount.metadata as any),
+            ...creditAccount.metadata,
             balance: newCreditBalance,
           },
         },

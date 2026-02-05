@@ -89,8 +89,7 @@ export class BusinessService {
         // Update existing inventory
         const currentQuantity = Number(inventoryItem.quantity);
         const newQuantity = currentQuantity + createSupplyDto.quantity;
-        const currentTotalValue =
-          (inventoryItem.metadata as any)?.totalValue || 0;
+        const currentTotalValue = inventoryItem.metadata?.totalValue || 0;
         const newTotalValue = currentTotalValue + total;
         const newAveragePrice = newTotalValue / newQuantity;
 
@@ -100,7 +99,7 @@ export class BusinessService {
             quantity: newQuantity,
             costPrice: createSupplyDto.unitPrice,
             metadata: {
-              ...(inventoryItem.metadata as any),
+              ...inventoryItem.metadata,
               averagePrice: newAveragePrice,
               totalValue: newTotalValue,
               lastStockUpdate: new Date(),
@@ -127,7 +126,7 @@ export class BusinessService {
         where: { id: supply.id },
         data: {
           context: {
-            ...(supply.context as any),
+            ...supply.context,
             transactionPairId: transactionResult.transactionPairId,
             linkedInventoryItems: [inventoryItem.id],
           },
@@ -187,7 +186,7 @@ export class BusinessService {
         throw new NotFoundException(`Supply with ID ${id} not found`);
       }
 
-      const context = existingSupply.context as any;
+      const context = existingSupply.context;
       const transactionPairId = context?.transactionPairId;
 
       // Reverse the original transaction if it exists
@@ -214,8 +213,7 @@ export class BusinessService {
           if (inventoryItem) {
             const newQuantity =
               Number(inventoryItem.quantity) - context.quantity;
-            const currentTotalValue =
-              (inventoryItem.metadata as any)?.totalValue || 0;
+            const currentTotalValue = inventoryItem.metadata?.totalValue || 0;
             const oldValue = context.total;
             const newTotalValue = currentTotalValue - oldValue;
             const newAveragePrice =
@@ -226,7 +224,7 @@ export class BusinessService {
               data: {
                 quantity: newQuantity,
                 metadata: {
-                  ...(inventoryItem.metadata as any),
+                  ...inventoryItem.metadata,
                   averagePrice: newAveragePrice,
                   totalValue: newTotalValue,
                   lastStockUpdate: new Date(),
@@ -295,8 +293,7 @@ export class BusinessService {
         // Update existing inventory
         const currentQuantity = Number(inventoryItem.quantity);
         const newQuantityTotal = currentQuantity + newQuantity;
-        const currentTotalValue =
-          (inventoryItem.metadata as any)?.totalValue || 0;
+        const currentTotalValue = inventoryItem.metadata?.totalValue || 0;
         const newTotalValue = currentTotalValue + newTotal;
         const newAveragePrice = newTotalValue / newQuantityTotal;
 
@@ -306,7 +303,7 @@ export class BusinessService {
             quantity: newQuantityTotal,
             costPrice: newUnitPrice,
             metadata: {
-              ...(inventoryItem.metadata as any),
+              ...inventoryItem.metadata,
               averagePrice: newAveragePrice,
               totalValue: newTotalValue,
               lastStockUpdate: new Date(),
@@ -331,7 +328,7 @@ export class BusinessService {
         where: { id },
         data: {
           context: {
-            ...(updatedSupply.context as any),
+            ...updatedSupply.context,
             transactionPairId: transactionResult.transactionPairId,
             linkedInventoryItems: [inventoryItem.id],
           },
@@ -360,7 +357,7 @@ export class BusinessService {
         throw new NotFoundException(`Supply with ID ${id} not found`);
       }
 
-      const context = supply.context as any;
+      const context = supply.context;
       const transactionPairId = context?.transactionPairId;
 
       // Reverse the transaction
@@ -382,8 +379,7 @@ export class BusinessService {
           if (inventoryItem) {
             const newQuantity =
               Number(inventoryItem.quantity) - context.quantity;
-            const currentTotalValue =
-              (inventoryItem.metadata as any)?.totalValue || 0;
+            const currentTotalValue = inventoryItem.metadata?.totalValue || 0;
             const oldValue = context.total;
             const newTotalValue = currentTotalValue - oldValue;
             const newAveragePrice =
@@ -394,7 +390,7 @@ export class BusinessService {
               data: {
                 quantity: newQuantity,
                 metadata: {
-                  ...(inventoryItem.metadata as any),
+                  ...inventoryItem.metadata,
                   averagePrice: newAveragePrice,
                   totalValue: newTotalValue,
                   lastStockUpdate: new Date(),
@@ -731,7 +727,7 @@ export class BusinessService {
         where: { id: payment.id },
         data: {
           metadata: {
-            ...(payment.metadata as any),
+            ...payment.metadata,
             transactionPairId: transactionResult.transactionPairId,
           },
         },
@@ -748,7 +744,7 @@ export class BusinessService {
         });
 
         if (invoice) {
-          const context = invoice.context as any;
+          const context = invoice.context;
           const newSettledAmount =
             (context.settledAmount || 0) + createPaymentDto.amount;
           const isSettled = newSettledAmount >= context.total;

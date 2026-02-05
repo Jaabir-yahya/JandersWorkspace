@@ -493,7 +493,7 @@ export class TransactionsService {
       reference: transaction.reference || undefined,
       type: transaction.type,
       reversed_transaction_id: transaction.reversedTransactionId || undefined,
-      metadata: transaction.metadata as any,
+      metadata: transaction.metadata,
       created_at: transaction.createdAt.toISOString(),
     };
 
@@ -759,7 +759,7 @@ export class TransactionsService {
     }
 
     // Get current linked phones from metadata
-    const metadata = (entity.metadata as any) || {};
+    const metadata = entity.metadata || {};
     const currentPhones: string[] = metadata.linked_phones || [];
 
     // Check if phone already exists
@@ -794,7 +794,7 @@ export class TransactionsService {
     }
 
     // Get current linked phones from metadata
-    const metadata = (entity.metadata as any) || {};
+    const metadata = entity.metadata || {};
     const currentPhones: string[] = metadata.linked_phones || [];
 
     // Remove phone
