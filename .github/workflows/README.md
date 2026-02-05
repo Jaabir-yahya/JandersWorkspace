@@ -25,7 +25,7 @@ CI/CD for the Project Bridge Turborepo: **apps/api** (NestJS), **apps/web** (Nex
 ### Railway (deploy-api-railway.yml)
 
 - **Secrets:** `RAILWAY_TOKEN` (Railway API token; Account → Tokens).
-- **Variables:** `RAILWAY_SERVICE_NAME`, `RAILWAY_PUBLIC_URL` (e.g. `https://your-service.up.railway.app`).
+- **Variables:** `RAILWAY_PUBLIC_URL` (e.g. `https://your-service.up.railway.app`). Optional: `RAILWAY_SERVICE_NAME` — set to the **exact** service name from Railway (Project → service name); leave empty for single-service projects.
 
 ### Vercel (deploy-vercel.yml)
 

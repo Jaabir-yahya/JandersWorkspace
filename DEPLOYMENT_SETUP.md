@@ -59,8 +59,10 @@ The workflow is [`.github/workflows/deploy-api-railway.yml`](.github/workflows/d
 - `RAILWAY_TOKEN`: Get from Railway Dashboard → Account Settings → Tokens
 
 **Required GitHub Variables:**
-- `RAILWAY_SERVICE_NAME`: Your Railway service name
 - `RAILWAY_PUBLIC_URL`: Your app URL (e.g. `https://your-service.up.railway.app`)
+
+**Optional:**
+- `RAILWAY_SERVICE_NAME`: Set only if your Railway project has multiple services. Use the **exact** name shown in Railway (Project → service). If you see "Service not found", either create a service with that name or leave this variable unset and rely on `railway up` (no `--service`) for single-service projects.
 
 ## 2. Vercel Frontend Deployment
 
