@@ -7,9 +7,16 @@ export interface Interaction {
     type: string;
     amount?: number;
 }
+export interface Transaction {
+    date: Date | string;
+    amount?: number;
+    type: string;
+    isCredit?: boolean;
+    [key: string]: unknown;
+}
 export interface PersonData {
     id: string;
-    transactions: any[];
+    transactions: Transaction[];
     lastContact?: Date;
     creditLimit?: number;
 }
@@ -24,7 +31,7 @@ export declare class PeopleIntelligence {
      */
     static calculateTrustScore(person: {
         balance: number;
-        transactions: any[];
+        transactions: Transaction[];
     }): number;
     /**
      * Suggests the next best action for a relationship.

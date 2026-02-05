@@ -122,11 +122,11 @@ function extractTimestamp(sms) {
     // Try to find date/time patterns in the SMS
     const patterns = [
         // "on 3/2/25 at 2:30 PM" or "on 3/2/2025 at 2:30 PM"
-        /on\s+(\d{1,2}[\/\-]\d{1,2}[\/\-](?:\d{2}|\d{4}))\s+at\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)/i,
+        /on\s+(\d{1,2}[/-]\d{1,2}[/-](?:\d{2}|\d{4}))\s+at\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)/i,
         // "3/2/25 14:30" or "3/2/2025 14:30"
-        /(\d{1,2}[\/\-]\d{1,2}[\/\-](?:\d{2}|\d{4}))\s+(\d{1,2}:\d{2}(?::\d{2})?)/,
+        /(\d{1,2}[/-]\d{1,2}[/-](?:\d{2}|\d{4}))\s+(\d{1,2}:\d{2}(?::\d{2})?)/,
         // "at 2:30 PM on 3/2/25"
-        /at\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)\s+on\s+(\d{1,2}[\/\-]\d{1,2}[\/\-](?:\d{2}|\d{4}))/i,
+        /at\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)\s+on\s+(\d{1,2}[/-]\d{1,2}[/-](?:\d{2}|\d{4}))/i,
     ];
     for (const pattern of patterns) {
         const match = sms.match(pattern);
@@ -135,7 +135,7 @@ function extractTimestamp(sms) {
             const timeStr = match[2] || match[1];
             try {
                 // Try to parse the date
-                const dateParts = dateStr.split(/[\/\-]/);
+                const dateParts = dateStr.split(/[/-]/);
                 let day = parseInt(dateParts[0], 10);
                 let month = parseInt(dateParts[1], 10) - 1; // JS months are 0-indexed
                 let year = parseInt(dateParts[2], 10);

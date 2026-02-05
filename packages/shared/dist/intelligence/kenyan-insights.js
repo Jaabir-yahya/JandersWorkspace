@@ -20,8 +20,7 @@ class KenyanBusinessInsights {
             return acc;
         }, {});
         Object.entries(partyGroups).forEach(([party, txns]) => {
-            const typedTxns = txns;
-            if (typedTxns.length >= 3) {
+            if (txns.length >= 3) {
                 patterns.push({
                     type: 'RECURRING_PARTY',
                     party,

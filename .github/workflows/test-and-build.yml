@@ -9,7 +9,7 @@ on:
       - "apps/api/**"
       - "packages/**"
       - "tests/**"
-      - "Dockerfile"
+      - "apps/api/Dockerfile"
       - "package.json"
       - "package-lock.json"
   pull_request:
@@ -18,7 +18,7 @@ on:
       - "apps/api/**"
       - "packages/**"
       - "tests/**"
-      - "Dockerfile"
+      - "apps/api/Dockerfile"
       - "package.json"
       - "package-lock.json"
 
@@ -59,11 +59,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate Prisma Client
-        run: npm run generate --workspace=@project-bridge/database
-
-      - name: Build database package
-        run: npm run build --workspace=@project-bridge/database
+      - name: Build (Turbo: generate then build all packages)
+        run: npx turbo run build
+        env:
+          TURBO_REMOTE_ONLY: false
 
       - name: Run migrations (test DB)
         run: npm run deploy --workspace=@project-bridge/database
@@ -77,7 +76,7 @@ jobs:
       - name: Build and verify Docker image
         if: github.ref == 'refs/heads/main'
         run: |
-          docker build -f Dockerfile -t project-bridge-api:test .
+          docker build -f apps/api/Dockerfile -t project-bridge-api:test .
           docker run --rm -d -p 3000:3000 --name api-test project-bridge-api:test
           sleep 10
           curl -f http://localhost:3000/api/v1/health || exit 1

@@ -30,7 +30,7 @@ CI/CD for the Project Bridge Turborepo: **apps/api** (NestJS), **apps/web** (Nex
 ### Vercel (deploy-vercel.yml)
 
 - **Secrets:** `VERCEL_TOKEN` (Vercel API token).
-- **Variables:** `VERCEL_ORG_ID`, `VERCEL_WEB_PROJECT_ID`, `NEXT_PUBLIC_API_URL` (API URL for the frontend; can be empty for build).
+- **Variables:** `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `NEXT_PUBLIC_API_URL` (API URL for the frontend; can be empty for build).
 
 ## Local usage (match CI)
 
@@ -50,3 +50,10 @@ CI/CD for the Project Bridge Turborepo: **apps/api** (NestJS), **apps/web** (Nex
 Obsolete apps `bridge-admin` and `bridge-perfect` are removed; only **apps/api** and **apps/web** are used.
 
 **Lockfile:** If `package-lock.json` references removed workspaces, run `npm install` at repo root once so CI (`npm ci`) succeeds.
+
+## Deployment pipeline completion
+
+- **CI (ci.yml):** On push/PR to `main` or `develop`: install → Turbo build (generate then build all) → lint → type-check → test. No remote Turbo cache by default (`TURBO_REMOTE_ONLY: false`); set `TURBO_TOKEN` and `TURBO_TEAM` to enable.
+- **API Integration (test-and-build.yml):** On API/packages/tests changes: install → Turbo build → migrate test DB → integration tests → (on `main`) Docker build from `apps/api/Dockerfile` and health check.
+- **Railway (deploy-api-railway.yml):** On push to `main` when API/packages change: `railway up --ci`. Uses `railway.json`: `dockerfilePath: apps/api/Dockerfile`, `dockerContext: .`. Requires `RAILWAY_TOKEN`, `RAILWAY_PUBLIC_URL`; optional `RAILWAY_SERVICE_NAME`.
+- **Vercel (deploy-vercel.yml):** On push to `main` when `apps/web/**` or packages change: Turbo build frontend → `vercel --prod`. Set root directory to `apps/web` in Vercel project settings. Requires `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.

@@ -344,9 +344,8 @@ class KenyanDataCleaner {
                 const cleanedTx = await this.cleanTransactionForExport(transaction);
                 cleaned.push(cleanedTx);
             }
-            catch (error) {
-                // Log error but continue processing
-                console.error(`Failed to clean transaction ${transaction.id}:`, error);
+            catch {
+                // Error occurred while cleaning transaction, skipping it
             }
         }
         return cleaned;

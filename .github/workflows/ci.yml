@@ -44,11 +44,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate Prisma Client
-        run: npm run generate --workspace=@project-bridge/database
-
-      - name: Build database package
-        run: npm run build --workspace=@project-bridge/database
+      - name: Build (Turbo: generate then build all packages)
+        run: npx turbo run build
+        env:
+          TURBO_REMOTE_ONLY: false
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://api.example.com' }}
 
       - name: Lint
         run: npm run lint
@@ -56,16 +56,8 @@ jobs:
       - name: Type check
         run: npm run type-check
 
-      - name: Unit tests (API)
-        run: npm run test:api
+      - name: Unit tests
+        run: npm run test
         env:
           JWT_SECRET: test-jwt-secret
           NODE_ENV: test
-
-      - name: Build API
-        run: npm run build:api
-
-      - name: Build frontend
-        run: npx turbo run build --filter=ledger-system-frontend
-        env:
-          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://api.example.com' }}

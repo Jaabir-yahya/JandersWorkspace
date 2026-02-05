@@ -8,7 +8,7 @@ on:
       - "apps/api/**"
       - "packages/**"
       - "railway.json"
-      - "Dockerfile"
+      - "apps/api/Dockerfile"
       - "package.json"
       - "package-lock.json"
   workflow_dispatch:

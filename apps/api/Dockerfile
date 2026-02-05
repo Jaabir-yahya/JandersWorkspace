@@ -28,9 +28,9 @@ RUN npm ci
 # Install NestJS CLI for building
 RUN npm install -g @nestjs/cli
 
-# Build database package (Prisma client + dist so API can resolve @project-bridge/database)
+# Build database package (generate Prisma client then compile so API can resolve @project-bridge/database)
 WORKDIR /app/packages/database
-RUN npm run build
+RUN npm run generate && npm run build
 
 # Build the application
 WORKDIR /app/apps/api
