@@ -20,7 +20,7 @@
   "scripts": {
     "build": "prisma generate && tsc",
     "dev": "tsc --watch",
-    "pregenerate": "mkdir -p generated/prisma/models",
+    "pregenerate": "mkdir -p generated/prisma",
     "generate": "prisma generate",
     "migrate": "prisma migrate dev",
     "deploy": "prisma migrate deploy",
