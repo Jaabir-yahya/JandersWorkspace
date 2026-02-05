@@ -63,7 +63,8 @@ The **tests** workspace is included in root `package.json` workspaces so `npm ru
 
 - **API:** `npm run lint --workspace=@project-bridge/api` (exit 0), `npm run test:api` (44 tests), `npm run build` (nest build).
 - **Web:** `NEXT_PUBLIC_API_URL=... npm run build` from repo root or `cd apps/web && npm run build`. `npm run lint --workspace=ledger-system-frontend` passes (ESLint config in `apps/web/.eslintrc.json` + `eslint-config-next`).
-- **Lockfile:** `npm ci` at root works after adding `tests` to workspaces and running `npm install` once.
+- **Node:** Use Node 24 (CI and engines use `24.x`). Prisma 7 requires Node 20.19+, 22.12+, or 24.
+- **Lockfile:** After changing `packages/database` or root deps, run `npm install` (with Node 24) at root and commit `package-lock.json` so `npm ci` passes in CI.
 
 ## Local deploy (verify before pushing)
 

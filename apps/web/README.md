@@ -66,6 +66,19 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+**Sign-in and API calls require the backend API.** The frontend calls `NEXT_PUBLIC_API_URL` (default `http://localhost:3001`). If you see `ERR_CONNECTION_REFUSED` on sign-in, start the API:
+
+```bash
+# From repo root – run API (port 3001) and frontend (port 3000) together
+npm run dev:app
+```
+
+Or in two terminals:
+- Terminal 1: `npm run dev:api` (API at http://localhost:3001)
+- Terminal 2: `npm run dev:web` (frontend at http://localhost:3000)
+
+Set `NEXT_PUBLIC_API_URL` in `.env.local` if your API runs on a different host/port.
+
 ### Build for Production
 
 ```bash
