@@ -20,7 +20,7 @@ export class ReportingService {
 
     // Group by account type and calculate balances
     const accounts = accountItems.map((item) => {
-      const metadata = item.metadata;
+      const metadata = item.metadata as any;
       return {
         id: item.id,
         name: item.name,
@@ -158,7 +158,7 @@ export class ReportingService {
     });
 
     const items = inventoryItems.map((item) => {
-      const metadata = item.metadata;
+      const metadata = item.metadata as any;
       return {
         id: item.id,
         name: item.name,
@@ -259,7 +259,7 @@ export class ReportingService {
         amount: Number(transaction.amount),
         date: transaction.date,
         party: transaction.entityId,
-        method: transaction.metadata?.method || 'unknown',
+        method: (transaction.metadata as any)?.method || 'unknown',
         status: transaction.status,
       })),
       summary: {
@@ -332,8 +332,8 @@ export class ReportingService {
           amount: Number(transaction.amount),
           date: transaction.date,
           party: transaction.entityId,
-          what: metadata?.what || transaction.notes,
-          method: metadata?.method || 'unknown',
+          what: (metadata as any)?.what || transaction.notes,
+          method: (metadata as any)?.method || 'unknown',
         };
       }),
       summary: {

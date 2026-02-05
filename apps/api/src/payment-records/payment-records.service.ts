@@ -101,7 +101,7 @@ export class PaymentRecordsService {
     });
 
     return paymentApps.map((app) => {
-      const metadata = app.payment?.metadata;
+      const metadata = app.payment?.metadata as any;
       return {
         id: app.paymentId,
         transaction_id: transactionId,

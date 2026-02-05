@@ -11,8 +11,8 @@ jest.setTimeout(30000);
 
 // Global test setup
 beforeAll(async () => {
-  // Verify required environment variables
-  const required = ["SUPABASE_URL"];
+  // Verify required environment variables (prisma-mock sets Supabase defaults if missing)
+  const required = ["SUPABASE_URL", "SUPABASE_SECRET_KEY"];
   const missing = required.filter((key) => !process.env[key]);
 
   if (missing.length > 0) {

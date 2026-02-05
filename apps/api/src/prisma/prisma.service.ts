@@ -10,45 +10,135 @@ import { PrismaClient } from '@project-bridge/database/client';
 type PrismaClientInstance = InstanceType<typeof PrismaClient>;
 
 @Injectable()
-/* eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging -- class is merged with interface below so injected PrismaService has full client types */
-export class PrismaService
-  extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+export class PrismaService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PrismaService.name);
+  private readonly prisma: PrismaClient;
 
   constructor() {
-    // Fix prepared statement conflicts with Supabase by adding pgBouncer=true
-    const databaseUrl = process.env.DATABASE_URL;
-    const connectionUrl = databaseUrl?.includes('?')
-      ? `${databaseUrl}&pgbouncer=true`
-      : `${databaseUrl}?pgbouncer=true`;
+    // In Prisma 7, accelerateUrl is required for the client
+    // We'll use the DATABASE_URL environment variable
+    let databaseUrl = process.env.DATABASE_URL;
 
-    super({
+    // For test environment, use a mock URL if DATABASE_URL is not set
+    if (!databaseUrl && process.env.NODE_ENV === 'test') {
+      databaseUrl = 'postgresql://test:test@localhost:5432/test_db';
+    }
+
+    if (!databaseUrl) {
+      throw new Error('DATABASE_URL environment variable is required');
+    }
+
+    this.prisma = new PrismaClient({
+      accelerateUrl: databaseUrl,
       log: [
         { emit: 'event', level: 'query' },
         { emit: 'stdout', level: 'info' },
         { emit: 'stdout', level: 'warn' },
         { emit: 'stdout', level: 'error' },
       ],
-      datasourceUrl: connectionUrl,
     });
 
     // Log queries in development
-    this.$on('query' as never, (e: any) => {
+    this.prisma.$on('query' as never, (e: any) => {
       this.logger.debug(`Query: ${e.query} - Duration: ${e.duration}ms`);
     });
   }
 
+  // Delegate all PrismaClient methods to the internal client
+  get $connect() {
+    return this.prisma.$connect.bind(this.prisma);
+  }
+
+  get $disconnect() {
+    return this.prisma.$disconnect.bind(this.prisma);
+  }
+
+  get $on() {
+    return this.prisma.$on.bind(this.prisma);
+  }
+
+  get $queryRaw() {
+    return this.prisma.$queryRaw.bind(this.prisma);
+  }
+
+  get $executeRawUnsafe() {
+    return this.prisma.$executeRawUnsafe.bind(this.prisma);
+  }
+
+  get $transaction() {
+    return this.prisma.$transaction.bind(this.prisma);
+  }
+
+  // Delegate all model accessors
+  get tenant() {
+    return this.prisma.tenant;
+  }
+
+  get user() {
+    return this.prisma.user;
+  }
+
+  get entity() {
+    return this.prisma.entity;
+  }
+
+  get transaction() {
+    return this.prisma.transaction;
+  }
+
+  get transactionLine() {
+    return this.prisma.transactionLine;
+  }
+
+  get item() {
+    return this.prisma.item;
+  }
+
+  get payment() {
+    return this.prisma.payment;
+  }
+
+  get paymentApplication() {
+    return this.prisma.paymentApplication;
+  }
+
+  get account() {
+    return this.prisma.account;
+  }
+
+  get note() {
+    return this.prisma.note;
+  }
+
+  get transactionReason() {
+    return this.prisma.transactionReason;
+  }
+
+  get proof() {
+    return this.prisma.proof;
+  }
+
+  get webhookEvent() {
+    return this.prisma.webhookEvent;
+  }
+
+  get featureFlag() {
+    return this.prisma.featureFlag;
+  }
+
+  get tenantIntegration() {
+    return this.prisma.tenantIntegration;
+  }
+
   async onModuleInit() {
     this.logger.log('Connecting to database...');
-    await this.$connect();
+    await this.prisma.$connect();
     this.logger.log('Database connected successfully');
   }
 
   async onModuleDestroy() {
     this.logger.log('Disconnecting from database...');
-    await this.$disconnect();
+    await this.prisma.$disconnect();
     this.logger.log('Database disconnected');
   }
 
@@ -60,7 +150,7 @@ export class PrismaService
       throw new Error('Cannot clean database in production');
     }
 
-    const tablenames = await this.$queryRaw<
+    const tablenames = await this.prisma.$queryRaw<
       Array<{ tablename: string }>
     >`SELECT tablename FROM pg_tables WHERE schemaname='public'`;
 
@@ -69,11 +159,9 @@ export class PrismaService
       .filter((name) => name !== '_prisma_migrations');
 
     for (const table of tables) {
-      await this.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE;`);
+      await this.prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE;`);
     }
   }
 }
 
-// Declaration merge: PrismaService is typed as the full Prisma client so injected usage (this.prisma.user, etc.) is correctly typed
-/* eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging -- intentional empty interface merge for Prisma client typing */
-export interface PrismaService extends PrismaClientInstance {}
+// PrismaService extends PrismaClient, so it has all the Prisma client methods

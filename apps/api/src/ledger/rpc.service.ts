@@ -363,7 +363,7 @@ export class RpcService {
     ];
 
     const accounts = accountItems.map((item) => {
-      const metadata = item.metadata;
+      const metadata = item.metadata as any;
       const balance = Number(metadata?.balance || 0);
       const accountType = metadata?.accountType || 'UNKNOWN';
 
@@ -442,7 +442,7 @@ export class RpcService {
     });
 
     const filteredTransactions = transactions.filter((t) => {
-      const metadata = t.metadata;
+      const metadata = t.metadata as any;
       return metadata?.transactionPairId === transactionPairId;
     });
 
@@ -456,10 +456,10 @@ export class RpcService {
     }
 
     const debitTransaction = filteredTransactions.find(
-      (t) => t.metadata?.entryType === 'DEBIT',
+      (t) => (t.metadata as any)?.entryType === 'DEBIT',
     );
     const creditTransaction = filteredTransactions.find(
-      (t) => t.metadata?.entryType === 'CREDIT',
+      (t) => (t.metadata as any)?.entryType === 'CREDIT',
     );
 
     if (!debitTransaction || !creditTransaction) {

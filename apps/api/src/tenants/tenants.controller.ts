@@ -245,7 +245,7 @@ export class TenantsController {
 
     return tenants.map((tenant) => ({
       ...tenant,
-      features: tenant.settings?.features || DEFAULT_TENANT_FEATURES,
+      features: (tenant.settings as any)?.features || DEFAULT_TENANT_FEATURES,
     }));
   }
 
@@ -299,7 +299,8 @@ export class TenantsController {
         success: true,
         data: allTenants.map((tenant) => ({
           ...tenant,
-          features: tenant.settings?.features || DEFAULT_TENANT_FEATURES,
+          features:
+            (tenant.settings as any)?.features || DEFAULT_TENANT_FEATURES,
         })),
       };
     }
@@ -327,7 +328,7 @@ export class TenantsController {
       success: true,
       data: tenants.map((tenant) => ({
         ...tenant,
-        features: tenant.settings?.features || DEFAULT_TENANT_FEATURES,
+        features: (tenant.settings as any)?.features || DEFAULT_TENANT_FEATURES,
       })),
     };
   }

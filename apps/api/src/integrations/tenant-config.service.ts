@@ -203,25 +203,25 @@ export class TenantConfigService {
       }
 
       // Merge settings
-      const currentSettings = existingTenant.settings || {};
+      const currentSettings = (existingTenant.settings as any) || {};
       const mergedSettings = { ...currentSettings };
 
       // Handle specific updates
       if (updates.commissionRates) {
         mergedSettings.commissionRates = {
-          ...currentSettings.commissionRates,
+          ...(currentSettings.commissionRates || {}),
           ...updates.commissionRates,
         };
       }
       if (updates.complianceData) {
         mergedSettings.complianceData = {
-          ...currentSettings.complianceData,
+          ...(currentSettings.complianceData || {}),
           ...updates.complianceData,
         };
       }
       if (updates.rateLimits) {
         mergedSettings.rateLimits = {
-          ...currentSettings.rateLimits,
+          ...(currentSettings.rateLimits || {}),
           ...updates.rateLimits,
         };
       }

@@ -42,7 +42,7 @@ export class TenantsPublicController {
       throw new NotFoundException(`Tenant with slug '${slug}' not found`);
     }
 
-    const settings = tenant.settings;
+    const settings = tenant.settings as any;
 
     return {
       id: tenant.id,
