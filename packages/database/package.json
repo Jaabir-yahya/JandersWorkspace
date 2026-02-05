@@ -12,9 +12,9 @@
       "default": "./dist/index.js"
     },
     "./client": {
-      "types": "./generated/prisma/client.d.ts",
-      "import": "./generated/prisma/client.js",
-      "default": "./generated/prisma/client.js"
+      "types": "./dist/generated/prisma/client.d.ts",
+      "import": "./dist/generated/prisma/client.js",
+      "default": "./dist/generated/prisma/client.js"
     }
   },
   "scripts": {
