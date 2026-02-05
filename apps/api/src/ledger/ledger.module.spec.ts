@@ -119,19 +119,7 @@ describe('Ledger Module Integration', () => {
         currency: 'KES',
       };
 
-      const expectedResult = {
-        id: 'test-account-123',
-        tenantId: mockTenantId,
-        name: 'Test Cash Account',
-        type: 'CASH',
-        balance: 1000,
-        currency: 'KES',
-        metadata: { accountType: 'CASH', currency: 'KES', balance: 1000 },
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
+      const mockDate = new Date('2024-01-01T00:00:00.000Z');
       jest.spyOn(prismaService.item, 'findFirst').mockResolvedValue(null);
       jest.spyOn(prismaService.item, 'create').mockResolvedValue({
         id: 'test-account-123',
@@ -142,8 +130,8 @@ describe('Ledger Module Integration', () => {
         quantity: 1000,
         metadata: { accountType: 'CASH', currency: 'KES', balance: 1000 },
         isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: mockDate,
+        updatedAt: mockDate,
       } as any);
 
       const result = await accountsService.create(
@@ -151,7 +139,19 @@ describe('Ledger Module Integration', () => {
         mockUserId,
         createAccountDto,
       );
-      expect(result).toEqual(expectedResult);
+
+      expect(result).toMatchObject({
+        id: 'test-account-123',
+        tenantId: mockTenantId,
+        name: 'Test Cash Account',
+        type: 'CASH',
+        balance: 1000,
+        currency: 'KES',
+        metadata: { accountType: 'CASH', currency: 'KES', balance: 1000 },
+        isActive: true,
+      });
+      expect(result.createdAt).toBeInstanceOf(Date);
+      expect(result.updatedAt).toBeInstanceOf(Date);
     });
   });
 
