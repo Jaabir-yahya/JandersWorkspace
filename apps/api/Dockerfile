@@ -17,28 +17,19 @@ FROM node:24-alpine AS builder
 WORKDIR /app
 
 # Copy source files (context must be repo root so packages/ and apps/ exist)
-# Note: turbo.json omitted so build works when context excludes it (e.g. Railway); this image only runs nest build.
 COPY package.json package-lock.json* ./
+COPY turbo.json ./
 COPY apps/api ./apps/api
 COPY packages ./packages
 
 # Install all dependencies (including dev)
 RUN npm ci
 
-# Install NestJS CLI for building
-RUN npm install -g @nestjs/cli
-
-# Build database package (generate Prisma client then compile so API can resolve @project-bridge/database)
-# Prisma config requires DATABASE_URL at load time; use a placeholder for generate (no DB connection needed).
+# Build API and all its dependencies (database generate+build, types, api) via Turbo — same as CI
+# Prisma config requires DATABASE_URL at load time; placeholder is enough for generate (no DB connection).
 ENV DATABASE_URL=postgresql://localhost:5432/build
-WORKDIR /app/packages/database
-RUN npm run generate && npm run build
-# Verify the client artifact exists so API build can resolve @project-bridge/database/client
-RUN test -f dist/generated/prisma/client.js && test -f dist/generated/prisma/client.d.ts || (echo "Missing database client build output" && exit 1)
-
-# Build the application
-WORKDIR /app/apps/api
-RUN npm run build
+ENV TURBO_REMOTE_ONLY=false
+RUN npx turbo run build --filter=@project-bridge/api
 
 # Production image, copy all the files and run next
 FROM node:24-alpine AS runner
