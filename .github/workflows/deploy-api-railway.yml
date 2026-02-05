@@ -28,13 +28,37 @@ jobs:
 
       - name: Deploy to Railway
         run: |
-          if [ -n "${{ vars.RAILWAY_SERVICE_NAME }}" ]; then
+          # Get list of services
+          SERVICES=$(railway service list --json 2>/dev/null || echo "[]")
+          SERVICE_COUNT=$(echo "$SERVICES" | jq 'length' 2>/dev/null || echo "0")
+
+          if [ "$SERVICE_COUNT" -eq "0" ]; then
+            echo "::error::No services found in Railway project. Please create a service first."
+            exit 1
+          elif [ "$SERVICE_COUNT" -eq "1" ]; then
+            # If only one service, use it
+            SERVICE_NAME=$(echo "$SERVICES" | jq -r '.[0].name')
+            echo "Found single service: $SERVICE_NAME"
+            railway up --service="$SERVICE_NAME"
+          elif [ -n "${{ vars.RAILWAY_SERVICE_NAME }}" ]; then
+            # Use specified service name
             if ! railway up --service=${{ vars.RAILWAY_SERVICE_NAME }}; then
-              echo "::error::Service '${{ vars.RAILWAY_SERVICE_NAME }}' not found in Railway. Either create a service with that name in your Railway project, or remove the RAILWAY_SERVICE_NAME repo variable (Settings → Secrets and variables → Actions) to use the default service."
+              echo "::error::Service '${{ vars.RAILWAY_SERVICE_NAME }}' not found in Railway."
+              echo "Available services:"
+              railway service list
+              echo ""
+              echo "Please set RAILWAY_SERVICE_NAME to one of the above service names at:"
+              echo "Settings → Secrets and variables → Actions → Variables"
               exit 1
             fi
           else
-            railway up
+            echo "::error::Multiple services found in Railway project. Please specify RAILWAY_SERVICE_NAME."
+            echo "Available services:"
+            railway service list
+            echo ""
+            echo "Set the RAILWAY_SERVICE_NAME variable at:"
+            echo "Settings → Secrets and variables → Actions → Variables"
+            exit 1
           fi
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
