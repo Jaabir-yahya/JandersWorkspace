@@ -18,7 +18,6 @@ WORKDIR /app
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY packages ./packages
 COPY apps/api ./apps/api
-COPY turbo.json ./
 COPY package.json ./
 WORKDIR /app/apps/api
 
