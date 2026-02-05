@@ -1,5 +1,6 @@
 # API image – build from repo root: docker build -f Dockerfile .
-# This file lives at root so Railway's build context includes packages/ and apps/api.
+# This file is used when service root is repo root (e.g. apps/api/railway.json with dockerContext "..").
+# Must build database package (generate + tsc) before API so @project-bridge/database resolves.
 FROM node:24-alpine AS deps
 RUN apk add --no-cache libc6-compat
 
@@ -14,20 +15,16 @@ FROM node:24-alpine AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
+COPY turbo.json ./
 COPY apps/api ./apps/api
 COPY packages ./packages
 
 RUN npm ci
-RUN npm install -g @nestjs/cli
 
-# Prisma 7 prisma.config.ts requires DATABASE_URL; generate only needs it to load config (no DB connection).
-ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
-
-WORKDIR /app/packages/database
-RUN npx prisma generate
-
-WORKDIR /app/apps/api
-RUN npm run build
+# Build API and all deps (database generate+build, types, api) via Turbo — same as CI and apps/api/Dockerfile
+ENV DATABASE_URL=postgresql://localhost:5432/build
+ENV TURBO_REMOTE_ONLY=false
+RUN npx turbo run build --filter=@project-bridge/api
 
 FROM node:24-alpine AS runner
 WORKDIR /app
