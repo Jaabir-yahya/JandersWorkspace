@@ -45,8 +45,8 @@ A monorepo platform that gives **80% of Kenyan business owners** (manual users: 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js **24.x** (see `engines` in root `package.json`)
-- npm ≥10
+- Node.js **20.19+ or 24** (Prisma 7; use `nvm use` with `.nvmrc` for 24)
+- npm ≥9
 - Docker (for local database)
 
 ### 1. Install Dependencies
