@@ -44,89 +44,88 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-  // Delegate all PrismaClient methods to the internal client
-  get $connect() {
+  // Delegate all PrismaClient methods and model accessors (return type any for portable emit; Prisma internals are not portable)
+  get $connect(): any {
     return this.prisma.$connect.bind(this.prisma);
   }
 
-  get $disconnect() {
+  get $disconnect(): any {
     return this.prisma.$disconnect.bind(this.prisma);
   }
 
-  get $on() {
+  get $on(): any {
     return this.prisma.$on.bind(this.prisma);
   }
 
-  get $queryRaw() {
+  get $queryRaw(): any {
     return this.prisma.$queryRaw.bind(this.prisma);
   }
 
-  get $executeRawUnsafe() {
+  get $executeRawUnsafe(): any {
     return this.prisma.$executeRawUnsafe.bind(this.prisma);
   }
 
-  get $transaction() {
+  get $transaction(): any {
     return this.prisma.$transaction.bind(this.prisma);
   }
 
-  // Delegate all model accessors
-  get tenant() {
+  get tenant(): any {
     return this.prisma.tenant;
   }
 
-  get user() {
+  get user(): any {
     return this.prisma.user;
   }
 
-  get entity() {
+  get entity(): any {
     return this.prisma.entity;
   }
 
-  get transaction() {
+  get transaction(): any {
     return this.prisma.transaction;
   }
 
-  get transactionLine() {
+  get transactionLine(): any {
     return this.prisma.transactionLine;
   }
 
-  get item() {
+  get item(): any {
     return this.prisma.item;
   }
 
-  get payment() {
+  get payment(): any {
     return this.prisma.payment;
   }
 
-  get paymentApplication() {
+  get paymentApplication(): any {
     return this.prisma.paymentApplication;
   }
 
-  get account() {
+  get account(): any {
     return this.prisma.account;
   }
 
-  get note() {
+  get note(): any {
     return this.prisma.note;
   }
 
-  get transactionReason() {
+  get transactionReason(): any {
     return this.prisma.transactionReason;
   }
 
-  get proof() {
+  get proof(): any {
     return this.prisma.proof;
   }
 
-  get webhookEvent() {
+  get webhookEvent(): any {
     return this.prisma.webhookEvent;
   }
 
-  get featureFlag() {
+  get featureFlag(): any {
     return this.prisma.featureFlag;
   }
 
-  get tenantIntegration() {
+  get tenantIntegration(): any {
     return this.prisma.tenantIntegration;
   }
 

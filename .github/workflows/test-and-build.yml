@@ -59,7 +59,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build (Turbo: generate then build all packages)
+      - name: "Build (Turbo: generate then build all packages)"
         run: npx turbo run build
         env:
           TURBO_REMOTE_ONLY: "false"

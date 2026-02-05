@@ -251,7 +251,7 @@ export class AccountsService {
       totalDebit: number;
       totalCredit: number;
     };
-    const trialBalance = items.reduce<Record<string, TrialBalanceGroup>>(
+    const trialBalance = (items as Array<{ id: string; metadata: unknown; name: string }>).reduce<Record<string, TrialBalanceGroup>>(
       (acc, item) => {
         const metadata = item.metadata as Record<string, unknown> | null;
         const accountType =

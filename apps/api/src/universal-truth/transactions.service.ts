@@ -70,12 +70,15 @@ export class UniversalTransactionsService {
       )
     `;
 
-    const transactionData = result[0];
+    const transactionData = (result as Record<string, unknown>[])[0];
     if (transactionData?.p_error_message) {
       throw new BadRequestException(transactionData.p_error_message);
     }
 
-    return transactionData?.p_transaction_id;
+    if (transactionData?.p_transaction_id == null) {
+      throw new BadRequestException('Stored procedure did not return transaction id');
+    }
+    return transactionData.p_transaction_id as string;
   }
 
   /**

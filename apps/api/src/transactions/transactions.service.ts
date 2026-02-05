@@ -537,7 +537,7 @@ export class TransactionsService {
             name: { contains: searchTerm, mode: 'insensitive' },
           },
         },
-        { id: { in: transactionIdsFromLines } },
+        { id: { in: transactionIdsFromLines as string[] } },
       ],
     };
 

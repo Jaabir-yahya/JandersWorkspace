@@ -73,12 +73,15 @@ export class UniversalAccountsService {
       )
     `;
 
-    const accountData = result[0];
+    const accountData = (result as Record<string, unknown>[])[0];
     if (accountData?.p_error_message) {
       throw new BadRequestException(accountData.p_error_message);
     }
 
-    return accountData?.p_account_id;
+    if (accountData?.p_account_id == null) {
+      throw new BadRequestException('Stored procedure did not return account id');
+    }
+    return accountData.p_account_id as string;
   }
 
   /**

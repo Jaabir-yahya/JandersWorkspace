@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TxnType, TxnStatus, PaymentStatus } from '@project-bridge/database';
 
+type JsonRecord = Record<string, unknown>;
+
 @Injectable()
 export class RpcService {
   constructor(private prisma: PrismaService) {}
@@ -47,8 +49,8 @@ export class RpcService {
         creditAccountType,
       );
 
-      const debitBalanceBefore = debitAccount.metadata?.balance || 0;
-      const creditBalanceBefore = creditAccount.metadata?.balance || 0;
+      const debitBalanceBefore = (debitAccount.metadata as JsonRecord)?.balance as number | undefined || 0;
+      const creditBalanceBefore = (creditAccount.metadata as JsonRecord)?.balance as number | undefined || 0;
       const debitBalanceAfter = debitBalanceBefore + amount;
       const creditBalanceAfter = creditBalanceBefore - amount;
 
@@ -164,7 +166,7 @@ export class RpcService {
       });
 
       const filteredTransactions = originalTransactions.filter((t) => {
-        const metadata = t.metadata;
+        const metadata = t.metadata as JsonRecord | null;
         return metadata?.transactionPairId === transactionPairId;
       });
 
@@ -173,10 +175,10 @@ export class RpcService {
       }
 
       const debitTransaction = filteredTransactions.find(
-        (t) => t.metadata?.entryType === 'DEBIT',
+        (t) => (t.metadata as JsonRecord)?.entryType === 'DEBIT',
       );
       const creditTransaction = filteredTransactions.find(
-        (t) => t.metadata?.entryType === 'CREDIT',
+        (t) => (t.metadata as JsonRecord)?.entryType === 'CREDIT',
       );
 
       if (!debitTransaction || !creditTransaction) {
@@ -211,8 +213,8 @@ export class RpcService {
         throw new Error('Accounts not found');
       }
 
-      const debitBalanceBefore = debitAccount.metadata?.balance || 0;
-      const creditBalanceBefore = creditAccount.metadata?.balance || 0;
+      const debitBalanceBefore = (debitAccount.metadata as JsonRecord)?.balance as number | undefined || 0;
+      const creditBalanceBefore = (creditAccount.metadata as JsonRecord)?.balance as number | undefined || 0;
       const debitBalanceAfter = debitBalanceBefore - amount;
       const creditBalanceAfter = creditBalanceBefore + amount;
 
@@ -494,7 +496,7 @@ export class RpcService {
     });
 
     let account = accounts.find(
-      (item) => item.metadata?.accountType === accountType,
+      (item) => (item.metadata as JsonRecord)?.accountType === accountType,
     );
 
     if (!account) {

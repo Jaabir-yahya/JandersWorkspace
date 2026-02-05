@@ -22,6 +22,38 @@ import {
   AddContainerItemDto,
 } from './dto/business.dto';
 
+/** Prisma stores context/metadata as JsonValue; cast for property access and spread in this service. */
+type JsonRecord = Record<string, unknown>;
+
+/** Supply note context shape (stored as JSON). */
+interface SupplyContext extends JsonRecord {
+  supplierName?: string;
+  itemType?: string;
+  quantity?: number;
+  unitPrice?: number;
+  total?: number;
+  unit?: string;
+  entityId?: string;
+  notes?: string;
+  metadata?: JsonRecord;
+  linkedInventoryItems?: string[];
+  transactionPairId?: string;
+}
+
+/** Invoice note context shape (stored as JSON). */
+interface InvoiceContext extends JsonRecord {
+  customerName?: string;
+  items?: unknown[];
+  subtotal?: number;
+  total?: number;
+  status?: string;
+  entityId?: string;
+  dueDate?: string;
+  notes?: string;
+  isSettled?: boolean;
+  settledAmount?: number;
+}
+
 @Injectable()
 export class BusinessService {
   constructor(
@@ -89,7 +121,7 @@ export class BusinessService {
         // Update existing inventory
         const currentQuantity = Number(inventoryItem.quantity);
         const newQuantity = currentQuantity + createSupplyDto.quantity;
-        const currentTotalValue = inventoryItem.metadata?.totalValue || 0;
+        const currentTotalValue = (inventoryItem.metadata as JsonRecord)?.totalValue as number | undefined || 0;
         const newTotalValue = currentTotalValue + total;
         const newAveragePrice = newTotalValue / newQuantity;
 
@@ -99,7 +131,7 @@ export class BusinessService {
             quantity: newQuantity,
             costPrice: createSupplyDto.unitPrice,
             metadata: {
-              ...inventoryItem.metadata,
+              ...(inventoryItem.metadata as JsonRecord || {}),
               averagePrice: newAveragePrice,
               totalValue: newTotalValue,
               lastStockUpdate: new Date(),
@@ -126,7 +158,7 @@ export class BusinessService {
         where: { id: supply.id },
         data: {
           context: {
-            ...supply.context,
+            ...(supply.context as JsonRecord || {}),
             transactionPairId: transactionResult.transactionPairId,
             linkedInventoryItems: [inventoryItem.id],
           },
@@ -186,8 +218,8 @@ export class BusinessService {
         throw new NotFoundException(`Supply with ID ${id} not found`);
       }
 
-      const context = existingSupply.context;
-      const transactionPairId = context?.transactionPairId;
+      const context = existingSupply.context as SupplyContext | null;
+      const transactionPairId = context?.transactionPairId as string | undefined;
 
       // Reverse the original transaction if it exists
       if (transactionPairId) {
@@ -204,17 +236,18 @@ export class BusinessService {
       }
 
       // Update inventory (remove old quantity)
-      if (context?.linkedInventoryItems) {
-        for (const inventoryId of context.linkedInventoryItems) {
+      const linkedIds = (context?.linkedInventoryItems || []) as string[];
+      if (linkedIds.length) {
+        for (const inventoryId of linkedIds) {
           const inventoryItem = await tx.item.findFirst({
             where: { id: inventoryId },
           });
 
           if (inventoryItem) {
             const newQuantity =
-              Number(inventoryItem.quantity) - context.quantity;
-            const currentTotalValue = inventoryItem.metadata?.totalValue || 0;
-            const oldValue = context.total;
+              Number(inventoryItem.quantity) - Number(context!.quantity ?? 0);
+            const currentTotalValue = (inventoryItem.metadata as JsonRecord)?.totalValue as number | undefined || 0;
+            const oldValue = Number(context!.total ?? 0);
             const newTotalValue = currentTotalValue - oldValue;
             const newAveragePrice =
               newQuantity > 0 ? newTotalValue / newQuantity : 0;
@@ -224,7 +257,7 @@ export class BusinessService {
               data: {
                 quantity: newQuantity,
                 metadata: {
-                  ...inventoryItem.metadata,
+                  ...(inventoryItem.metadata as JsonRecord || {}),
                   averagePrice: newAveragePrice,
                   totalValue: newTotalValue,
                   lastStockUpdate: new Date(),
@@ -236,12 +269,13 @@ export class BusinessService {
       }
 
       // Create new supply with updated values
-      const newQuantity = updateSupplyDto.quantity || context.quantity;
-      const newUnitPrice = updateSupplyDto.unitPrice || context.unitPrice;
+      const ctx = context!;
+      const newQuantity = updateSupplyDto.quantity ?? Number(ctx.quantity ?? 0);
+      const newUnitPrice = updateSupplyDto.unitPrice ?? Number(ctx.unitPrice ?? 0);
       const newTotal = newQuantity * newUnitPrice;
       const newSupplierName =
-        updateSupplyDto.supplierName || context.supplierName;
-      const newItemType = updateSupplyDto.itemType || context.itemType;
+        updateSupplyDto.supplierName || (ctx.supplierName as string);
+      const newItemType = updateSupplyDto.itemType || (ctx.itemType as string);
 
       // Update supply record
       const updatedSupply = await tx.note.update({
@@ -249,15 +283,15 @@ export class BusinessService {
         data: {
           content: `Supply: ${newSupplierName} - ${newItemType}`,
           context: {
-            ...context,
+            ...(ctx as JsonRecord),
             supplierName: newSupplierName,
             itemType: newItemType,
             quantity: newQuantity,
             unitPrice: newUnitPrice,
             total: newTotal,
-            unit: updateSupplyDto.unit || context.unit,
-            notes: updateSupplyDto.notes || context.notes,
-            metadata: { ...context.metadata, ...updateSupplyDto.metadata },
+            unit: updateSupplyDto.unit || (ctx.unit as string),
+            notes: updateSupplyDto.notes || (ctx.notes as string),
+            metadata: { ...(ctx.metadata as JsonRecord || {}), ...updateSupplyDto.metadata },
           },
         },
       });
@@ -293,7 +327,7 @@ export class BusinessService {
         // Update existing inventory
         const currentQuantity = Number(inventoryItem.quantity);
         const newQuantityTotal = currentQuantity + newQuantity;
-        const currentTotalValue = inventoryItem.metadata?.totalValue || 0;
+        const currentTotalValue = (inventoryItem.metadata as JsonRecord)?.totalValue as number | undefined || 0;
         const newTotalValue = currentTotalValue + newTotal;
         const newAveragePrice = newTotalValue / newQuantityTotal;
 
@@ -303,7 +337,7 @@ export class BusinessService {
             quantity: newQuantityTotal,
             costPrice: newUnitPrice,
             metadata: {
-              ...inventoryItem.metadata,
+              ...(inventoryItem.metadata as JsonRecord || {}),
               averagePrice: newAveragePrice,
               totalValue: newTotalValue,
               lastStockUpdate: new Date(),
@@ -328,7 +362,7 @@ export class BusinessService {
         where: { id },
         data: {
           context: {
-            ...updatedSupply.context,
+            ...(updatedSupply.context as JsonRecord || {}),
             transactionPairId: transactionResult.transactionPairId,
             linkedInventoryItems: [inventoryItem.id],
           },
@@ -357,8 +391,8 @@ export class BusinessService {
         throw new NotFoundException(`Supply with ID ${id} not found`);
       }
 
-      const context = supply.context;
-      const transactionPairId = context?.transactionPairId;
+      const context = supply.context as SupplyContext | null;
+      const transactionPairId = context?.transactionPairId as string | undefined;
 
       // Reverse the transaction
       if (transactionPairId) {
@@ -370,17 +404,18 @@ export class BusinessService {
       }
 
       // Update inventory
-      if (context?.linkedInventoryItems) {
-        for (const inventoryId of context.linkedInventoryItems) {
+      const linkedIdsDel = (context?.linkedInventoryItems || []) as string[];
+      if (linkedIdsDel.length) {
+        for (const inventoryId of linkedIdsDel) {
           const inventoryItem = await tx.item.findFirst({
             where: { id: inventoryId },
           });
 
           if (inventoryItem) {
             const newQuantity =
-              Number(inventoryItem.quantity) - context.quantity;
-            const currentTotalValue = inventoryItem.metadata?.totalValue || 0;
-            const oldValue = context.total;
+              Number(inventoryItem.quantity) - Number(context!.quantity ?? 0);
+            const currentTotalValue = (inventoryItem.metadata as JsonRecord)?.totalValue as number | undefined || 0;
+            const oldValue = Number(context!.total ?? 0);
             const newTotalValue = currentTotalValue - oldValue;
             const newAveragePrice =
               newQuantity > 0 ? newTotalValue / newQuantity : 0;
@@ -390,7 +425,7 @@ export class BusinessService {
               data: {
                 quantity: newQuantity,
                 metadata: {
-                  ...inventoryItem.metadata,
+                  ...(inventoryItem.metadata as JsonRecord || {}),
                   averagePrice: newAveragePrice,
                   totalValue: newTotalValue,
                   lastStockUpdate: new Date(),
@@ -727,7 +762,7 @@ export class BusinessService {
         where: { id: payment.id },
         data: {
           metadata: {
-            ...payment.metadata,
+            ...(payment.metadata as JsonRecord || {}),
             transactionPairId: transactionResult.transactionPairId,
           },
         },
@@ -744,16 +779,16 @@ export class BusinessService {
         });
 
         if (invoice) {
-          const context = invoice.context;
+          const invContext = invoice.context as InvoiceContext | null;
           const newSettledAmount =
-            (context.settledAmount || 0) + createPaymentDto.amount;
-          const isSettled = newSettledAmount >= context.total;
+            Number(invContext?.settledAmount ?? 0) + createPaymentDto.amount;
+          const isSettled = newSettledAmount >= Number(invContext?.total ?? 0);
 
           await tx.note.update({
             where: { id: createPaymentDto.invoiceId },
             data: {
               context: {
-                ...context,
+                ...(invContext as JsonRecord || {}),
                 settledAmount: newSettledAmount,
                 isSettled,
                 status: isSettled ? 'SETTLED' : 'PARTIAL',
@@ -802,21 +837,21 @@ export class BusinessService {
   }
 
   private mapSupplyToDto(supply: any): SupplyDto {
-    const context = supply.context;
+    const context = supply.context as SupplyContext;
     return {
       id: supply.id,
       tenantId: supply.tenantId,
-      supplierName: context.supplierName,
-      itemType: context.itemType,
-      quantity: context.quantity,
-      unitPrice: context.unitPrice,
-      total: context.total,
-      unit: context.unit || 'PCS',
-      entityId: context.entityId,
-      notes: context.notes,
-      metadata: context.metadata || {},
-      linkedInventoryItems: context.linkedInventoryItems || [],
-      transactionPairId: context.transactionPairId,
+      supplierName: (context.supplierName as string) ?? '',
+      itemType: (context.itemType as string) ?? '',
+      quantity: Number(context.quantity ?? 0),
+      unitPrice: Number(context.unitPrice ?? 0),
+      total: Number(context.total ?? 0),
+      unit: (context.unit as string) || 'PCS',
+      entityId: context.entityId as string | undefined,
+      notes: context.notes as string | undefined,
+      metadata: (context.metadata as Record<string, unknown>) || {},
+      linkedInventoryItems: (context.linkedInventoryItems as string[]) || [],
+      transactionPairId: context.transactionPairId as string | undefined,
       createdByUserId: '', // Note model doesn't have this
       createdAt: supply.createdAt,
       updatedAt: supply.updatedAt,
@@ -852,21 +887,21 @@ export class BusinessService {
   }
 
   private mapNoteToInvoiceDto(invoice: any): InvoiceDto {
-    const context = invoice.context;
+    const context = invoice.context as InvoiceContext;
     return {
       id: invoice.id,
       tenantId: invoice.tenantId,
-      customerName: context.customerName,
-      items: context.items || [],
-      subtotal: context.subtotal || 0,
-      total: context.total || 0,
-      status: context.status || 'DRAFT',
-      entityId: context.entityId,
-      dueDate: context.dueDate ? new Date(context.dueDate) : undefined,
-      notes: context.notes,
-      metadata: context.metadata || {},
-      isSettled: context.isSettled || false,
-      settledAmount: context.settledAmount || 0,
+      customerName: (context.customerName as string) ?? '',
+      items: (context.items as InvoiceDto['items']) || [],
+      subtotal: Number(context.subtotal ?? 0),
+      total: Number(context.total ?? 0),
+      status: (context.status as string) || 'DRAFT',
+      entityId: context.entityId as string | undefined,
+      dueDate: context.dueDate ? new Date(context.dueDate as string) : undefined,
+      notes: context.notes as string | undefined,
+      metadata: (context.metadata as Record<string, unknown>) || {},
+      isSettled: Boolean(context.isSettled),
+      settledAmount: Number(context.settledAmount ?? 0),
       createdByUserId: '', // Note model doesn't have this
       createdAt: invoice.createdAt,
       updatedAt: invoice.updatedAt,

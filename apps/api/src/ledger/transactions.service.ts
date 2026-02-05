@@ -16,6 +16,8 @@ import {
 } from './dto/transaction.dto';
 import { AccountsService } from './accounts.service';
 
+type JsonRecord = Record<string, unknown>;
+
 @Injectable()
 export class TransactionsService {
   constructor(
@@ -142,16 +144,16 @@ export class TransactionsService {
 
       // Update account balances
       const newDebitBalance =
-        (debitAccount.metadata?.balance || 0) + createDoubleEntryDto.amount;
+        ((debitAccount.metadata as JsonRecord)?.balance as number | undefined || 0) + createDoubleEntryDto.amount;
       const newCreditBalance =
-        (creditAccount.metadata?.balance || 0) - createDoubleEntryDto.amount;
+        ((creditAccount.metadata as JsonRecord)?.balance as number | undefined || 0) - createDoubleEntryDto.amount;
 
       await tx.item.update({
         where: { id: debitAccount.id },
         data: {
           quantity: newDebitBalance,
           metadata: {
-            ...debitAccount.metadata,
+            ...(debitAccount.metadata as JsonRecord || {}),
             balance: newDebitBalance,
           },
         },
@@ -162,7 +164,7 @@ export class TransactionsService {
         data: {
           quantity: newCreditBalance,
           metadata: {
-            ...creditAccount.metadata,
+            ...(creditAccount.metadata as JsonRecord || {}),
             balance: newCreditBalance,
           },
         },
@@ -344,15 +346,15 @@ export class TransactionsService {
       });
 
       // Update account balances (reverse the original amounts)
-      const newDebitBalance = (debitAccount.metadata?.balance || 0) - amount;
-      const newCreditBalance = (creditAccount.metadata?.balance || 0) + amount;
+      const newDebitBalance = ((debitAccount.metadata as JsonRecord)?.balance as number | undefined || 0) - amount;
+      const newCreditBalance = ((creditAccount.metadata as JsonRecord)?.balance as number | undefined || 0) + amount;
 
       await tx.item.update({
         where: { id: debitAccount.id },
         data: {
           quantity: newDebitBalance,
           metadata: {
-            ...debitAccount.metadata,
+            ...(debitAccount.metadata as JsonRecord || {}),
             balance: newDebitBalance,
           },
         },
@@ -363,7 +365,7 @@ export class TransactionsService {
         data: {
           quantity: newCreditBalance,
           metadata: {
-            ...creditAccount.metadata,
+            ...(creditAccount.metadata as JsonRecord || {}),
             balance: newCreditBalance,
           },
         },
@@ -460,11 +462,11 @@ export class TransactionsService {
     });
 
     return Object.values(transactionPairs).map((pair) => ({
-      transactionPairId: pair[0]?.metadata?.transactionPairId,
+      transactionPairId: (pair[0]?.metadata as JsonRecord)?.transactionPairId,
       transactions: pair,
       date: pair[0]?.date,
       totalAmount: pair[0]?.amount,
-      isReversal: pair[0]?.metadata?.reversal || false,
+      isReversal: (pair[0]?.metadata as JsonRecord)?.reversal || false,
     }));
   }
 
@@ -489,7 +491,7 @@ export class TransactionsService {
     });
 
     account = accounts.find(
-      (item) => item.metadata?.accountType === accountType,
+      (item) => (item.metadata as JsonRecord)?.accountType === accountType,
     );
 
     if (!account) {
