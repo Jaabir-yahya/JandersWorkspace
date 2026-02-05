@@ -14,8 +14,48 @@ describe('Ledger Module Integration', () => {
   let rpcService: RpcService;
   let prismaService: PrismaService;
 
-  const mockTenantId = 'test-tenant-123';
-  const mockUserId = 'test-user-123';
+  let mockTenantId = 'test-tenant-123';
+  let mockUserId = 'test-user-123';
+  let mockAccount: any;
+  let mockTransaction: any;
+  let mockAccounts: any[];
+
+  beforeEach(() => {
+    mockAccount = {
+      id: 'account-123',
+      name: 'Cash Account',
+      sku: 'ACC_CASH_123',
+      itemType: 'ACCOUNT',
+      metadata: { accountType: 'CASH', balance: 1000 },
+    };
+
+    mockTransaction = {
+      id: 'tx-123',
+      tenantId: mockTenantId,
+      amount: 500,
+      insights: {
+        transactionPairId: 'PAIR_123_abc',
+        entryType: 'DEBIT',
+      },
+    };
+
+    mockAccounts = [
+      {
+        id: 'acc-1',
+        name: 'Cash Account',
+        sku: 'ACC_CASH_1',
+        itemType: 'ACCOUNT',
+        metadata: { accountType: 'CASH', balance: 1000 },
+      },
+      {
+        id: 'acc-2',
+        name: 'Inventory Account',
+        sku: 'ACC_INVENTORY_1',
+        itemType: 'ACCOUNT',
+        metadata: { accountType: 'INVENTORY', balance: 2000 },
+      },
+    ];
+  });
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -146,9 +186,20 @@ describe('Ledger Module Integration', () => {
         },
       };
 
-      jest
-        .spyOn(prismaService, '$transaction')
-        .mockImplementation(async (callback) => {
+      jest.spyOn(prismaService, '$transaction').mockImplementation(
+        async (
+          callback: (data: {
+            item: {
+              findFirst: jest.Mock;
+              findMany: jest.Mock;
+              create: jest.Mock;
+              update: jest.Mock;
+            };
+            transaction: {
+              create: jest.Mock;
+            };
+          }) => Promise<any>,
+        ) => {
           return callback({
             item: {
               findFirst: jest.fn().mockResolvedValue(mockAccount),
@@ -159,11 +210,9 @@ describe('Ledger Module Integration', () => {
             transaction: {
               create: jest.fn().mockResolvedValue(mockTransaction),
             },
-            note: {
-              create: jest.fn().mockResolvedValue({}),
-            },
-          } as any);
-        });
+          });
+        },
+      );
 
       const result = await transactionsService.createDoubleEntry(
         mockTenantId,
@@ -191,30 +240,33 @@ describe('Ledger Module Integration', () => {
         unit: 'PCS',
       };
 
-      jest
-        .spyOn(prismaService, '$transaction')
-        .mockImplementation(async (callback) => {
-          return callback({
-            note: {
-              create: jest.fn().mockResolvedValue({
-                id: 'supply-123',
-                tenantId: mockTenantId,
-                content: 'Test Supply',
-                aboutType: 'SUPPLY',
-                context: { ...createSupplyDto, total: 500 },
-              }),
-              update: jest.fn().mockResolvedValue({}),
-            },
+      jest.spyOn(prismaService, '$transaction').mockImplementation(
+        async (
+          callback: (data: {
             item: {
-              findFirst: jest.fn().mockResolvedValue(null),
-              create: jest.fn().mockResolvedValue({
-                id: 'item-123',
-                name: 'Test Product',
-                quantity: 10,
-              }),
+              findFirst: jest.Mock;
+              findMany: jest.Mock;
+              create: jest.Mock;
+              update: jest.Mock;
+            };
+            transaction: {
+              create: jest.Mock;
+            };
+          }) => Promise<any>,
+        ) => {
+          return callback({
+            item: {
+              findFirst: jest.fn().mockResolvedValue(mockAccount),
+              findMany: jest.fn().mockResolvedValue([mockAccount]),
+              create: jest.fn().mockResolvedValue(mockAccount),
+              update: jest.fn().mockResolvedValue(mockAccount),
             },
-          } as any);
-        });
+            transaction: {
+              create: jest.fn().mockResolvedValue(mockTransaction),
+            },
+          });
+        },
+      );
 
       jest.spyOn(transactionsService, 'createDoubleEntry').mockResolvedValue({
         debitTransaction: { id: 'debit-123' },
@@ -281,9 +333,20 @@ describe('Ledger Module Integration', () => {
     });
 
     it('should create double-entry transaction atomically', async () => {
-      jest
-        .spyOn(prismaService, '$transaction')
-        .mockImplementation(async (callback) => {
+      jest.spyOn(prismaService, '$transaction').mockImplementation(
+        async (
+          callback: (data: {
+            item: {
+              findFirst: jest.Mock;
+              findMany: jest.Mock;
+              create: jest.Mock;
+              update: jest.Mock;
+            };
+            transaction: {
+              create: jest.Mock;
+            };
+          }) => Promise<any>,
+        ) => {
           return callback({
             item: {
               findFirst: jest.fn().mockResolvedValue(null),
@@ -300,8 +363,9 @@ describe('Ledger Module Integration', () => {
                 insights: { transactionPairId: 'PAIR_123_abc' },
               }),
             },
-          } as any);
-        });
+          });
+        },
+      );
 
       const result = await rpcService.createDoubleEntryTransaction(
         mockTenantId,
@@ -329,9 +393,20 @@ describe('Ledger Module Integration', () => {
         unitPrice: 100,
       };
 
-      jest
-        .spyOn(prismaService, '$transaction')
-        .mockImplementation(async (callback) => {
+      jest.spyOn(prismaService, '$transaction').mockImplementation(
+        async (
+          callback: (data: {
+            note: {
+              create: jest.Mock;
+              update: jest.Mock;
+            };
+            item: {
+              findFirst: jest.Mock;
+              create: jest.Mock;
+              update: jest.Mock;
+            };
+          }) => Promise<any>,
+        ) => {
           return callback({
             note: {
               create: jest.fn().mockResolvedValue({
@@ -348,8 +423,9 @@ describe('Ledger Module Integration', () => {
               }),
               update: jest.fn().mockResolvedValue({}),
             },
-          } as any);
-        });
+          });
+        },
+      );
 
       jest.spyOn(transactionsService, 'createDoubleEntry').mockResolvedValue({
         debitTransaction: { id: 'debit-123', amount: 1000 },
