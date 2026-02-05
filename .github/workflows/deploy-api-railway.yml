@@ -28,15 +28,23 @@ jobs:
 
       - name: Deploy to Railway
         run: |
-          # Link to the project first
-          railway link --project="${{ vars.RAILWAY_PROJECT_ID || 'abundant-clarity' }}"
-
-          if [ -n "${{ vars.RAILWAY_SERVICE_NAME }}" ]; then
+          # Use CI mode with explicit project and service
+          if [ -n "${{ vars.RAILWAY_PROJECT_ID }}" ] && [ -n "${{ vars.RAILWAY_SERVICE_NAME }}" ]; then
+            echo "Deploying to project: ${{ vars.RAILWAY_PROJECT_ID }}, service: ${{ vars.RAILWAY_SERVICE_NAME }}"
+            railway up \
+              --project="${{ vars.RAILWAY_PROJECT_ID }}" \
+              --service="${{ vars.RAILWAY_SERVICE_NAME }}" \
+              --environment=production \
+              --ci
+          elif [ -n "${{ vars.RAILWAY_SERVICE_NAME }}" ]; then
             echo "Deploying to service: ${{ vars.RAILWAY_SERVICE_NAME }}"
-            railway up --service="${{ vars.RAILWAY_SERVICE_NAME }}"
+            railway up \
+              --service="${{ vars.RAILWAY_SERVICE_NAME }}" \
+              --environment=production \
+              --ci
           else
-            echo "Deploying to default service"
-            railway up
+            echo "::error::RAILWAY_SERVICE_NAME must be set"
+            exit 1
           fi
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
@@ -44,7 +52,7 @@ jobs:
       - name: Wait for deployment
         run: |
           sleep 30
-          railway status
+          echo "Checking deployment status..."
           timeout 300 bash -c 'until curl -sf ${{ vars.RAILWAY_PUBLIC_URL }}/api/v1/health; do sleep 10; done'
 
       - name: Smoke test production
